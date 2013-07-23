@@ -27,6 +27,22 @@ public:
         val = (valh << 8) + vall;
     }
 
+    void grain(ref int val) {
+        grainReinterpret(val);
+    }
+
+    void grain(ref uint val) {
+        ubyte val0 = (val >> 24);
+        ubyte val1 = cast(ubyte)(val >> 16);
+        ubyte val2 = cast(ubyte)(val >> 8);
+        ubyte val3 = val & 0xff;
+        grainUByte(val0);
+        grainUByte(val1);
+        grainUByte(val2);
+        grainUByte(val3);
+        val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
+    }
+
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
     }
@@ -40,15 +56,19 @@ protected:
 private:
 
     void grainReinterpret(T)(ref T val) {
-        auto ptr = cast(CerealTraits!T)(&val);
+        auto ptr = cast(CerealPtrType!T)(&val);
         grain(*ptr);
     }
 }
 
-private template CerealTraits(T) {
+private template CerealPtrType(T) {
     static if(is(T == bool)) {
-        alias ubyte* CerealTraits;
+        alias ubyte* CerealPtrType;
+    }
+    else static if(is(T == double)) {
+       alias ulong* CerealPtrType;
     } else {
-        alias ubyte* CerealTraits;
+       import std.traits;
+       alias Unsigned!T* CerealPtrType;
     }
 }

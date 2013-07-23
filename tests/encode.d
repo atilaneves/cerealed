@@ -28,15 +28,30 @@ void testEncodeUByte() {
 }
 
 void testEncodeShort() {
+    import std.stdio;
     auto cereal = new Cerealiser();
-    short[] ins = [ -2, 3, -1, 0];
+    short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0xfe, 0x3, 0xff, 0x0 ]);
+    checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x7f, 0xff, 0x0, 0x0 ]);
 }
 
 void testEncodeUShort() {
     auto cereal = new Cerealiser();
-    short[] ins = [ 2, 3, 1, 0];
+    ushort[] ins = [ 2, 3, cast(short)65535, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x2, 0x3, 0x1, 0x0 ]);
+    checkEqual(cereal.bytes, [ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);
+}
+
+void testEncodeInt() {
+    auto cereal = new Cerealiser();
+    int[] ins = [ 3, -1_000_000];
+    foreach(i; ins) cereal ~= i;
+    checkEqual(cereal.bytes, [ 0x0, 0x0, 0x0, 0x3, 0xff, 0x3, 0xc0, 0x0 ]);
+}
+
+void testEncodeUInt() {
+    auto cereal = new Cerealiser();
+    uint[] ins = [ 1_000_000, 0];
+    foreach(i; ins) cereal ~= i;
+    checkEqual(cereal.bytes, [ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
 }
