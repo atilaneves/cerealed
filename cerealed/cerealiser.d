@@ -13,12 +13,15 @@ public:
         grain(val);
     }
 
-    Cerealiser opBinary(T, string op)(T val) if(op == "~") {
+    Cerealiser opOpAssign(string op : "~", T)(T val) {
+        write(val);
+        return this;
     }
 
 
 protected:
 
     override void grainUByte(ref ubyte val) {
+        _bytes ~= val;
     }
 }

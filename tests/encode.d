@@ -8,6 +8,9 @@ void testEncodeBool() {
     cereal.write(true);
     cereal.write(false);
     checkEqual(cereal.bytes, [ 0x0, 0x1, 0x0 ]);
+
+    cereal ~= true;
+    checkEqual(cereal.bytes, [ 0x0, 0x1, 0x0, 0x1 ]);
 }
 
 void testEncodeByte() {
