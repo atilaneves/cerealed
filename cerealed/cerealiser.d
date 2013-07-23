@@ -1,17 +1,24 @@
 module cerealed.cerealiser;
 
-class Cerealiser {
-    void grain(bool b) {
+import cerealed.cereal;
+
+class Cerealiser: Cereal {
+public:
+
+    void write(T)(T val) {
+        grain(val);
     }
 
-    void grain(byte b) {
+    void write(T)(ref T val) {
+        grain(val);
     }
 
-    @property const(ubyte[]) bytes() const nothrow {
-        return _bytes;
+    Cerealiser opBinary(T, string op)(T val) if(op == "~") {
     }
 
-private:
 
-    ubyte[] _bytes;
+protected:
+
+    override void grainUByte(ref ubyte val) {
+    }
 }
