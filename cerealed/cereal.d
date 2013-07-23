@@ -7,13 +7,24 @@ public:
         grainReinterpret(val);
     }
 
-
     void grain(ref byte val) {
         grainReinterpret(val);
     }
 
     void grain(ref ubyte val) {
         grainUByte(val);
+    }
+
+    void grain(ref short val) {
+        grainReinterpret(val);
+    }
+
+    void grain(ref ushort val) {
+        ubyte valh = (val >> 8);
+        ubyte vall = val & 0xff;
+        grainUByte(valh);
+        grainUByte(vall);
+        val = (valh << 8) + vall;
     }
 
     @property const(ubyte[]) bytes() const nothrow {
