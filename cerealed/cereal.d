@@ -1,25 +1,24 @@
 module cerealed.cereal;
 
+import std.traits;
+
 class Cereal {
 public:
 
-    void grain(ref bool val) {
+    void grain(T)(ref T val) if(isBoolean!T) {
         grainReinterpret(val);
     }
 
-    void grain(ref byte val) {
+    //catch all signed numbers and forward to reinterpret
+    void grain(T)(ref T val) if(isSigned!T && !isBoolean!T) {
         grainReinterpret(val);
     }
 
-    void grain(ref ubyte val) {
+    void grain(T)(ref T val) if(is(T == ubyte)) {
         grainUByte(val);
     }
 
-    void grain(ref short val) {
-        grainReinterpret(val);
-    }
-
-    void grain(ref ushort val) {
+    void grain(T)(ref T val) if(is(T == ushort)) {
         ubyte valh = (val >> 8);
         ubyte vall = val & 0xff;
         grainUByte(valh);
@@ -27,11 +26,7 @@ public:
         val = (valh << 8) + vall;
     }
 
-    void grain(ref int val) {
-        grainReinterpret(val);
-    }
-
-    void grain(ref uint val) {
+    void grain(T)(ref T val) if(is(T == uint)) {
         ubyte val0 = (val >> 24);
         ubyte val1 = cast(ubyte)(val >> 16);
         ubyte val2 = cast(ubyte)(val >> 8);
