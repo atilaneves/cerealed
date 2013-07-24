@@ -32,7 +32,7 @@ void testEncodeShort() {
     auto cereal = new Cerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x7f, 0xff, 0x0, 0x0 ]);
+    checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
 }
 
 void testEncodeUShort() {
@@ -46,7 +46,7 @@ void testEncodeInt() {
     auto cereal = new Cerealiser();
     int[] ins = [ 3, -1_000_000];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x0, 0x0, 0x0, 0x3, 0xff, 0x3, 0xc0, 0x0 ]);
+    checkEqual(cereal.bytes, [ 0x0, 0x0, 0x0, 0x3, 0xff, 0xf0, 0xbd, 0xc0 ]);
 }
 
 void testEncodeUInt() {
