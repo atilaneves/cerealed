@@ -55,3 +55,19 @@ void testEncodeUInt() {
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
 }
+
+void testEncodeLong() {
+    auto cereal = new Cerealiser();
+    long[] ins = [1, 2];
+    foreach(i; ins) cereal ~= i;
+    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
+}
+
+void testEncodeULong() {
+    auto cereal = new Cerealiser();
+    cereal ~= 45L;
+    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 45 ]);
+    cereal = new Cerealiser();
+    cereal ~= 42L;
+    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 42 ]);
+}

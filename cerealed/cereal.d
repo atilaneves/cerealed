@@ -34,6 +34,18 @@ public:
         val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
     }
 
+    void grain(T)(ref T val) if(is(T == ulong)) {
+        auto ptr = cast(ubyte*)(&val);
+        for(int i = 7; i >= 0; --i) {
+            grainUByte(ptr[i]);
+        }
+        ulong newVal = 0;
+        for(int i = 7; i >= 0; --i) {
+            newVal += (ptr[i] << (i * 8));
+        }
+        val = newVal;
+    }
+
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
     }

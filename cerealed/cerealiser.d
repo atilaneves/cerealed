@@ -1,15 +1,17 @@
 module cerealed.cerealiser;
 
 import cerealed.cereal;
+import std.traits;
 
 class Cerealiser: Cereal {
 public:
 
     void write(T)(T val) {
-        grain(val);
+        Unqual!T lval = val;
+        grain(lval);
     }
 
-    void write(T)(ref T val) {
+    void write(T)(const ref T val) {
         grain(val);
     }
 
