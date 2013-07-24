@@ -71,3 +71,11 @@ void testEncodeULong() {
     cereal ~= 42L;
     checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 42 ]);
 }
+
+void testEncodeChars() {
+    auto cereal = new Cerealiser();
+    char  c; cereal ~= c;
+    wchar w; cereal ~= w;
+    dchar d; cereal ~= d;
+    checkEqual(cereal.bytes, [ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff]);
+}

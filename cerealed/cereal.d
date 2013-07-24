@@ -6,7 +6,7 @@ class Cereal {
 public:
 
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) if(isSigned!T || isBoolean!T) {
+    void grain(T)(ref T val) if(isSigned!T || isBoolean!T || isSomeChar!T) {
         grainReinterpret(val);
     }
 
@@ -65,11 +65,10 @@ private:
 }
 
 private template CerealPtrType(T) {
-    static if(is(T == bool)) {
+    static if(is(T == bool) || isSomeChar!T) {
         alias ubyte* CerealPtrType;
-    }
-    else static if(is(T == double)) {
-       alias ulong* CerealPtrType;
+    } else static if(is(T == double)) {
+        alias ulong* CerealPtrType;
     } else {
        import std.traits;
        alias Unsigned!T* CerealPtrType;
