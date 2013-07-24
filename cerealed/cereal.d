@@ -6,7 +6,7 @@ class Cereal {
 public:
 
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) if(isSigned!T || isBoolean!T || is(T == char)) {
+    void grain(T)(ref T val) if(isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T) {
         grainReinterpret(val);
     }
 
@@ -50,7 +50,6 @@ public:
         grain(*cast(ushort*)&val);
     }
 
-
     void grain(T)(ref T val) if(is(T == dchar)) {
         grain(*cast(uint*)&val);
     }
@@ -76,6 +75,8 @@ private:
 private template CerealPtrType(T) {
     static if(is(T == bool) || is(T == char)) {
         alias ubyte* CerealPtrType;
+    } else static if(is(T == float)) {
+        alias uint* CerealPtrType;
     } else static if(is(T == double)) {
         alias ulong* CerealPtrType;
     } else {

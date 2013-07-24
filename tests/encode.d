@@ -72,6 +72,16 @@ void testEncodeULong() {
     checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 42 ]);
 }
 
+void testEncodeFloat() {
+    auto cereal = new Cerealiser();
+    cereal ~= 1.0f;
+}
+
+void testEncodeDouble() {
+    auto cereal = new Cerealiser();
+    cereal ~= 1.0;
+}
+
 void testEncodeChars() {
     auto cereal = new Cerealiser();
     char  c; cereal ~= c;
