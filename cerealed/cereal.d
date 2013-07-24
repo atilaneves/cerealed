@@ -5,12 +5,8 @@ import std.traits;
 class Cereal {
 public:
 
-    void grain(T)(ref T val) if(isBoolean!T) {
-        grainReinterpret(val);
-    }
-
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) if(isSigned!T && !isBoolean!T) {
+    void grain(T)(ref T val) if(isSigned!T || isBoolean!T) {
         grainReinterpret(val);
     }
 
