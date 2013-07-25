@@ -1,12 +1,19 @@
 module cerealed.cerealiser;
 
 import cerealed.cereal;
+import std.traits;
 
 class Cerealiser: Cereal {
 public:
 
-    void write(T)(T val) {
-        grain(val);
+    void write(T)(T val) if(!isArray!T) {
+        T lval = val;
+        grain(lval);
+    }
+
+    void write(T)(const(T)[] val) {
+        T[] lval = val.dup;
+        grain(lval);
     }
 
     void write(T)(const ref T val) {

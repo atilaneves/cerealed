@@ -89,3 +89,11 @@ void testEncodeChars() {
     dchar d; cereal ~= d;
     checkEqual(cereal.bytes, [ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff]);
 }
+
+void testEncodeArray() {
+    auto cereal = new Cerealiser();
+    const ints = [ 2, 6, 9];
+    cereal ~= ints;
+    //encoding should be a short with the length, plus payload
+    checkEqual(cereal.bytes, [ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9]);
+}

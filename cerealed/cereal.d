@@ -54,6 +54,12 @@ public:
         grain(*cast(uint*)&val);
     }
 
+    void grain(T, U = ushort)(ref T val) if(isArray!T) {
+        U length = cast(U)val.length;
+        grain(length);
+        foreach(e; val) grain(e);
+    }
+
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
     }
