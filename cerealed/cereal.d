@@ -76,13 +76,9 @@ public:
 protected:
 
     abstract void grainUByte(ref ubyte val);
-    void addByte(ubyte b) {
-        _bytes ~= b;
-    }
+    ubyte[] _bytes;
 
 private:
-
-    ubyte[] _bytes;
 
     void grainReinterpret(T)(ref T val) {
         auto ptr = cast(CerealPtrType!T)(&val);

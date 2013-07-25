@@ -34,6 +34,6 @@ public:
 protected:
 
     override void grainUByte(ref ubyte val) {
-        addByte(val);
+        _bytes ~= val;
     }
 }
