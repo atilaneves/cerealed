@@ -97,3 +97,11 @@ void testEncodeArray() {
     //encoding should be a short with the length, plus payload
     checkEqual(cereal.bytes, [ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9]);
 }
+
+void testEncodeAssocArray() {
+    auto cereal = new Cerealiser();
+    const intToInt = [ 1:2, 3:6];
+    cereal ~= intToInt;
+    //short with length, then payload
+    checkEqual(cereal.bytes, [ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
+}

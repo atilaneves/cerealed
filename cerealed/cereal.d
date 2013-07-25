@@ -60,6 +60,15 @@ public:
         foreach(e; val) grain(e);
     }
 
+    void grain(T, U = ushort)(ref T val) if(isAssociativeArray!T) {
+        U length = cast(U)val.length;
+        grain(length);
+        foreach(k, v; val) {
+            grain(k);
+            grain(v);
+        }
+    }
+
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
     }

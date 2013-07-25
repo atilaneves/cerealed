@@ -6,7 +6,7 @@ import std.traits;
 class Cerealiser: Cereal {
 public:
 
-    void write(T)(T val) if(!isArray!T) {
+    void write(T)(T val) if(!isArray!T && !isAssociativeArray!T) {
         T lval = val;
         grain(lval);
     }
@@ -16,7 +16,12 @@ public:
         grain(lval);
     }
 
-    void write(T)(const ref T val) {
+    void write(K, V)(const(V[K]) val) {
+        V[K] lval = cast(V[K])val.dup;
+        grain(lval);
+    }
+
+    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T) {
         grain(val);
     }
 
