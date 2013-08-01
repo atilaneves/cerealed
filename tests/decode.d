@@ -40,3 +40,9 @@ void testDecodeInt() {
     auto cereal = new Decerealiser([ 0xff, 0xf0, 0xbd, 0xc0]);
     checkEqual(cereal.value!int, -1_000_000);
 }
+
+void testDecodeLong() {
+    auto cereal = new Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
+    checkEqual(cereal.value!long, 1);
+    checkEqual(cereal.value!long, 2);
+}
