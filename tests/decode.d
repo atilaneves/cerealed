@@ -27,22 +27,32 @@ void testDecodeUByte() {
     checkEqual(cereal.value!ubyte, 0);
     checkEqual(cereal.value!ubyte, 2);
     checkEqual(cereal.value!ubyte, 252);
-    checkThrown!RangeError(cereal.value!byte); //no more bytes
+    checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 void testDecodeShort() {
     auto cereal = new Decerealiser([0xff, 0xfe, 0x0, 0x3]);
     checkEqual(cereal.value!short, -2);
     checkEqual(cereal.value!short, 3);
+    checkThrown!RangeError(cereal.value!short); //no more bytes
 }
 
 void testDecodeInt() {
     auto cereal = new Decerealiser([ 0xff, 0xf0, 0xbd, 0xc0]);
     checkEqual(cereal.value!int, -1_000_000);
+    checkThrown!RangeError(cereal.value!int); //no more bytes
 }
 
 void testDecodeLong() {
     auto cereal = new Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
     checkEqual(cereal.value!long, 1);
     checkEqual(cereal.value!long, 2);
+    checkThrown!RangeError(cereal.value!byte); //no more bytes
+}
+
+void testDecodeDouble() {
+    auto cereal = new Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
+    checkNotThrown(cereal.value!double);
+    checkNotThrown(cereal.value!double);
+    checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
