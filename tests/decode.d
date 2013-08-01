@@ -22,11 +22,16 @@ void testDecodeByte() {
     checkThrown!RangeError(cereal.value!byte); //no more bytes
 }
 
-
 void testDecodeUByte() {
     auto cereal = new Decerealiser([0x0, 0x2, 0xfc]);
     checkEqual(cereal.value!ubyte, 0);
     checkEqual(cereal.value!ubyte, 2);
     checkEqual(cereal.value!ubyte, 252);
     checkThrown!RangeError(cereal.value!byte); //no more bytes
+}
+
+void testDecodeShort() {
+    auto cereal = new Decerealiser([0xff, 0xfe, 0x0, 0x3]);
+    checkEqual(cereal.value!short, -2);
+    checkEqual(cereal.value!short, 3);
 }

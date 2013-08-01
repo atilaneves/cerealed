@@ -28,7 +28,6 @@ void testEncodeUByte() {
 }
 
 void testEncodeShort() {
-    import std.stdio;
     auto cereal = new Cerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
