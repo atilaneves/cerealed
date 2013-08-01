@@ -56,3 +56,11 @@ void testDecodeDouble() {
     checkNotThrown(cereal.value!double);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
+
+void testDecodeChars() {
+    auto cereal = new Decerealiser([ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff ]);
+    checkEqual(cereal.value!char, 0xff);
+    checkEqual(cereal.value!wchar, 0xffff);
+    checkEqual(cereal.value!dchar, 0x0000ffff);
+    checkThrown!RangeError(cereal.value!ubyte); //no more bytes
+}
