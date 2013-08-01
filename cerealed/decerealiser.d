@@ -14,7 +14,7 @@ public:
         }
     }
 
-    @property T value(T)() const pure nothrow {
+    @property T value(T)() {
         T val;
         grain(val);
         return val;
