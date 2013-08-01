@@ -1,6 +1,5 @@
 import unit_threaded.check;
 import cerealed.decerealiser;
-import std.exception;
 import core.exception;
 
 void testDecodeBool() {
@@ -19,5 +18,5 @@ void testDecodeByte() {
     checkEqual(cereal.value!byte, 0);
     checkEqual(cereal.value!byte, 2);
     checkEqual(cereal.value!byte, -4);
-    assertThrown!RangeError(cereal.value!byte);
+    checkThrown!RangeError(cereal.value!byte); //no more bytes
 }
