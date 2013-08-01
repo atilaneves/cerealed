@@ -35,3 +35,8 @@ void testDecodeShort() {
     checkEqual(cereal.value!short, -2);
     checkEqual(cereal.value!short, 3);
 }
+
+void testDecodeInt() {
+    auto cereal = new Decerealiser([ 0xff, 0xf0, 0xbd, 0xc0]);
+    checkEqual(cereal.value!int, -1_000_000);
+}
