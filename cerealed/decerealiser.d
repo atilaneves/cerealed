@@ -20,8 +20,8 @@ public:
         return val;
     }
 
-    @property int[] value(T)() if(isArray!T) {
-        ushort length;
+    @property int[] value(T, U = ushort)() if(isArray!T) {
+        U length;
         grain(length);
         T values;
         values.length = length; //allocate, can't use new
@@ -30,7 +30,6 @@ public:
         }
         return values;
     }
-
 
     @property T value(T, U = ushort)() if(isAssociativeArray!T) {
         ushort length;
@@ -45,7 +44,6 @@ public:
         }
         return values;
     }
-
 
 protected:
 
