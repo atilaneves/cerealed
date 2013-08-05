@@ -32,7 +32,7 @@ public:
     }
 
     @property T value(T, U = ushort)() if(isAssociativeArray!T) {
-        ushort length;
+        U length;
         grain(length);
         T values;
         for(ushort i = 0; i < length; ++i) {
