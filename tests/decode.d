@@ -67,7 +67,7 @@ void testDecodeChars() {
 
 void testDecodeArray() {
     auto cereal = new Decerealiser([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
-    checkEqual(cereal.value!(int[3]), [ 2, 6, 9 ]);
+    checkEqual(cereal.value!(int[]), [ 2, 6, 9 ]);
 }
 
 void testDecodeAssocArray() {

@@ -14,11 +14,30 @@ public:
         }
     }
 
-    @property T value(T)() {
+    @property T value(T)() if(!isArray!T && !isAssociativeArray!T) {
         T val;
         grain(val);
         return val;
     }
+
+    @property int[] value(T)() if(isArray!T) {
+        ushort length;
+        grain(length);
+        T values;
+        values.length = length; //allocate, can't use new
+        for(ushort i = 0; i < length; ++i) {
+            grain(values[i]);
+        }
+        return values;
+    }
+
+
+    @property T value(T, U = ushort)() if(isAssociativeArray!T) {
+        T val;
+        grain(val);
+        return val;
+    }
+
 
 protected:
 
