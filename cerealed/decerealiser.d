@@ -33,9 +33,17 @@ public:
 
 
     @property T value(T, U = ushort)() if(isAssociativeArray!T) {
-        T val;
-        grain(val);
-        return val;
+        ushort length;
+        grain(length);
+        T values;
+        for(ushort i = 0; i < length; ++i) {
+            KeyType!T key;
+            ValueType!T value;
+            grain(key);
+            grain(value);
+            values[key] = value;
+        }
+        return values;
     }
 
 
