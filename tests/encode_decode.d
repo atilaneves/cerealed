@@ -5,7 +5,6 @@ import core.exception;
 
 
 private void implEncDec(T)(T[] values) {
-    import std.stdio;
     auto enc = new Cerealiser();
     foreach(b; values) enc ~= b;
     auto dec = new Decerealiser(enc.bytes);
