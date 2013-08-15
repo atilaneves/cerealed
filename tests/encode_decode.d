@@ -6,8 +6,13 @@ import core.exception;
 
 private void implEncDec(T)(T[] values) {
     auto enc = new Cerealiser();
-    foreach(b; values) enc ~= b;
+    import std.stdio;
+    foreach(b; values) {
+        //writeln("Encoding ", b); //TODO: replace with utPrint
+        enc ~= b;
+    }
     auto dec = new Decerealiser(enc.bytes);
+    //writeln("Decoding ", values); //TODO: same as above
     foreach(b; values) checkEqual(dec.value!T, b);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
 }
@@ -47,7 +52,7 @@ void testEncDecUInt() {
 }
 
 void testEncDecLong() {
-    implEncDecValues!(long, [ 5_000_000, 2, -5_000_000_000, 1 ]);
+    implEncDecValues!(long, [ 5_000_000, 2, -3, -5_000_000_000, 1 ]);
 }
 
 void testEncDecULong() {
