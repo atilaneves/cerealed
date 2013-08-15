@@ -39,11 +39,11 @@ public:
         immutable oldVal = val;
         val = 0;
 
-        for(int i = 7; i >= 0; --i) {
-            immutable shift = 64 - i*8;
+        for(int i = T.sizeof - 1; i >= 0; --i) {
+            immutable shift = (T.sizeof - i) * 8;
             ubyte byteVal = (oldVal >> shift) & 0xff;
             grainUByte(byteVal);
-            val += cast(ulong)byteVal << shift;
+            val |= cast(T)byteVal << shift;
         }
     }
 
