@@ -70,6 +70,13 @@ public:
         }
     }
 
+    // void grain(T)(ref T val) if(isAggregateType!T) {
+    //     foreach(member; __traits(allMembers, T)) {
+    //         pragma(msg, "Code: ", q{grain(val.} ~ member ~ q{);})
+    //         mixin(q{grain(val.} ~ member ~ q{);});
+    //     }
+    // }
+
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
     }
