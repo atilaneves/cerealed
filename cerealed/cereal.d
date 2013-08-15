@@ -70,12 +70,13 @@ public:
         }
     }
 
-    // void grain(T)(ref T val) if(isAggregateType!T) {
-    //     foreach(member; __traits(allMembers, T)) {
-    //         pragma(msg, "Code: ", q{grain(val.} ~ member ~ q{);})
-    //         mixin(q{grain(val.} ~ member ~ q{);});
-    //     }
-    // }
+    void grain(T)(ref T val) if(isAggregateType!T) {
+        foreach(member; __traits(allMembers, T)) {
+            static if(isField(member)) {
+                mixin(q{grain(val.} ~ member ~ q{);});
+            }
+        }
+    }
 
     @property const(ubyte[]) bytes() const nothrow {
         return _bytes;
@@ -105,4 +106,16 @@ private template CerealPtrType(T) {
        import std.traits;
        alias Unsigned!T* CerealPtrType;
     }
+}
+
+private bool isField(in string member) pure nothrow {
+    return member.length < 2 || member[0..2] != "__";
+}
+
+unittest {
+    static assert(isField("foo"));
+    static assert(isField("_"));
+    static assert(!isField("__"));
+    static assert(!isField("__f"));
+    static assert(!isField("__xopEquals"));
 }
