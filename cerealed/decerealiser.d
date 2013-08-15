@@ -20,15 +20,25 @@ public:
         return val;
     }
 
-    @property int[] value(T, U = ushort)() if(isArray!T) {
+    @property T value(T, U = ushort)() if(isArray!T && !is(T == string)) {
         U length;
         grain(length);
-        T values;
-        values.length = length; //allocate, can't use new
+        Unqual!T values;
+        values.length = length; //allocate, can't use new (new what?)
         for(ushort i = 0; i < length; ++i) {
             grain(values[i]);
         }
         return values;
+    }
+
+    @property string value(T, U = ushort)() if(is(T == string)) {
+        U length;
+        grain(length);
+        auto values = new char[length];
+        for(ushort i = 0; i < length; ++i) {
+            grain(values[i]);
+        }
+        return cast(string)values;
     }
 
     @property T value(T, U = ushort)() if(isAssociativeArray!T) {

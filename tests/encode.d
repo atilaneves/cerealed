@@ -104,3 +104,11 @@ void testEncodeAssocArray() {
     //short with length, then payload
     checkEqual(cereal.bytes, [ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
 }
+
+void testEncodeString() {
+    auto cereal = new Cerealiser();
+    const str = "foobarbaz";
+    cereal ~= str;
+    //short with length, then payload
+    checkEqual(cereal.bytes, [ 0, 9, 'f', 'o', 'o', 'b', 'a', 'r', 'b', 'a', 'z' ]);
+}

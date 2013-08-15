@@ -88,3 +88,9 @@ void testDecodeAssocArrayIntLength() {
     checkEqual(cereal.value!(int[int], int), [ 1:2, 3:6]);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
+
+void testDecodeString() {
+    auto cereal = new Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
+    checkEqual(cereal.value!(string), "atoyn");
+    checkThrown!RangeError(cereal.value!ubyte); //no more bytes
+}
