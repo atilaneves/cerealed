@@ -58,7 +58,10 @@ public:
     void grain(T, U = ushort)(ref T val) if(isArray!T) {
         U length = cast(U)val.length;
         grain(length);
-        foreach(e; val) grain(e);
+        if(val.length == 0) { //decoding
+            val.length = length;
+        }
+        foreach(ref e; val) grain(e);
     }
 
     void grain(T, U = ushort)(ref T val) if(isAssociativeArray!T) {

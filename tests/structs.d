@@ -8,6 +8,8 @@ private struct DummyStruct {
 //private:
     int i;
     double d;
+    int[] a;
+    double[int] aa;
     //string s;
 }
 
@@ -15,7 +17,7 @@ private struct DummyStruct {
 void testDummyStruct() {
     auto enc = new Cerealiser();
     //auto dummy = DummyStruct(5, 6.0, "dummy!");
-    auto dummy = DummyStruct(5, 6.0);
+    auto dummy = DummyStruct(5, 6.0, [2, 3], [2: 4.0]);
     enc ~= dummy;
 
     auto dec = new Decerealiser(enc.bytes);
