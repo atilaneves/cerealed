@@ -67,8 +67,15 @@ public:
     void grain(T, U = ushort)(ref T val) if(is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
+
         auto values = new char[length];
-        foreach(ref e; values) grain(e);
+        if(val.length != 0) { //copy string
+            values[] = val[];
+        }
+
+        foreach(ref e; values) {
+            grain(e);
+        }
         val = cast(string)values;
     }
 
