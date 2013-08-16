@@ -40,7 +40,7 @@ void testDecodeStringStruct() {
 
 void testEncodeStringStruct() {
     auto enc = new Cerealiser();
-    auto str = StringStruct("foo");
+    const str = StringStruct("foo");
     enc ~= str;
     checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
 }

@@ -7,7 +7,7 @@ class Cerealiser: Cereal {
 public:
 
     void write(T)(T val) if(!isArray!T && !isAssociativeArray!T) {
-        T lval = val;
+        Unqual!T lval = val;
         grain(lval);
     }
 
@@ -21,7 +21,8 @@ public:
         grain(lval);
     }
 
-    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T) {
+    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
+                                      !isAggregateType!T) {
         grain(val);
     }
 

@@ -58,8 +58,10 @@ public:
     void grain(T, U = ushort)(ref T val) if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
-        if(val.length == 0) { //decoding
-            val.length = length;
+        static if(isMutable!T) {
+            if(val.length == 0) { //decoding
+                val.length = length;
+            }
         }
         foreach(ref e; val) grain(e);
     }
