@@ -146,3 +146,12 @@ void testDecodeString() {
     checkEqual(cereal.value!(string), "atoyn");
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
+
+
+void testDecodeRefString() {
+    auto cereal = new Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
+    string val;
+    cereal.grain(val);
+    checkEqual(val, "atoyn");
+    checkThrown!RangeError(cereal.value!ubyte); //no more bytes
+}

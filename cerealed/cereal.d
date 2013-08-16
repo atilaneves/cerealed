@@ -55,13 +55,21 @@ public:
         grain(*cast(uint*)&val);
     }
 
-    void grain(T, U = ushort)(ref T val) if(isArray!T) {
+    void grain(T, U = ushort)(ref T val) if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
         if(val.length == 0) { //decoding
             val.length = length;
         }
         foreach(ref e; val) grain(e);
+    }
+
+    void grain(T, U = ushort)(ref T val) if(is(T == string)) {
+        U length = cast(U)val.length;
+        grain(length);
+        auto values = new char[length];
+        foreach(ref e; values) grain(e);
+        val = cast(string)values;
     }
 
     void grain(T, U = ushort)(ref T val) if(isAssociativeArray!T) {
