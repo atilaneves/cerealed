@@ -75,9 +75,13 @@ public:
     void grain(T, U = ushort)(ref T val) if(isAssociativeArray!T) {
         U length = cast(U)val.length;
         grain(length);
-        foreach(k, v; val) {
+        const keys = val.keys;
+        for(U i = 0; i < length; ++i) {
+            auto k = val.length ? keys[i] : KeyType!T.init;
+            auto v = val.length ? val[k] : ValueType!T.init;
             grain(k);
             grain(v);
+            val[k] = v;
         }
     }
 
