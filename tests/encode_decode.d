@@ -1,4 +1,5 @@
 import unit_threaded.check;
+import unit_threaded.io;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
 import core.exception;
@@ -8,11 +9,11 @@ private void implEncDec(T)(T[] values) {
     auto enc = new Cerealiser();
     import std.stdio;
     foreach(b; values) {
-        //writeln("Encoding ", b); //TODO: replace with utPrint
+        writelnUt("Encoding ", b);
         enc ~= b;
     }
     auto dec = new Decerealiser(enc.bytes);
-    //writeln("Decoding ", values); //TODO: same as above
+    writelnUt("Decoding ", values);
     foreach(b; values) checkEqual(dec.value!T, b);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
 }
