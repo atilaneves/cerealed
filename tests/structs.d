@@ -11,18 +11,36 @@ private struct DummyStruct {
     int[] a;
     bool b;
     double[int] aa;
-    //string s;
+    string s;
 }
 
 
 void testDummyStruct() {
     auto enc = new Cerealiser();
-    //auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0], "dummy!");
-    auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0]);
+    auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0], "dummy!");
     enc ~= dummy;
 
     auto dec = new Decerealiser(enc.bytes);
     checkEqual(dec.value!DummyStruct, dummy);
 
     checkThrown!RangeError(dec.value!ubyte);
+}
+
+private struct StringStruct {
+    string s;
+}
+
+void testDecodeStringStruct() {
+    auto dec = new Decerealiser([0, 3, 'f', 'o', 'o']);
+    auto str = StringStruct();
+    dec.grain(str);
+    checkEqual(str.s, "foo");
+    checkThrown!RangeError(dec.value!ubyte);
+}
+
+void testEncodeStringStruct() {
+    auto enc = new Cerealiser();
+    auto str = StringStruct("foo");
+    enc ~= str;
+    checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
 }

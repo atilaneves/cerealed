@@ -89,7 +89,7 @@ public:
     void grain(T)(ref T val) if(isAggregateType!T) {
         foreach(member; __traits(allMembers, T)) {
             static if(isField(member)) {
-                mixin(q{grain(val.} ~ member ~ q{);});
+                grain(__traits(getMember, val, member));
             }
         }
     }
