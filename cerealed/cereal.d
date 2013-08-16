@@ -76,9 +76,10 @@ public:
         U length = cast(U)val.length;
         grain(length);
         const keys = val.keys;
+
         for(U i = 0; i < length; ++i) {
-            auto k = val.length ? keys[i] : KeyType!T.init;
-            auto v = val.length ? val[k] : ValueType!T.init;
+            auto k = keys.length ? keys[i] : KeyType!T.init;
+            auto v = keys.length ? val[k] : ValueType!T.init;
             grain(k);
             grain(v);
             val[k] = v;
