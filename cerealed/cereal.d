@@ -2,6 +2,7 @@ module cerealed.cereal;
 
 import std.traits;
 import std.conv;
+import std.algorithm;
 
 class Cereal {
 public:
@@ -134,7 +135,8 @@ private template CerealPtrType(T) {
 }
 
 private bool isField(in string member) pure nothrow {
-    return member.length < 2 || member[0..2] != "__";
+    return find(["toString", "toHash", "Monitor", "factory"], member) == [] &&
+        (member.length < 2 || member[0..2] != "__" && member[0..2] != "op");
 }
 
 unittest {
@@ -143,4 +145,5 @@ unittest {
     static assert(!isField("__"));
     static assert(!isField("__f"));
     static assert(!isField("__xopEquals"));
+    static assert(!isField("opEquals"));
 }
