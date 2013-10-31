@@ -23,14 +23,15 @@ public:
 
     void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
                                       !isAggregateType!T) {
-        grain(val);
+        T realVal = val;
+        grain(realVal);
     }
 
     Cerealiser opOpAssign(string op : "~", T)(T val) {
+        assert(this !is null);
         write(val);
         return this;
     }
-
 
 protected:
 
