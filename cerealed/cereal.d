@@ -104,14 +104,9 @@ public:
         }
     }
 
-    @property const(ubyte[]) bytes() const nothrow {
-        return _bytes;
-    }
-
 protected:
 
     abstract void grainUByte(ref ubyte val);
-    ubyte[] _bytes;
 
 private:
 

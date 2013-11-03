@@ -33,9 +33,17 @@ public:
         return this;
     }
 
+    @property const(ubyte[]) bytes() const nothrow {
+        return _bytes;
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) {
         _bytes ~= val;
     }
+
+private:
+
+    ubyte[] _bytes;
 }

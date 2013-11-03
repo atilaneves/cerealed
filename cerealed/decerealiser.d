@@ -6,9 +6,9 @@ import std.traits;
 class Decerealiser: Cereal {
 public:
 
-    this(T)(T[] bytes) if(isNumeric!T) {
+    this(T)(in T[] bytes) if(isNumeric!T) {
         static if(is(T == ubyte)) {
-            _bytes = bytes.dup;
+            _bytes = bytes;
         } else {
             foreach(b; bytes) _bytes ~= cast(ubyte)b;
         }
@@ -32,4 +32,8 @@ protected:
         val = _bytes[0];
         _bytes = _bytes[1..$];
     }
+
+private:
+
+    const (ubyte)[] _bytes;
 }
