@@ -129,3 +129,13 @@ void testEncodeSubByte() {
     cereal.writeBits(1, 1);
     checkEqual(cereal.bytes, [ 0xeb]);
 }
+
+void testEncodeSubWord() {
+    auto cereal = new Cerealiser();
+    cereal.writeBits(4, 3);
+    cereal.writeBits(7, 3);
+    cereal.writeBits(23, 5);
+    cereal.writeBits(1, 2);
+    cereal.writeBits(2, 3);
+    checkEqual(cereal.bytes, [ 0x9e, 0xea]);
+}
