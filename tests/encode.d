@@ -119,3 +119,13 @@ void testEncodeNibble() {
     cereal.writeBits(0xf, 4);
     checkEqual(cereal.bytes, [ 0x4f ]);
 }
+
+void testEncodeSubByte() {
+    auto cereal = new Cerealiser();
+    cereal.writeBits(1, 1);
+    cereal.writeBits(3, 2);
+    cereal.writeBits(0, 1);
+    cereal.writeBits(5, 3);
+    cereal.writeBits(1, 1);
+    checkEqual(cereal.bytes, [ 0xeb]);
+}
