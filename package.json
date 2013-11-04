@@ -1,0 +1,13 @@
+{
+    "name": "cerealed",
+    "description": "Binary serialisation library for D",
+    "authors": ["Atila Nevves"],
+    "homepage": "https://github.com/atilaneves/cerealed",
+    "license": "BSD 3-clause",
+    "sourcePaths": ["cerealed"],
+    "importPaths": ["."],
+    "targetType": "library",
+    "dependencies": {
+        "unit-threaded": "~master",
+    }
+}
