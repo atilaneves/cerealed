@@ -112,3 +112,10 @@ void testEncodeString() {
     //short with length, then payload
     checkEqual(cereal.bytes, [ 0, 9, 'f', 'o', 'o', 'b', 'a', 'r', 'b', 'a', 'z' ]);
 }
+
+void testEncodeNibble() {
+    auto cereal = new Cerealiser();
+    cereal.writeBits(0x4, 4);
+    cereal.writeBits(0xf, 4);
+    checkEqual(cereal.bytes, [ 0x4f ]);
+}

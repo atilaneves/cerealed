@@ -3,6 +3,7 @@ module cerealed.cerealiser;
 import cerealed.cereal;
 import std.traits;
 
+
 class Cerealiser: Cereal {
 public:
 
@@ -27,8 +28,18 @@ public:
         grain(realVal);
     }
 
+    void writeBits(ubyte value, int bits) {
+        enum bitsInByte = 8;
+        _currentByte |= (value << (bitsInByte - bits - _bitIndex));
+        _bitIndex += bits;
+        if(_bitIndex == bitsInByte) {
+            this ~= _currentByte;
+            _bitIndex = 0;
+            _currentByte = 0;
+        }
+    }
+
     Cerealiser opOpAssign(string op : "~", T)(T val) {
-        assert(this !is null);
         write(val);
         return this;
     }
@@ -46,4 +57,6 @@ protected:
 private:
 
     ubyte[] _bytes;
+    ubyte _currentByte;
+    int _bitIndex;
 }
