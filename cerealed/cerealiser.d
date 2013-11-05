@@ -2,6 +2,8 @@ module cerealed.cerealiser;
 
 import cerealed.cereal;
 import std.traits;
+import std.exception;
+import std.conv;
 
 
 class Cerealiser: Cereal {
@@ -29,6 +31,7 @@ public:
     }
 
     void writeBits(in ubyte value, in int bits) {
+        enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
             const remainingBits = _bitIndex + bits - bitsInByte;
