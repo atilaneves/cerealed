@@ -98,7 +98,7 @@ public:
 
     void grain(T)(ref T val) if(isAggregateType!T) {
         foreach(member; __traits(allMembers, T)) {
-            static if(isField(member)) {
+            static if(__traits(compiles, grain(__traits(getMember,val, member)))) {
                 grain(__traits(getMember, val, member));
             }
         }
@@ -127,18 +127,4 @@ private template CerealPtrType(T) {
        import std.traits;
        alias Unsigned!T* CerealPtrType;
     }
-}
-
-private bool isField(in string member) pure nothrow {
-    return find(["toString", "toHash", "Monitor", "factory"], member) == [] &&
-        (member.length < 2 || member[0..2] != "__" && member[0..2] != "op");
-}
-
-unittest {
-    static assert(isField("foo"));
-    static assert(isField("_"));
-    static assert(!isField("__"));
-    static assert(!isField("__f"));
-    static assert(!isField("__xopEquals"));
-    static assert(!isField("opEquals"));
 }

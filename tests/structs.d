@@ -5,13 +5,14 @@ import core.exception;
 
 
 private struct DummyStruct {
-//private:
     int i;
     double d;
     int[] a;
     bool b;
     double[int] aa;
     string s;
+
+    void foo() {}
 }
 
 
