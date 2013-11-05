@@ -1,8 +1,10 @@
 module cerealed.cereal;
 
+import cerealed.bits;
 import std.traits;
 import std.conv;
 import std.algorithm;
+
 
 class Cereal {
 public:
@@ -97,9 +99,15 @@ public:
     }
 
     void grain(T)(ref T val) if(isAggregateType!T) {
-        foreach(member; __traits(allMembers, T)) {
-            static if(__traits(compiles, grain(__traits(getMember,val, member)))) {
-                grain(__traits(getMember, val, member));
+        static if(isBitsStruct!T) {
+            //this is the way I found to distinguish between
+            //one of the Bits!N types and any other type
+            grainBits(val.value, val.bits);
+        } else {
+            foreach(member; __traits(allMembers, T)) {
+                static if(__traits(compiles, grain(__traits(getMember,val, member)))) {
+                    grain(__traits(getMember, val, member));
+                }
             }
         }
     }
@@ -107,6 +115,7 @@ public:
 protected:
 
     abstract void grainUByte(ref ubyte val);
+    abstract void grainBits(ref uint val, int bits);
 
 private:
 

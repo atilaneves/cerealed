@@ -1,6 +1,7 @@
 module cerealed.cerealiser;
 
 import cerealed.cereal;
+import cerealed.bits;
 import std.traits;
 import std.exception;
 import std.conv;
@@ -64,6 +65,11 @@ protected:
     override void grainUByte(ref ubyte val) {
         _bytes ~= val;
     }
+
+    override void grainBits(ref uint value, int bits) {
+        writeBits(value, bits);
+    }
+
 
 private:
 

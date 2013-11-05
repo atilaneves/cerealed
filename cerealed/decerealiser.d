@@ -1,6 +1,7 @@
 module cerealed.decerealiser;
 
 import cerealed.cereal;
+import cerealed.bits;
 import std.traits;
 
 class Decerealiser: Cereal {
@@ -43,6 +44,10 @@ protected:
     override void grainUByte(ref ubyte val) {
         val = _bytes[0];
         _bytes = _bytes[1..$];
+    }
+
+    override void grainBits(ref uint value, int bits) {
+        value = readBits(bits);
     }
 
 private:
