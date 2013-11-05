@@ -1,5 +1,6 @@
 import unit_threaded.check;
 import cerealed.cerealiser;
+import cerealed.bits;
 
 
 void testEncodeBool() {
@@ -161,4 +162,11 @@ void testEncodeFailsIfToBigForBits() {
     checkThrown(cereal.writeBits(2, 1));
     checkNotThrown(cereal.writeBits(3, 2));
     checkThrown(cereal.writeBits(5, 2));
+}
+
+void testEncodeBitsStruct() {
+    auto cereal = new Cerealiser();
+    cereal ~= Bits!3(7);
+    cereal ~= Bits!5(1);
+    checkEqual(cereal.bytes, [0xe1]);
 }
