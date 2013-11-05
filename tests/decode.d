@@ -154,3 +154,20 @@ void testDecodeRefString() {
     checkEqual(val, "atoyn");
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
+
+void testDecodeBits() {
+    auto cereal = new Decerealiser([ 0x9e, 0xea]);
+    //1001 1110 1110 1010 or
+    //100 111 10111 01 010
+    checkEqual(cereal.readBits(3), 4);
+    checkEqual(cereal.readBits(3), 7);
+    checkEqual(cereal.readBits(5), 23);
+    checkEqual(cereal.readBits(2), 1);
+    checkEqual(cereal.readBits(3), 2);
+}
+
+void testDecodeBitsMultiByte() {
+    auto cereal = new Decerealiser([ 0x9e, 0xea]);
+    checkEqual(cereal.readBits(9), 317);
+    checkEqual(cereal.readBits(7), 0x6a);
+}

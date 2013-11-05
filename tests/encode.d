@@ -140,6 +140,21 @@ void testEncodeSubWord() {
     checkEqual(cereal.bytes, [ 0x9e, 0xea]);
 }
 
+void testEncodeMoreThan8Bits() {
+    {
+        auto cereal = new Cerealiser();
+        cereal.writeBits(1, 9);
+        cereal.writeBits(15, 7);
+        checkEqual(cereal.bytes, [ 0x00, 0x8f]);
+    }
+    {
+        auto cereal = new Cerealiser();
+        cereal.writeBits((0x9e << 1) | 1, 9);
+        cereal.writeBits(0xea & 0x7f, 7);
+        checkEqual(cereal.bytes, [ 0x9e, 0xea]);
+    }
+}
+
 void testEncodeFailsIfToBigForBits() {
     auto cereal = new Cerealiser();
     checkNotThrown(cereal.writeBits(1, 1));

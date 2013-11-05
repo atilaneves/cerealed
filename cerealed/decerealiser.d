@@ -30,6 +30,14 @@ public:
         return _bytes;
     }
 
+    uint readBits(int bits) {
+        if(_bitIndex == 0) {
+            _currentByte = this.value!ubyte;
+        }
+
+        return readBitsHelper(bits);
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) {
@@ -40,4 +48,24 @@ protected:
 private:
 
     const (ubyte)[] _bytes;
+    ubyte _currentByte;
+    int _bitIndex;
+
+    uint readBitsHelper(int bits) {
+        enum bitsInByte = 8;
+        if(_bitIndex + bits > bitsInByte) { //have to carry on to the next byte
+            immutable bits1stTime = bitsInByte - _bitIndex; //what's left of this byte
+            immutable bits2ndTime = (_bitIndex + bits) - bitsInByte; //bits to read from next byte
+            immutable value1 = readBitsHelper(bits1stTime);
+            _bitIndex = 0;
+            _currentByte = this.value!ubyte;
+            immutable value2 = readBitsHelper(bits2ndTime);
+            return (value1 << bits2ndTime) | value2;
+        }
+
+        _bitIndex += bits;
+
+        auto shift =  _currentByte >> (bitsInByte - _bitIndex);
+        return shift & (0xff >> (bitsInByte - bits));
+    }
 }
