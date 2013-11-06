@@ -45,3 +45,28 @@ void testEncodeStringStruct() {
     enc ~= str;
     checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
 }
+
+
+private struct ProtoHeaderStruct {
+    this(ubyte i3, ubyte i1, ubyte i4, ubyte i8) {
+        //TODO: eliminate need for this
+        bits3 = Bits!3(i3);
+        bits1 = Bits!1(i1);
+        bits4 = Bits!4(i4);
+        bits8 = i8;
+    }
+    Bits!3 bits3;
+    Bits!1 bits1;
+    Bits!4 bits4;
+    ubyte bits8;
+}
+
+void testEncDecProtoHeaderStruct() {
+    const hdr = ProtoHeaderStruct(6, 1, 3, 254);
+    auto enc = new Cerealiser();
+    enc ~= hdr; //1101 0011, 254
+    checkEqual(enc.bytes, [0xd3, 254]);
+
+    auto dec = new Decerealiser(enc.bytes);
+    checkEqual(dec.value!ProtoHeaderStruct, hdr);
+}
