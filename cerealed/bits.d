@@ -9,6 +9,7 @@ template isBitsStruct(T) {
 }
 
 struct Bits(int N) if(N <= 32) {
-    @property int bits() { return N; }
     uint value;
+    this(uint v) { value = v; }
+    @property int bits() const pure nothrow { return N; }
 }
