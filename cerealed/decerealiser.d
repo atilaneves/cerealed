@@ -1,7 +1,7 @@
 module cerealed.decerealiser;
 
 import cerealed.cereal;
-import cerealed.bits;
+public import cerealed.bits;
 import std.traits;
 
 class Decerealiser: Cereal {

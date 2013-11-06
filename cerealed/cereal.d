@@ -1,6 +1,6 @@
 module cerealed.cereal;
 
-import cerealed.bits;
+public import cerealed.bits;
 import std.traits;
 import std.conv;
 import std.algorithm;
@@ -63,7 +63,7 @@ public:
         grain(length);
         static if(isMutable!T) {
             if(val.length == 0) { //decoding
-                val.length = length;
+                val.length = cast(uint)length;
             }
         }
         foreach(ref e; val) grain(e);
@@ -100,8 +100,6 @@ public:
 
     void grain(T)(ref T val) if(isAggregateType!T) {
         static if(isBitsStruct!T) {
-            //this is the way I found to distinguish between
-            //one of the Bits!N types and any other type
             grainBits(val.value, val.bits);
         } else {
             foreach(member; __traits(allMembers, T)) {

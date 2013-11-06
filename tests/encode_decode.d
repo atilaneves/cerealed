@@ -2,7 +2,6 @@ import unit_threaded.check;
 import unit_threaded.io;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
-import cerealed.bits;
 import core.exception;
 
 
