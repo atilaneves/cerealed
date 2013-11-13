@@ -5,6 +5,5 @@
     "authors": ["Atila Neves"],
     "license": "BSD 3-clause",
     "sourcePaths": ["cerealed"],
-    "importPaths": ["."],
     "targetType": "library",
 }

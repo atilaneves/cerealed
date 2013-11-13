@@ -50,18 +50,12 @@ void testEncodeStringStruct() {
 
 
 private struct ProtoHeaderStruct {
-    this(ubyte i3, ubyte i1, ubyte i4, ubyte i8) {
-        //TODO: eliminate need for this
-        bits3 = Bits!3(i3);
-        bits1 = Bits!1(i1);
-        bits4 = Bits!4(i4);
-        bits8 = i8;
-    }
-    Bits!3 bits3;
-    Bits!1 bits1;
-    Bits!4 bits4;
-    ubyte bits8;
+    @Bits!3 ubyte bits3;
+    @Bits!1 ubyte bits1;
+    @Bits!4 uint bits4;
+    ubyte bits8; //no UDA necessary
 }
+
 
 void testEncDecProtoHeaderStruct() {
     const hdr = ProtoHeaderStruct(6, 1, 3, 254);

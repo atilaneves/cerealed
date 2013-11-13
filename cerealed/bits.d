@@ -1,15 +1,25 @@
 module cerealed.bits;
 
-template isBitsStruct(T) {
+
+import std.typetuple;
+
+
+template getNumBits(T) {
     static if(is(T:Bits!N, int N)) {
-        enum isBitsStruct = true;
+        enum getNumBits = N;
     } else {
-        enum isBitsStruct = false;
+        enum getNumBits = 0;
     }
 }
 
-struct Bits(int N) if(N <= 32) {
-    uint value;
-    this(uint v) { value = v; }
-    @property int bits() const pure nothrow { return N; }
+template isABitsStruct(T) {
+    static if(is(T:Bits!N, int N)) {
+        enum isABitsStruct = true;
+    } else {
+        enum isABitsStruct = false;
+    }
+}
+
+
+struct Bits(int N) if(N > 0 && N <= 32) {
 }

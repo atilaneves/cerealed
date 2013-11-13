@@ -100,20 +100,3 @@ void testEncDecAssocArray() {
     checkEqual(dec.value!(int[int]), intToInts);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
 }
-
-void testEncDecBitsGrain() {
-    auto enc = new Cerealiser();
-    auto enc1 = Bits!3(7);
-    enc.grain(enc1);
-    auto enc2 = Bits!5(1);
-    enc.grain(enc2);
-    checkEqual(enc.bytes, [0xe1]);
-
-    auto dec = new Decerealiser(enc.bytes);
-    auto dec1 = Bits!3(0);
-    dec.grain(dec1);
-    checkEqual(dec1.value, 7);
-    auto dec2 = Bits!5(0);
-    dec.grain(dec2);
-    checkEqual(dec2.value, 1);
-}

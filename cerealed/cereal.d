@@ -99,12 +99,20 @@ public:
     }
 
     void grain(T)(ref T val) if(isAggregateType!T) {
-        static if(isBitsStruct!T) {
-            grainBits(val.value, val.bits);
-        } else {
-            foreach(member; __traits(allMembers, T)) {
-                static if(__traits(compiles, grain(__traits(getMember,val, member)))) {
+        foreach(member; __traits(allMembers, T)) {
+            static if(__traits(compiles, grain(__traits(getMember, val, member)))) {
+                import std.typetuple;
+                alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
+                                                              __traits(getMember, val, member)));
+                static assert(attrs.length == 0 || attrs.length == 1,
+                              "Too many Bits!N attributes!");
+                static if(attrs.length == 0) {
+                    //normal case, no attributes
                     grain(__traits(getMember, val, member));
+                } else {
+                    //Bits attributes, do it piecemeal
+                    enum bits = getNumBits!(attrs[0]);
+                    grainBitsT(__traits(getMember, val, member), bits);
                 }
             }
         }
@@ -116,6 +124,12 @@ protected:
     abstract void grainBits(ref uint val, int bits);
 
 private:
+
+    void grainBitsT(T)(ref T val, int bits) {
+        uint realVal = val;
+        grainBits(realVal, bits);
+        val = cast(T)realVal;
+    }
 
     void grainReinterpret(T)(ref T val) {
         auto ptr = cast(CerealPtrType!T)(&val);

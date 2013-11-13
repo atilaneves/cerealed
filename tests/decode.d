@@ -174,9 +174,3 @@ void testDecodeBitsMultiByte() {
     checkEqual(cereal.readBits(9), 317);
     checkEqual(cereal.readBits(7), 0x6a);
 }
-
-void testDecodeBitsStruct() {
-    auto cereal = new Decerealiser([0xe1]);
-    checkEqual(cereal.value!(Bits!3).value, 7);
-    checkEqual(cereal.value!(Bits!5).value, 1);
-}
