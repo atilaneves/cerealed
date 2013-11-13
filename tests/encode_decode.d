@@ -1,3 +1,5 @@
+module tests.encode_decode;
+
 import unit_threaded.check;
 import unit_threaded.io;
 import cerealed.cerealiser;

@@ -1,3 +1,5 @@
+module tests.klasses;
+
 import unit_threaded.check;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
