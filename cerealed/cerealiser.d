@@ -44,8 +44,8 @@ public:
             if(remainingBits > 0) {
                 ubyte remainingValue = value & (0xff >> (bitsInByte - remainingBits));
                 writeBits(remainingValue, remainingBits);
-                return;
             }
+            return;
         }
         _currentByte |= (value << (bitsInByte - bits - _bitIndex));
         _bitIndex += bits;

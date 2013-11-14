@@ -165,3 +165,14 @@ void testEncodeFailsIfToBigForBits() {
     checkNotThrown(cereal.writeBits(3, 2));
     checkThrown(cereal.writeBits(5, 2));
 }
+
+void testEncodeTwoBytesBits() {
+    auto cereal = new Cerealiser();
+    immutable uint value = 5;
+    cereal.writeBits(3, 4);
+    cereal.writeBits(1, 1);
+    cereal.writeBits(2, 2);
+    cereal.writeBits(0, 1);
+    cereal.writeBits(5, 8);
+    checkEqual(cereal.bytes, [0x3c, 0x05]);
+}

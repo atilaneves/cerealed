@@ -66,3 +66,38 @@ void testEncDecProtoHeaderStruct() {
     auto dec = new Decerealiser(enc.bytes);
     checkEqual(dec.value!ProtoHeaderStruct, hdr);
 }
+
+private enum MqttType {
+    RESERVED1 = 0, CONNECT = 1, CONNACK = 2, PUBLISH = 3,
+    PUBACK = 4, PUBREC = 5, PUBREL = 6, PUBCOMP = 7,
+    SUBSCRIBE = 8, SUBACK = 9, UNSUBSCRIBE = 10, UNSUBACK = 11,
+    PINGREQ = 12, PINGRESP = 13, DISCONNECT = 14, RESERVED2 = 15
+}
+
+private struct MqttFixedHeader {
+    @Bits!4 MqttType type;
+    @Bits!1 bool dup;
+    @Bits!2 ubyte qos;
+    @Bits!1 bool retain;
+    @Bits!8 uint remaining;
+
+    this(MqttType type, bool dup, ubyte qos, bool retain, uint remaining = 0) {
+        this.type = type;
+        this.dup = dup;
+        this.qos = qos;
+        this.retain = retain;
+        this.remaining = remaining;
+    }
+}
+
+void testCerealiseMqttHeader() {
+    auto cereal = new Cerealiser();
+    cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
+    checkEqual(cereal.bytes, [0x3c, 0x5]);
+}
+
+void testDecerealiseMqttHeader() {
+    auto cereal = new Decerealiser([0x3c, 0x5]);
+    checkEqual(cereal.value!MqttFixedHeader,
+               MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
+}
