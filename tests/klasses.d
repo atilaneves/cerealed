@@ -19,3 +19,23 @@ void testDummyClass() {
 
     auto dec = new Decerealiser(enc.bytes);
 }
+
+private struct DummyStruct {
+    ubyte first;
+    ushort second;
+}
+
+private class ClassWithStruct {
+    DummyStruct dummy;
+    ubyte anotherByte;
+    this(DummyStruct d, ubyte a) {
+        dummy = d;
+        anotherByte = a;
+    }
+}
+
+void testClassWithStruct() {
+    auto cereal = new Cerealiser();
+    cereal ~= new ClassWithStruct(DummyStruct(2, 3), 4);
+    checkEqual(cereal.bytes, [2, 0, 3, 4]);
+}
