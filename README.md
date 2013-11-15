@@ -61,3 +61,26 @@ the scenes.
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
     auto decerealiser = new Decerealiser([1, 0, 2, 4]);
     assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
+
+
+The other option when custom serialisation is needed, to avoid boilerplate, is to
+define a `void postBlit(Cereal cereal)` function instead of `accept`. The
+marshalling or unmarshalling is done as it would in the absence of customisation,
+and postBlit is called to fix things up. Example below.
+
+    struct CustomStruct {
+        ubyte mybyte;
+        ushort myshort;
+        void postBlit(Cereal cereal) {
+             ubyte otherbyte = 4; //make it an lvalue
+             cereal.grain(otherbyte);
+        }
+    }
+
+    auto cerealiser = new Cerealiser();
+    cerealiser ~= CustomStruct(1, 2);
+    assert(cerealiser.bytes == [ 1, 0, 2, 4]);
+
+    //because of the custom serialisation, passing in just [1, 0, 2] would throw
+    auto decerealiser = new Decerealiser([1, 0, 2, 4]);
+    assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
