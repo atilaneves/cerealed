@@ -8,6 +8,7 @@ class Decerealiser: Cereal {
 public:
 
     override Type type() const { return Cereal.Type.Read; }
+    override ulong bytesLeft() const { return bytes.length; }
 
     this(T)(in T[] bytes) if(isNumeric!T) {
         static if(is(T == ubyte)) {

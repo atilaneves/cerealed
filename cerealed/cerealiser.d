@@ -11,6 +11,7 @@ class Cerealiser: Cereal {
 public:
 
     override Type type() const { return Cereal.Type.Write; }
+    override ulong bytesLeft() const { return bytes.length; }
 
     void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
                                       !isAggregateType!T) {
