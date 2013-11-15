@@ -114,10 +114,10 @@ public:
     }
 
     void grainAllMembers(T)(ref T val) {
-        /*grains all members of an  aggregate type*/
+        /*grains all members of an aggregate type*/
         foreach(member; __traits(allMembers, T)) {
             //makes sure to only serialise members that make sense, i.e. data
-            static if(__traits(compiles, grain(__traits(getMember, val, member)))) {
+            static if(__traits(compiles, grainMember!member(val))) {
                 grainMember!member(val);
             }
         }

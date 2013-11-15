@@ -159,3 +159,25 @@ void testAttrMember() {
     //only nibble1, nibble2 and value should show up in bytes
     checkEqual(cereal.bytes, [0x3e, 0x00, 0x05]);
 }
+
+struct EnumStruct {
+    enum Enum:byte {
+        Foo,
+        Bar,
+        Baz
+    }
+
+    ubyte foo;
+    Enum bar;
+}
+
+void testEnum() {
+    auto cerealiser = new Cerealiser();
+    const e = EnumStruct(1, EnumStruct.Enum.Baz);
+    cerealiser ~= e;
+    const bytes = [1, 2];
+    checkEqual(cerealiser.bytes, bytes);
+
+    auto decerealiser = new Decerealiser(bytes);
+    checkEqual(decerealiser.value!EnumStruct, e);
+}
