@@ -12,6 +12,12 @@ public:
 
     override Type type() const { return Cereal.Type.Write; }
 
+    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
+                                      !isAggregateType!T) {
+        T realVal = val;
+        grain(realVal);
+    }
+
     void write(T)(T val) if(!isArray!T && !isAssociativeArray!T) {
         Unqual!T lval = val;
         grain(lval);
@@ -25,12 +31,6 @@ public:
     void write(K, V)(const(V[K]) val) {
         V[K] lval = cast(V[K])val.dup;
         grain(lval);
-    }
-
-    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
-                                      !isAggregateType!T) {
-        T realVal = val;
-        grain(realVal);
     }
 
     void writeBits(in int value, in int bits) {
