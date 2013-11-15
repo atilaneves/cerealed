@@ -25,8 +25,8 @@ public:
         return val;
     }
 
-    @property T value(T)() if(is(T == class)) {
-        auto val = new T();
+    @property T value(T, A...)(A args) if(is(T == class)) {
+        auto val = new T(args);
         grain(val);
         return val;
     }
