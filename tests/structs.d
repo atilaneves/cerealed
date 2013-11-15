@@ -1,6 +1,6 @@
 module tests.structs;
 
-import unit_threaded.check;
+import unit_threaded;
 import cerealed;
 import core.exception;
 
@@ -101,7 +101,7 @@ void testDecerealiseMqttHeader() {
                MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
 
-struct StructWithNoCereal {
+private struct StructWithNoCereal {
     @Bits!4 ubyte nibble1;
     @Bits!4 ubyte nibble2;
     @NoCereal ushort nocereal1;
@@ -120,4 +120,28 @@ void testNoCereal() {
     //won't be the same as the serialised struct, since the members
     //marked with NoCereal will be set to T.init
     checkEqual(decerealizer.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
+}
+
+private struct CustomStruct {
+    ubyte mybyte;
+    ushort myshort;
+    void accept(Cereal cereal) {
+        //cereal.grain(this);
+        cereal.grain(mybyte);
+        cereal.grain(myshort);
+        ubyte otherbyte = 4;
+        cereal.grain(otherbyte);
+    }
+}
+
+void testCustomCereal() {
+    auto cerealiser = new Cerealiser();
+    import std.stdio;
+    writeln("Serialising custom struct ");
+    cerealiser ~= CustomStruct(1, 2);
+    checkEqual(cerealiser.bytes, [ 1, 0, 2, 4]);
+
+    //because of the custom serialisation, passing in just [1, 0, 2] would throw
+    auto decerealiser = new Decerealiser([1, 0, 2, 4]);
+    checkEqual(decerealiser.value!CustomStruct, CustomStruct(1, 2));
 }
