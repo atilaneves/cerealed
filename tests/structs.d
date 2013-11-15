@@ -126,9 +126,8 @@ private struct CustomStruct {
     ubyte mybyte;
     ushort myshort;
     void accept(Cereal cereal) {
-        //cereal.grain(this);
-        cereal.grain(mybyte);
-        cereal.grain(myshort);
+        //can't call grain(this), that would cause an infinite loop
+        cereal.grainAllMembers(this);
         ubyte otherbyte = 4;
         cereal.grain(otherbyte);
     }
