@@ -110,14 +110,14 @@ struct StructWithNoCereal {
 }
 
 void testNoCereal() {
-    auto cerealiser = new Cerealiser();
-    cerealiser ~= StructWithNoCereal(3, 14, 42, 5, 12);
+    auto cerealizer = new Cerealizer();
+    cerealizer ~= StructWithNoCereal(3, 14, 42, 5, 12);
     //only nibble1, nibble2 and value should show up in bytes
     immutable bytes = [0x3e, 0x00, 0x05];
-    checkEqual(cerealiser.bytes, bytes);
+    checkEqual(cerealizer.bytes, bytes);
 
-    auto decerealiser = new Decerealiser(bytes);
+    auto decerealizer = new Decerealizer(bytes);
     //won't be the same as the serialised struct, since the members
     //marked with NoCereal will be set to T.init
-    checkEqual(decerealiser.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
+    checkEqual(decerealizer.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
 }
