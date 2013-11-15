@@ -15,6 +15,8 @@ public:
         } else {
             foreach(b; bytes) _bytes ~= cast(ubyte)b;
         }
+
+        _originalBytes = _bytes;
     }
 
     @property T value(T)() if(!isArray!T && !isAssociativeArray!T) {
@@ -41,6 +43,13 @@ public:
         return readBitsHelper(bits);
     }
 
+    void reset() {
+        /**resets the deceraliser to read from the beginning again*/
+        _bitIndex = 0;
+        _currentByte = 0;
+        _bytes = _originalBytes;
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) {
@@ -54,6 +63,7 @@ protected:
 
 private:
 
+    const (ubyte)[] _originalBytes;
     const (ubyte)[] _bytes;
     ubyte _currentByte;
     int _bitIndex;
