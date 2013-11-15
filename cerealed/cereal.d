@@ -114,24 +114,28 @@ public:
         foreach(member; __traits(allMembers, T)) {
             //makes sure to only serialise members that make sense, i.e. data
             static if(__traits(compiles, grain(__traits(getMember, val, member)))) {
-                import std.typetuple;
-                enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
-                                                                       __traits(getMember, val, member)));
-                //only serialise if the member doesn't have @NoCereal
-                static if(noCerealIndex == -1) {
-                    alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
-                                                                  __traits(getMember, val, member)));
-                    static assert(attrs.length == 0 || attrs.length == 1,
+                grainMember!member(val);
+            }
+        }
+    }
+
+    void grainMember(string member, T)(ref T val) {
+        import std.typetuple;
+        enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
+                                                               __traits(getMember, val, member)));
+        //only serialise if the member doesn't have @NoCereal
+        static if(noCerealIndex == -1) {
+            alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
+                                                          __traits(getMember, val, member)));
+            static assert(attrs.length == 0 || attrs.length == 1,
                                   "Too many Bits!N attributes!");
-                    static if(attrs.length == 0) {
-                        //normal case, no Bits attributes
-                        grain(__traits(getMember, val, member));
-                    } else {
-                        //Bits attributes, do it piecemeal
-                        enum bits = getNumBits!(attrs[0]);
-                        grainBitsT(__traits(getMember, val, member), bits);
-                    }
-                }
+            static if(attrs.length == 0) {
+                //normal case, no Bits attributes
+                grain(__traits(getMember, val, member));
+            } else {
+                //Bits attributes, do it piecemeal
+                enum bits = getNumBits!(attrs[0]);
+                grainBitsT(__traits(getMember, val, member), bits);
             }
         }
     }

@@ -144,3 +144,18 @@ void testCustomCereal() {
     auto decerealiser = new Decerealiser([1, 0, 2, 4]);
     checkEqual(decerealiser.value!CustomStruct, CustomStruct(1, 2));
 }
+
+
+void testAttrMember() {
+    //test that attributes work when calling grain member by member
+    auto cereal = new Cerealizer();
+    auto str = StructWithNoCereal(3, 14, 42, 5, 12);
+    cereal.grainMember!"nibble1"(str);
+    cereal.grainMember!"nibble2"(str);
+    cereal.grainMember!"nocereal1"(str);
+    cereal.grainMember!"value"(str);
+    cereal.grainMember!"nocereal2"(str);
+
+    //only nibble1, nibble2 and value should show up in bytes
+    checkEqual(cereal.bytes, [0x3e, 0x00, 0x05]);
+}
