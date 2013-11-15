@@ -28,14 +28,25 @@ private struct DummyStruct {
 private class ClassWithStruct {
     DummyStruct dummy;
     ubyte anotherByte;
+    this() {
+    }
     this(DummyStruct d, ubyte a) {
         dummy = d;
         anotherByte = a;
     }
+    override string toString() const {
+        import std.conv;
+        return text("ClassWithStruct(", dummy, ", ", anotherByte, ")");
+    }
 }
 
 void testClassWithStruct() {
-    auto cereal = new Cerealiser();
-    cereal ~= new ClassWithStruct(DummyStruct(2, 3), 4);
-    checkEqual(cereal.bytes, [2, 0, 3, 4]);
+    auto enc = new Cerealiser();
+    auto klass = new ClassWithStruct(DummyStruct(2, 3), 4);
+    enc ~= klass;
+    const bytes = [2, 0, 3, 4];
+    checkEqual(enc.bytes, bytes);
+
+    auto dec = new Decerealiser(bytes);
+    checkEqual(dec.value!ClassWithStruct, klass);
 }

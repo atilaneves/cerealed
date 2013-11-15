@@ -19,8 +19,14 @@ public:
         _originalBytes = _bytes;
     }
 
-    @property T value(T)() if(!isArray!T && !isAssociativeArray!T) {
+    @property T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
         T val;
+        grain(val);
+        return val;
+    }
+
+    @property T value(T)() if(is(T == class)) {
+        auto val = new T();
         grain(val);
         return val;
     }
