@@ -166,6 +166,13 @@ void testDecodeBits() {
     checkEqual(cereal.readBits(5), 23);
     checkEqual(cereal.readBits(2), 1);
     checkEqual(cereal.readBits(3), 2);
+
+    cereal.reset();
+    checkEqual(cereal.readBits(3), 4);
+    checkEqual(cereal.readBits(3), 7);
+    checkEqual(cereal.readBits(5), 23);
+    checkEqual(cereal.readBits(2), 1);
+    checkEqual(cereal.readBits(3), 2);
 }
 
 void testDecodeBitsMultiByte() {
