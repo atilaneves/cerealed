@@ -181,3 +181,23 @@ void testEnum() {
     auto decerealiser = new Decerealiser(bytes);
     checkEqual(decerealiser.value!EnumStruct, e);
 }
+
+struct PostBlitStruct {
+    ubyte foo;
+    @NoCereal ubyte bar;
+    ubyte baz;
+    void postBlit(Cereal cereal) {
+        ushort foo = 4;
+        cereal.grain(foo);
+    }
+}
+
+void testPostBlit() {
+    auto enc = new Cerealiser();
+    enc ~= PostBlitStruct(3, 5, 8);
+    const bytes = [ 3, 8, 0, 4];
+    checkEqual(enc.bytes, bytes);
+
+    auto dec = new Decerealiser(bytes);
+    checkEqual(dec.value!PostBlitStruct, PostBlitStruct(3, 0, 8));
+}

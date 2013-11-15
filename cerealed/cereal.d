@@ -107,10 +107,17 @@ public:
         static if(__traits(hasMember, val, "accept") &&
                   __traits(compiles, val.accept(this))) {
             //custom serialisation, let the aggreagate do its thing
+            static assert(!__traits(hasMember, val, "postBlit"),
+                          "Cannot define both accept and postBlit");
             val.accept(this);
         } else {
             //normal serialisation, go through each member and possibly serialise
             grainAllMembers(val);
+            static if(__traits(hasMember, val, "postBlit") &&
+                      __traits(compiles, val.postBlit(this))) {
+                //semi-custom serialisation, do post blit
+                val.postBlit(this);
+            }
         }
     }
 
