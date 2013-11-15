@@ -1,8 +1,7 @@
 module tests.structs;
 
 import unit_threaded.check;
-import cerealed.cerealiser;
-import cerealed.decerealiser;
+import cerealed;
 import core.exception;
 
 
