@@ -10,6 +10,8 @@ import std.conv;
 class Cerealiser: Cereal {
 public:
 
+    override Type type() const { return Cereal.Type.Write; }
+
     void write(T)(T val) if(!isArray!T && !isAssociativeArray!T) {
         Unqual!T lval = val;
         grain(lval);

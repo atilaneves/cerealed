@@ -7,6 +7,8 @@ import std.traits;
 class Decerealiser: Cereal {
 public:
 
+    override Type type() const { return Cereal.Type.Read; }
+
     this(T)(in T[] bytes) if(isNumeric!T) {
         static if(is(T == ubyte)) {
             _bytes = bytes;

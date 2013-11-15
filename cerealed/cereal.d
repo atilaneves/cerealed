@@ -9,6 +9,10 @@ import std.algorithm;
 class Cereal {
 public:
 
+    enum Type { Write, Read }
+
+    abstract Type type() const;
+
     //catch all signed numbers and forward to reinterpret
     void grain(T)(ref T val) if(isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T) {
         grainReinterpret(val);
