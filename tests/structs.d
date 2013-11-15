@@ -101,3 +101,24 @@ void testDecerealiseMqttHeader() {
     checkEqual(cereal.value!MqttFixedHeader,
                MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
+
+struct StructWithNoCereal {
+    @Bits!4 ubyte nibble1;
+    @Bits!4 ubyte nibble2;
+    @NoCereal ushort nocereal1;
+    ushort value;
+    @NoCereal ushort nocereal2;
+}
+
+void testNoCereal() {
+    auto cerealiser = new Cerealiser();
+    cerealiser ~= StructWithNoCereal(3, 14, 42, 5, 12);
+    //only nibble1, nibble2 and value should show up in bytes
+    immutable bytes = [0x3e, 0x00, 0x05];
+    checkEqual(cerealiser.bytes, bytes);
+
+    auto decerealiser = new Decerealiser(bytes);
+    //won't be the same as the serialised struct, since the members
+    //marked with NoCereal will be set to T.init
+    checkEqual(decerealiser.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
+}

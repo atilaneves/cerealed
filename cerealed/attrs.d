@@ -1,4 +1,4 @@
-module cerealed.bits;
+module cerealed.attrs;
 
 
 import std.typetuple;
@@ -23,3 +23,5 @@ template isABitsStruct(T) {
 
 struct Bits(int N) if(N > 0 && N <= 32) {
 }
+
+enum NoCereal;

@@ -1,7 +1,7 @@
 module cerealed.cerealiser;
 
 import cerealed.cereal;
-public import cerealed.bits;
+public import cerealed.attrs;
 import std.traits;
 import std.exception;
 import std.conv;

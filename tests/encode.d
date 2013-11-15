@@ -2,7 +2,6 @@ module tests.encode;
 
 import unit_threaded.check;
 import cerealed.cerealiser;
-import cerealed.bits;
 
 
 void testEncodeBool() {
