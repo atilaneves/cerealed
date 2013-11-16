@@ -19,9 +19,9 @@ Example usage:
 It can also handle strings, associative arrays, arrays, chars, etc.
 What about structs? No boilerplate necessary, compile-time reflection does it for you.
 The example below shows off a few features. First and foremost, members are serialised
-automatically, but can be opted out via the @NoCereal attribute. Also importantly,
+automatically, but can be opted out via the `@NoCereal` attribute. Also importantly,
 members to be serialised in a certain number of bits (important for binary protocols)
-are signalled with the @Bits attribute with a compile-time integer specifying the
+are signalled with the `@Bits` attribute with a compile-time integer specifying the
 number of bits to use.
 
     struct MyStruct {
