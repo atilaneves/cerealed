@@ -14,15 +14,15 @@ public:
     abstract ulong bytesLeft() const;
 
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) if(isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T) {
+    void grain(T)(ref T val) @safe if(isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T) {
         grainReinterpret(val);
     }
 
-    void grain(T)(ref T val) if(is(T == ubyte)) {
+    void grain(T)(ref T val) @safe if(is(T == ubyte)) {
         grainUByte(val);
     }
 
-    void grain(T)(ref T val) if(is(T == ushort)) {
+    void grain(T)(ref T val) @safe if(is(T == ushort)) {
         ubyte valh = (val >> 8);
         ubyte vall = val & 0xff;
         grainUByte(valh);
@@ -30,7 +30,7 @@ public:
         val = (valh << 8) + vall;
     }
 
-    void grain(T)(ref T val) if(is(T == uint)) {
+    void grain(T)(ref T val) @safe if(is(T == uint)) {
         ubyte val0 = (val >> 24);
         ubyte val1 = cast(ubyte)(val >> 16);
         ubyte val2 = cast(ubyte)(val >> 8);
@@ -42,7 +42,7 @@ public:
         val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
     }
 
-    void grain(T)(ref T val) if(is(T == ulong)) {
+    void grain(T)(ref T val) @safe if(is(T == ulong)) {
         immutable oldVal = val;
         val = 0;
 
@@ -54,15 +54,15 @@ public:
         }
     }
 
-    void grain(T)(ref T val) if(is(T == wchar)) {
+    void grain(T)(ref T val) @trusted if(is(T == wchar)) {
         grain(*cast(ushort*)&val);
     }
 
-    void grain(T)(ref T val) if(is(T == dchar)) {
+    void grain(T)(ref T val) @trusted if(is(T == dchar)) {
         grain(*cast(uint*)&val);
     }
 
-    void grain(T, U = ushort)(ref T val) if(isArray!T && !is(T == string)) {
+    void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
         static if(isMutable!T) {
@@ -73,7 +73,7 @@ public:
         foreach(ref e; val) grain(e);
     }
 
-    void grain(T, U = ushort)(ref T val) if(is(T == string)) {
+    void grain(T, U = ushort)(ref T val) @trusted if(is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
 
@@ -88,7 +88,7 @@ public:
         val = cast(string)values;
     }
 
-    void grain(T, U = ushort)(ref T val) if(isAssociativeArray!T) {
+    void grain(T, U = ushort)(ref T val) @trusted if(isAssociativeArray!T) {
         U length = cast(U)val.length;
         grain(length);
         const keys = val.keys;
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    void grain(T)(ref T val) if(isAggregateType!T) {
+    void grain(T)(ref T val) @trusted if(isAggregateType!T) {
         static if(__traits(hasMember, val, "accept") &&
                   __traits(compiles, val.accept(this))) {
             //custom serialisation, let the aggreagate do its thing
@@ -120,7 +120,7 @@ public:
         }
     }
 
-    void grainAllMembers(T)(ref T val) {
+    void grainAllMembers(T)(ref T val) @trusted {
         /*grains all members of an aggregate type*/
         foreach(member; __traits(allMembers, T)) {
             //makes sure to only serialise members that make sense, i.e. data
@@ -130,7 +130,7 @@ public:
         }
     }
 
-    void grainMember(string member, T)(ref T val) {
+    void grainMember(string member, T)(ref T val) @trusted {
         import std.typetuple;
         enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                                __traits(getMember, val, member)));
@@ -157,7 +157,7 @@ public:
         }
     }
 
-    void grainRawArray(T)(ref T[] val) {
+    void grainRawArray(T)(ref T[] val) @trusted {
         //can't use virtual functions due to template parameter
         if(type == Type.Read) {
             val.length = 0;
@@ -172,18 +172,18 @@ public:
 
 protected:
 
-    abstract void grainUByte(ref ubyte val);
-    abstract void grainBits(ref uint val, int bits);
+    abstract void grainUByte(ref ubyte val) @safe;
+    abstract void grainBits(ref uint val, int bits) @safe;
 
 private:
 
-    void grainBitsT(T)(ref T val, int bits) {
+    void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
         grainBits(realVal, bits);
         val = cast(T)realVal;
     }
 
-    void grainReinterpret(T)(ref T val) {
+    void grainReinterpret(T)(ref T val) @trusted {
         auto ptr = cast(CerealPtrType!T)(&val);
         grain(*ptr);
     }

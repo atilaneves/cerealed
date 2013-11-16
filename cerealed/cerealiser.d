@@ -1,5 +1,6 @@
 module cerealed.cerealiser;
 
+
 import cerealed.cereal;
 public import cerealed.attrs;
 import std.traits;
@@ -10,31 +11,32 @@ import std.conv;
 class Cerealiser: Cereal {
 public:
 
-    override Type type() const { return Cereal.Type.Write; }
-    override ulong bytesLeft() const { return bytes.length; }
+    override Type type() const pure nothrow @safe { return Cereal.Type.Write; }
+    override ulong bytesLeft() const @safe { return bytes.length; }
 
-    void write(T)(const ref T val) if(!isArray!T && !isAssociativeArray!T &&
-                                      !isAggregateType!T) {
+    void write(T)(const ref T val) @safe if(!isArray!T &&
+                                            !isAssociativeArray!T &&
+                                            !isAggregateType!T) {
         T realVal = val;
         grain(realVal);
     }
 
-    void write(T)(T val) if(!isArray!T && !isAssociativeArray!T) {
+    void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
         Unqual!T lval = val;
         grain(lval);
     }
 
-    void write(T)(const(T)[] val) {
+    void write(T)(const(T)[] val) @safe {
         T[] lval = val.dup;
         grain(lval);
     }
 
-    void write(K, V)(const(V[K]) val) {
+    void write(K, V)(const(V[K]) val) @trusted {
         V[K] lval = cast(V[K])val.dup;
         grain(lval);
     }
 
-    void writeBits(in int value, in int bits) {
+    void writeBits(in int value, in int bits) @safe {
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
@@ -54,22 +56,22 @@ public:
         _bitIndex += bits;
     }
 
-    Cerealiser opOpAssign(string op : "~", T)(T val) {
+    Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
         write(val);
         return this;
     }
 
-    @property const(ubyte[]) bytes() const nothrow {
+    const(ubyte[]) bytes() const nothrow @property @safe {
         return _bytes;
     }
 
 protected:
 
-    override void grainUByte(ref ubyte val) {
+    override void grainUByte(ref ubyte val) @safe {
         _bytes ~= val;
     }
 
-    override void grainBits(ref uint value, int bits) {
+    override void grainBits(ref uint value, int bits) @safe {
         writeBits(value, bits);
     }
 

@@ -7,10 +7,10 @@ import std.traits;
 class Decerealiser: Cereal {
 public:
 
-    override Type type() const { return Cereal.Type.Read; }
-    override ulong bytesLeft() const { return bytes.length; }
+    override Type type() const pure nothrow @safe { return Cereal.Type.Read; }
+    override ulong bytesLeft() const @safe { return bytes.length; }
 
-    this(T)(in T[] bytes) if(isNumeric!T) {
+    this(T)(in T[] bytes) @trusted if(isNumeric!T) {
         static if(is(T == ubyte)) {
             _bytes = bytes;
         } else {
@@ -20,29 +20,29 @@ public:
         _originalBytes = _bytes;
     }
 
-    @property T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
+    @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
         T val;
         grain(val);
         return val;
     }
 
-    @property T value(T, A...)(A args) if(is(T == class)) {
+    @property @trusted T value(T, A...)(A args) if(is(T == class)) {
         auto val = new T(args);
         grain(val);
         return val;
     }
 
-    @property T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
+    @property @safe T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
         T val;
         grain!(T, U)(val);
         return val;
     }
 
-    @property const(ubyte[]) bytes() const nothrow {
+    const(ubyte[]) bytes() const nothrow @safe @property {
         return _bytes;
     }
 
-    uint readBits(int bits) {
+    uint readBits(int bits) @safe {
         if(_bitIndex == 0) {
             _currentByte = this.value!ubyte;
         }
@@ -50,7 +50,7 @@ public:
         return readBitsHelper(bits);
     }
 
-    void reset() {
+    void reset() @safe {
         /**resets the deceraliser to read from the beginning again*/
         _bitIndex = 0;
         _currentByte = 0;
@@ -59,12 +59,12 @@ public:
 
 protected:
 
-    override void grainUByte(ref ubyte val) {
+    override void grainUByte(ref ubyte val) @safe {
         val = _bytes[0];
         _bytes = _bytes[1..$];
     }
 
-    override void grainBits(ref uint value, int bits) {
+    override void grainBits(ref uint value, int bits) @safe {
         value = readBits(bits);
     }
 
@@ -75,7 +75,7 @@ private:
     ubyte _currentByte;
     int _bitIndex;
 
-    uint readBitsHelper(int bits) {
+    uint readBitsHelper(int bits) @safe {
         enum bitsInByte = 8;
         if(_bitIndex + bits > bitsInByte) { //have to carry on to the next byte
             immutable bits1stTime = bitsInByte - _bitIndex; //what's left of this byte
