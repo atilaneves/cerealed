@@ -5,7 +5,6 @@ import std.traits;
 import std.conv;
 import std.algorithm;
 
-
 class Cereal {
 public:
 
@@ -135,6 +134,8 @@ public:
         import std.typetuple;
         enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                                __traits(getMember, val, member)));
+        enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
+                                                               __traits(getMember, val, member)));
         //only serialise if the member doesn't have @NoCereal
         static if(noCerealIndex == -1) {
             alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
@@ -143,12 +144,28 @@ public:
                                   "Too many Bits!N attributes!");
             static if(attrs.length == 0) {
                 //normal case, no Bits attributes
-                grain(__traits(getMember, val, member));
+                static if(rawArrayIndex == -1) {
+                    grain(__traits(getMember, val, member));
+                } else {
+                    grainRawArray(__traits(getMember, val, member));
+                }
             } else {
-                //Bits attributes, do it piecemeal
+                //Bits attributes, store it in less bits than fits
                 enum bits = getNumBits!(attrs[0]);
                 grainBitsT(__traits(getMember, val, member), bits);
             }
+        }
+    }
+
+    void grainRawArray(T)(ref T[] val) {
+        if(type == Type.Read) {
+            val.length = 0;
+            while(bytesLeft) {
+                val.length++;
+                grain(val[$ - 1]);
+            }
+        } else {
+            foreach(ref t; val) grain(t);
         }
     }
 

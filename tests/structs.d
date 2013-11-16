@@ -201,3 +201,21 @@ void testPostBlit() {
     auto dec = new Decerealiser(bytes);
     checkEqual(dec.value!PostBlitStruct, PostBlitStruct(3, 0, 8));
 }
+
+private struct StringsStruct {
+    ubyte mybyte;
+    @RawArray string[] strings;
+}
+
+void testRawArray() {
+    auto enc = new Cerealiser();
+    auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
+    enc ~= strs;
+    //no length encoding for the array, but strings still get a length each
+    const bytes = [ 5, 0, 3, 'f', 'o', 'o', 0, 6, 'f', 'o', 'o', 'b', 'a', 'r',
+                    0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
+    checkEqual(enc.bytes, bytes);
+
+    auto dec = new Decerealiser(bytes);
+    checkEqual(dec.value!StringsStruct, strs);
+}
