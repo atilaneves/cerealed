@@ -158,6 +158,7 @@ public:
     }
 
     void grainRawArray(T)(ref T[] val) {
+        //can't use virtual functions due to template parameter
         if(type == Type.Read) {
             val.length = 0;
             while(bytesLeft) {

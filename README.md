@@ -96,3 +96,25 @@ define both `accept` and `postBlit`. Example below.
 For more examples of how to serialise structs, check the [tests](tests) directory
 or real-world usage in my [MQTT](https://github.com/atilaneves/mqtt) broker
 also written in D.
+
+Arrays are by default serialised with a ushort denoting array length followed
+by the array contents. It happens often enough that networking protocols
+have explicit length parameters for the whole packet and that array lengths
+are implicitly determined from this. For this use case, the `@RawArray`
+attribute tells `cerealed` to not add the length parameter.
+
+    private struct StringsStruct {
+        ubyte mybyte;
+        @RawArray string[] strings;
+    }
+
+    auto enc = new Cerealiser();
+    auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
+    enc ~= strs;
+    //no length encoding for the array, but strings still get a length each
+    const bytes = [ 5, 0, 3, 'f', 'o', 'o', 0, 6, 'f', 'o', 'o', 'b', 'a', 'r',
+                    0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
+    assert(enc.bytes == bytes);
+
+    auto dec = new Decerealiser(bytes);
+    assert(dec.value!StringsStruct ==  strs);
