@@ -1,7 +1,11 @@
 cerealed
 =============
 
-Binary serialisation library for D. Minimal to no boilerplate necessary. Example usage:
+Binary serialisation library for D. Minimal to no boilerplate necessary.
+The tests in the [tests directory](tests) depend on
+[unit-threaded](https://github.com/atilaneves/unit-threaded) to run.
+
+Example usage:
 
     auto cerealiser = new Cerealiser(); //UK spelling
     cerealiser ~= 5; //int
