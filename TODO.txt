@@ -1,5 +1,2 @@
-- UDA to disable serialisation of certain members
-- UDA to mark a uint or ubyte or whatever as Bits!N. That way a struct can be initialised
-  with int literals without a constructor having to be written to initialise all
-  the Bit!N structs within, say, a protocol header
 - Throw if Bits!N is initialised with a value that is too big for N
+- Negative tests for when exceptions should be thrown
