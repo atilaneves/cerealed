@@ -134,13 +134,13 @@ public:
     private void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
         foreach(member; __traits(derivedMembers, ActualType)) {
             //makes sure to only serialise members that make sense, i.e. data
-            static if(__traits(compiles, grainMember!member(val))) {
-                grainMember!member(val);
+            static if(__traits(compiles, grainMemberWithAttr!member(val))) {
+                grainMemberWithAttr!member(val);
             }
         }
     }
 
-    void grainMember(string member, T)(ref T val) @trusted {
+    void grainMemberWithAttr(string member, T)(ref T val) @trusted {
         /**(De)serialises one member taking into account its attributes*/
         import std.typetuple;
         enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
