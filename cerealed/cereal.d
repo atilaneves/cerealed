@@ -122,7 +122,17 @@ public:
 
     void grainAllMembers(T)(ref T val) @trusted {
         /*grains all members of an aggregate type*/
-        foreach(member; __traits(allMembers, T)) {
+        static if(is(T == class)) {
+            foreach(base; BaseTypeTuple!T) {
+                foreach(member; __traits(derivedMembers, base)) {
+                    //makes sure to only serialise members that make sense, i.e. data
+                    static if(__traits(compiles, grainMember!member(val))) {
+                        grainMember!member(val);
+                    }
+                }
+            }
+        }
+        foreach(member; __traits(derivedMembers, T)) {
             //makes sure to only serialise members that make sense, i.e. data
             static if(__traits(compiles, grainMember!member(val))) {
                 grainMember!member(val);
@@ -131,6 +141,7 @@ public:
     }
 
     void grainMember(string member, T)(ref T val) @trusted {
+        /**(De)serialises one member taking into account its attributes*/
         import std.typetuple;
         enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                                __traits(getMember, val, member)));

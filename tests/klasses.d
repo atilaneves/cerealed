@@ -34,7 +34,7 @@ private class ClassWithStruct {
         dummy = d;
         anotherByte = a;
     }
-    override string toString() const {
+    override string toString() const {  //so it can be used in checkEqual
         import std.conv;
         return text("ClassWithStruct(", dummy, ", ", anotherByte, ")");
     }
@@ -49,4 +49,41 @@ void testClassWithStruct() {
 
     auto dec = new Decerealiser(bytes);
     checkEqual(dec.value!ClassWithStruct, klass);
+}
+
+class BaseClass {
+    ubyte byte1;
+    ubyte byte2;
+    this(ubyte byte1, ubyte byte2) {
+        this.byte1 = byte1;
+        this.byte2 = byte2;
+    }
+}
+
+class DerivedClass: BaseClass {
+    ubyte byte3;
+    ubyte byte4;
+    this() { //needed for deserialisation
+        this(0, 0, 0, 0);
+    }
+    this(ubyte byte1, ubyte byte2, ubyte byte3, ubyte byte4) {
+        super(byte1, byte2);
+        this.byte3 = byte3;
+        this.byte4 = byte4;
+    }
+    override string toString() const { //so it can be used in checkEqual
+        import std.conv;
+        return text("DerivedClass(", byte1, ", ", byte2, ", ", byte2, ", ", byte4, ")");
+    }
+}
+
+void testDerivedClass() {
+    auto enc = new Cerealiser();
+    auto klass = new DerivedClass(2, 4, 8, 9);
+    enc ~= klass;
+    const bytes = [2, 4, 8, 9];
+    checkEqual(enc.bytes, [2, 4, 8, 9]);
+
+    auto dec = new Decerealiser(bytes);
+    checkEqual(dec.value!DerivedClass, klass);
 }
