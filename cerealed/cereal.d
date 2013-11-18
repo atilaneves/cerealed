@@ -123,16 +123,16 @@ public:
     void grainAllMembers(T)(ref T val) @trusted {
         /*grains all members of an aggregate type*/
         static if(is(T == class)) {
+            //do base classes first or else the order is wrong
             foreach(base; BaseTypeTuple!T) {
-                foreach(member; __traits(derivedMembers, base)) {
-                    //makes sure to only serialise members that make sense, i.e. data
-                    static if(__traits(compiles, grainMember!member(val))) {
-                        grainMember!member(val);
-                    }
-                }
+                grainAllMembersImpl!base(val);
             }
         }
-        foreach(member; __traits(derivedMembers, T)) {
+        grainAllMembersImpl!T(val);
+    }
+
+    private void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
+        foreach(member; __traits(derivedMembers, ActualType)) {
             //makes sure to only serialise members that make sense, i.e. data
             static if(__traits(compiles, grainMember!member(val))) {
                 grainMember!member(val);
