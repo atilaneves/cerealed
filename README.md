@@ -27,15 +27,15 @@ number of bits to use.
     struct MyStruct {
         ubyte mybyte1;
         @NoCereal uint nocereal1; //won't be serialised
-        @Bits!4 nibble;
-        @Bits!1 bit;
-        @Bits!3 bits3;
+        @Bits!4 ubyte nibble;
+        @Bits!1 ubyte bit;
+        @Bits!3 ubyte bits3;
         ubyte mybyte2;
     }
 
     auto cereal = new Cerealiser();
-    cereal ~= MyStruct(3, 123, 14, 1, 2);
-    assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 2]);
+    cereal ~= MyStruct(3, 123, 14, 1, 42);
+    assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 42]);
 
 What if custom serialisation is needed and the default, even with opt-outs, won't work?
 If an aggregate type defines a member function `void accept(Cereal)` it will be used
