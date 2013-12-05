@@ -219,3 +219,26 @@ void testRawArray() {
     auto dec = new Decerealiser(bytes);
     checkEqual(dec.value!StringsStruct, strs);
 }
+
+void testFoo() {
+    struct MyStruct {
+        ubyte mybyte1;
+        @NoCereal uint nocereal1; //won't be serialised
+        //the next 3 members will all take up one byte
+        @Bits!4 ubyte nibble; //gets packed into 4 bits
+        @Bits!1 ubyte bit; //gets packed into 1 bit
+        @Bits!3 ubyte bits3; //gets packed into 3 bits
+        ubyte mybyte2;
+    }
+
+    auto enc = new Cerealiser();
+    enc ~= MyStruct(3, 123, 14, 1, 2, 42);
+    import std.conv;
+    assert(enc.bytes == [ 3, 0xea /*1110 1 010*/, 42], text("bytes were ", enc.bytes));
+
+    auto dec = new Decerealizer([ 3, 0xea, 42]); //US spelling works too
+    //the 2nd value is 0 and not 123 since that value
+    //doesn't get serialised/deserialised
+    auto val = dec.value!MyStruct;
+    assert(val == MyStruct(3, 0, 14, 1, 2, 42), text("struct was ", val));
+}

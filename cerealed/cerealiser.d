@@ -32,7 +32,7 @@ public:
     }
 
     void write(K, V)(const(V[K]) val) @trusted {
-        V[K] lval = cast(V[K])val.dup;
+        auto lval = cast(V[K])val.dup;
         grain(lval);
     }
 
