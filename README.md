@@ -122,3 +122,7 @@ attribute tells `cerealed` to not add the length parameter.
 
     auto dec = new Decerealiser(bytes);
     assert(dec.value!StringsStruct ==  strs);
+
+Related Projects
+----------------
+- [orange](https://github.com/jacob-carlborg/orange).
