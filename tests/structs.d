@@ -220,7 +220,7 @@ void testRawArray() {
     checkEqual(dec.value!StringsStruct, strs);
 }
 
-void testFoo() {
+void testReadmeCode() {
     struct MyStruct {
         ubyte mybyte1;
         @NoCereal uint nocereal1; //won't be serialised
