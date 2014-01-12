@@ -157,7 +157,7 @@ void testEncodeMoreThan8Bits() {
     }
 }
 
-void testEncodeFailsIfToBigForBits() {
+void testEncodeFailsIfTooBigForBits() {
     auto cereal = new Cerealiser();
     checkNotThrown(cereal.writeBits(1, 1));
     checkThrown(cereal.writeBits(2, 1));
