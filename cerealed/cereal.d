@@ -18,6 +18,12 @@ public:
         grainReinterpret(val);
     }
 
+	/// If the type is an enum, get the unqualified base type and cast it to that.
+	void grain(T)(ref T val) @safe if(is(T == enum)) {
+		alias Unqual!(OriginalType!(T)) BaseType;
+		grain( cast(BaseType)val );
+	}
+
     void grain(T)(ref T val) @safe if(is(T == ubyte)) {
         grainUByte(val);
     }
