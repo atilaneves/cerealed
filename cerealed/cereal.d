@@ -14,15 +14,16 @@ public:
     abstract ulong bytesLeft() const;
 
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) @safe if(isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T) {
+    void grain(T)(ref T val) @safe if(!is(T == enum) &&
+                                      (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
         grainReinterpret(val);
     }
 
-	/// If the type is an enum, get the unqualified base type and cast it to that.
-	void grain(T)(ref T val) @safe if(is(T == enum)) {
-		alias Unqual!(OriginalType!(T)) BaseType;
-		grain( cast(BaseType)val );
-	}
+    // If the type is an enum, get the unqualified base type and cast it to that.
+    void grain(T)(ref T val) @safe if(is(T == enum)) {
+        alias Unqual!(OriginalType!(T)) BaseType;
+        grain( cast(BaseType)val );
+    }
 
     void grain(T)(ref T val) @safe if(is(T == ubyte)) {
         grainUByte(val);

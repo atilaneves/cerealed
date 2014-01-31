@@ -180,15 +180,3 @@ void testDecodeBitsMultiByte() {
     checkEqual(cereal.readBits(9), 317);
     checkEqual(cereal.readBits(7), 0x6a);
 }
-
-void testDecodeEnum() {
-    enum Foo : ubyte {
-        Bar = 0,
-        Baz = 1
-    }
-
-    auto cereal = new Decerealiser([ 0, 1 ]);
-    checkEqual(cereal.value!Foo, Foo.Bar);
-    checkEqual(cereal.value!Foo, Foo.Baz);
-    checkThrown!RangeError(cereal.value!ubyte);
-}
