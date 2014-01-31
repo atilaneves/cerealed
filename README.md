@@ -1,5 +1,6 @@
 cerealed
 =============
+[![Build Status](https://travis-ci.org/atilaneves/cerealed.png)](https://travis-ci.org/atilaneves/cerealed)
 
 Binary serialisation library for D. Minimal to no boilerplate necessary.
 The tests in the [tests directory](tests) depend on
