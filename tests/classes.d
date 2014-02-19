@@ -1,4 +1,4 @@
-module tests.klasses;
+module tests.classes;
 
 import unit_threaded.check;
 import cerealed.cerealiser;
