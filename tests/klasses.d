@@ -82,7 +82,7 @@ void testDerivedClass() {
     auto klass = new DerivedClass(2, 4, 8, 9);
     enc ~= klass;
     const bytes = [2, 4, 8, 9];
-    checkEqual(enc.bytes, [2, 4, 8, 9]);
+    checkEqual(enc.bytes, bytes);
 
     auto dec = new Decerealiser(bytes);
     checkEqual(dec.value!DerivedClass, klass);
