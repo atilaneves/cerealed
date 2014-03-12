@@ -65,6 +65,11 @@ public:
         return _bytes;
     }
 
+    void reset() @trusted {
+        _bytes = _bytes[0..0];
+        _bytes.assumeSafeAppend();
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) @safe {
