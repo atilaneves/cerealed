@@ -6,4 +6,5 @@ install:
  - sudo apt-get update
  - sudo apt-get -y install dmd-bin
  - git clone https://github.com/atilaneves/unit-threaded.git
-script: rdmd -Iunit-threaded unit-threaded/utils/dtest.d -u unit-threaded
+ - git clone https://github.com/atilaneves/dtest.git
+script: rdmd -Iunit-threaded dtest/dtest.d -u unit-threaded
