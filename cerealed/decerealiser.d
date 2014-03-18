@@ -10,14 +10,8 @@ public:
     override Type type() const pure nothrow @safe { return Cereal.Type.Read; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
-    this(T)(in T[] bytes) @trusted if(isNumeric!T) {
-        static if(is(T == ubyte)) {
-            _bytes = bytes;
-        } else {
-            foreach(b; bytes) _bytes ~= cast(ubyte)b;
-        }
-
-        _originalBytes = _bytes;
+    this(T)(in T[] bytes) @safe if(isNumeric!T) {
+        setBytes(bytes);
     }
 
     @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
@@ -51,10 +45,15 @@ public:
     }
 
     void reset() @safe {
-        /**resets the deceraliser to read from the beginning again*/
+        /**resets the decerealiser to read from the beginning again*/
+        reset(_originalBytes);
+    }
+
+    void reset(T)(in T[] bytes) @safe if(isNumeric!T) {
+        /**resets the decerealiser to use the new slice*/
         _bitIndex = 0;
         _currentByte = 0;
-        _bytes = _originalBytes;
+        setBytes(bytes);
     }
 
 protected:
@@ -91,5 +90,15 @@ private:
 
         auto shift =  _currentByte >> (bitsInByte - _bitIndex);
         return shift & (0xff >> (bitsInByte - bits));
+    }
+
+    void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
+        static if(is(T == ubyte)) {
+            _bytes = bytes;
+        } else {
+            foreach(b; bytes) _bytes ~= cast(ubyte)b;
+        }
+
+        _originalBytes = _bytes;
     }
 }
