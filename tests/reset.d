@@ -40,3 +40,10 @@ void testResetDecerealiser() {
     dec.reset(bytes2);
     checkEqual(dec.bytes, bytes2);
 }
+
+
+void testEmptyDecerealiser() {
+    import core.exception: RangeError;
+    auto dec = new Decerealiser;
+    checkThrown!RangeError(dec.value!ubyte); //no bytes
+}

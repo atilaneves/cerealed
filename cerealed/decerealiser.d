@@ -10,6 +10,11 @@ public:
     override Type type() const pure nothrow @safe { return Cereal.Type.Read; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
+    this() @safe {
+        static const ubyte[] empty;
+        this(empty);
+    }
+
     this(T)(in T[] bytes) @safe if(isNumeric!T) {
         setBytes(bytes);
     }
