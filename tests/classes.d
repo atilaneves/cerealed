@@ -1,6 +1,7 @@
 module tests.classes;
 
 import unit_threaded.check;
+import cerealed.cereal;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
 import core.exception;
@@ -86,4 +87,23 @@ void testDerivedClass() {
 
     auto dec = new Decerealiser(bytes);
     checkEqual(dec.value!DerivedClass, klass);
+}
+
+
+void testSerialisationViaBaseClass() {
+    BaseClass klass = new DerivedClass(2, 4, 8, 9);
+    const baseBytes = [2, 4];
+    const childBytes = [2, 4, 8, 9];
+
+    auto enc = new Cerealiser;
+    enc ~= klass;
+    checkEqual(enc.bytes, baseBytes);
+
+    Cereal.registerChildClass!DerivedClass;
+    enc.reset();
+    enc ~= klass;
+    checkEqual(enc.bytes, childBytes);
+
+    auto dec = new Decerealiser(childBytes);
+    checkEqual(dec.value!DerivedClass, cast(DerivedClass)klass);
 }

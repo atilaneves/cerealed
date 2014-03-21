@@ -124,6 +124,18 @@ attribute tells `cerealed` to not add the length parameter.
     auto dec = new Decerealiser(bytes);
     assert(dec.value!StringsStruct ==  strs);
 
+Derived classes can be serialised via a reference to the base class, but the
+child class must be registered first:
+
+    class BaseClass  { int a; this(int a) { this.a = a; }}
+    class ChildClass { int b; this(int b) { this.b = b; }}
+    Cereal.registerChildClass!ChildClass;
+    auto enc = new Cerealiser;
+    BaseClass obj = new ChildClass(3, 7);
+    enc ~= new obj;
+    assert(enc.bytes == [0, 0, 0, 3, 0, 0, 0, 7]);
+
+
 Related Projects
 ----------------
 - [orange](https://github.com/jacob-carlborg/orange).

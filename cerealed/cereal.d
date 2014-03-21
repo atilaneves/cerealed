@@ -128,15 +128,30 @@ public:
         }
     }
 
-    void grainAllMembers(T)(ref T val) @trusted {
-        /*grains all members of an aggregate type*/
-        static if(is(T == class)) {
-            //do base classes first or else the order is wrong
-            foreach(base; BaseTypeTuple!T) {
-                grainAllMembersImpl!base(val);
-            }
-        }
+    final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
         grainAllMembersImpl!T(val);
+    }
+
+    final void grainAllMembers(T)(ref T val) @trusted if(is(T == class)) {
+        //check to see if child class that was registered
+        if(val.classinfo.name in _childCerealisers) {
+            Object obj = val;
+            _childCerealisers[val.classinfo.name](this, obj);
+        } else {
+            grainClassImpl(val);
+        }
+    }
+
+    private final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
+        //do base classes first or else the order is wrong
+        grainBaseClasses(val);
+        grainAllMembersImpl!T(val);
+    }
+
+    private final void grainBaseClasses(T)(ref T val) @safe if(is(T == class)) {
+        foreach(base; BaseTypeTuple!T) {
+            grainAllMembersImpl!base(val);
+        }
     }
 
     private void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
@@ -189,12 +204,21 @@ public:
         }
     }
 
+    static void registerChildClass(T)() @safe {
+        _childCerealisers[T.classinfo.name] = (Cereal cereal, ref Object val){
+            T child = cast(T)val;
+            cereal.grainClassImpl(child);
+        };
+    }
+
 protected:
 
     abstract void grainUByte(ref ubyte val) @safe;
     abstract void grainBits(ref uint val, int bits) @safe;
 
 private:
+
+    static void function(Cereal cereal, ref Object val)[string] _childCerealisers;
 
     void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
