@@ -19,29 +19,29 @@ public:
         setBytes(bytes);
     }
 
-    @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
+    @property @safe final T value(T)() if(!isArray!T && !isAssociativeArray!T && !is(T == class)) {
         T val;
         grain(val);
         return val;
     }
 
-    @property @trusted T value(T, A...)(A args) if(is(T == class)) {
+    @property @trusted final T value(T, A...)(A args) if(is(T == class)) {
         auto val = new T(args);
         grain(val);
         return val;
     }
 
-    @property @safe T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
+    @property @safe final T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
         T val;
         grain!(T, U)(val);
         return val;
     }
 
-    const(ubyte[]) bytes() const nothrow @safe @property {
+    final const(ubyte[]) bytes() const nothrow @safe @property {
         return _bytes;
     }
 
-    uint readBits(int bits) @safe {
+    final uint readBits(int bits) @safe {
         if(_bitIndex == 0) {
             _currentByte = this.value!ubyte;
         }
@@ -49,12 +49,12 @@ public:
         return readBitsHelper(bits);
     }
 
-    void reset() @safe {
+    final void reset() @safe {
         /**resets the decerealiser to read from the beginning again*/
         reset(_originalBytes);
     }
 
-    void reset(T)(in T[] bytes) @safe if(isNumeric!T) {
+    final void reset(T)(in T[] bytes) @safe if(isNumeric!T) {
         /**resets the decerealiser to use the new slice*/
         _bitIndex = 0;
         _currentByte = 0;
@@ -79,7 +79,7 @@ private:
     ubyte _currentByte;
     int _bitIndex;
 
-    uint readBitsHelper(int bits) @safe {
+    final uint readBitsHelper(int bits) @safe {
         enum bitsInByte = 8;
         if(_bitIndex + bits > bitsInByte) { //have to carry on to the next byte
             immutable bits1stTime = bitsInByte - _bitIndex; //what's left of this byte
@@ -97,7 +97,7 @@ private:
         return shift & (0xff >> (bitsInByte - bits));
     }
 
-    void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
+    final void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
         static if(is(T == ubyte)) {
             _bytes = bytes;
         } else {

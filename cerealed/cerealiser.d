@@ -14,29 +14,29 @@ public:
     override Type type() const pure nothrow @safe { return Cereal.Type.Write; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
-    void write(T)(const ref T val) @safe if(!isArray!T &&
-                                            !isAssociativeArray!T &&
-                                            !isAggregateType!T) {
+    final void write(T)(const ref T val) @safe if(!isArray!T &&
+                                                  !isAssociativeArray!T &&
+                                                  !isAggregateType!T) {
         T realVal = val;
         grain(realVal);
     }
 
-    void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
+    final void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
         Unqual!T lval = val;
         grain(lval);
     }
 
-    void write(T)(const(T)[] val) @safe {
+    final void write(T)(const(T)[] val) @safe {
         T[] lval = val.dup;
         grain(lval);
     }
 
-    void write(K, V)(const(V[K]) val) @trusted {
+    final void write(K, V)(const(V[K]) val) @trusted {
         auto lval = cast(V[K])val.dup;
         grain(lval);
     }
 
-    void writeBits(in int value, in int bits) @safe {
+    final void writeBits(in int value, in int bits) @safe {
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
@@ -56,16 +56,16 @@ public:
         _bitIndex += bits;
     }
 
-    Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
+    final Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
         write(val);
         return this;
     }
 
-    const(ubyte[]) bytes() const nothrow @property @safe {
+    final const(ubyte[]) bytes() const nothrow @property @safe {
         return _bytes;
     }
 
-    void reset() @trusted {
+    final void reset() @trusted {
         if(_bytes !is null) {
             _bytes = _bytes[0..0];
             _bytes.assumeSafeAppend();
