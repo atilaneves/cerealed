@@ -66,8 +66,10 @@ public:
     }
 
     void reset() @trusted {
-        _bytes = _bytes[0..0];
-        _bytes.assumeSafeAppend();
+        if(_bytes !is null) {
+            _bytes = _bytes[0..0];
+            _bytes.assumeSafeAppend();
+        }
     }
 
 protected:
