@@ -14,22 +14,22 @@ public:
     abstract ulong bytesLeft() const;
 
     //catch all signed numbers and forward to reinterpret
-    void grain(T)(ref T val) @safe if(!is(T == enum) &&
-                                      (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
+    final void grain(T)(ref T val) @safe if(!is(T == enum) &&
+                                            (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
         grainReinterpret(val);
     }
 
     // If the type is an enum, get the unqualified base type and cast it to that.
-    void grain(T)(ref T val) @safe if(is(T == enum)) {
+    final void grain(T)(ref T val) @safe if(is(T == enum)) {
         alias Unqual!(OriginalType!(T)) BaseType;
         grain( cast(BaseType)val );
     }
 
-    void grain(T)(ref T val) @safe if(is(T == ubyte)) {
+    final void grain(T)(ref T val) @safe if(is(T == ubyte)) {
         grainUByte(val);
     }
 
-    void grain(T)(ref T val) @safe if(is(T == ushort)) {
+    final void grain(T)(ref T val) @safe if(is(T == ushort)) {
         ubyte valh = (val >> 8);
         ubyte vall = val & 0xff;
         grainUByte(valh);
@@ -37,7 +37,7 @@ public:
         val = (valh << 8) + vall;
     }
 
-    void grain(T)(ref T val) @safe if(is(T == uint)) {
+    final void grain(T)(ref T val) @safe if(is(T == uint)) {
         ubyte val0 = (val >> 24);
         ubyte val1 = cast(ubyte)(val >> 16);
         ubyte val2 = cast(ubyte)(val >> 8);
@@ -49,7 +49,7 @@ public:
         val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
     }
 
-    void grain(T)(ref T val) @safe if(is(T == ulong)) {
+    final void grain(T)(ref T val) @safe if(is(T == ulong)) {
         immutable oldVal = val;
         val = 0;
 
@@ -61,15 +61,15 @@ public:
         }
     }
 
-    void grain(T)(ref T val) @trusted if(is(T == wchar)) {
+    final void grain(T)(ref T val) @trusted if(is(T == wchar)) {
         grain(*cast(ushort*)&val);
     }
 
-    void grain(T)(ref T val) @trusted if(is(T == dchar)) {
+    final void grain(T)(ref T val) @trusted if(is(T == dchar)) {
         grain(*cast(uint*)&val);
     }
 
-    void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
+    final void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
         static if(isMutable!T) {
@@ -80,7 +80,7 @@ public:
         foreach(ref e; val) grain(e);
     }
 
-    void grain(T, U = ushort)(ref T val) @trusted if(is(T == string)) {
+    final void grain(T, U = ushort)(ref T val) @trusted if(is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
 
@@ -95,7 +95,7 @@ public:
         val = cast(string)values;
     }
 
-    void grain(T, U = ushort)(ref T val) @trusted if(isAssociativeArray!T) {
+    final void grain(T, U = ushort)(ref T val) @trusted if(isAssociativeArray!T) {
         U length = cast(U)val.length;
         grain(length);
         const keys = val.keys;
@@ -110,7 +110,7 @@ public:
         }
     }
 
-    void grain(T)(ref T val) @trusted if(isAggregateType!T) {
+    final void grain(T)(ref T val) @trusted if(isAggregateType!T) {
         static if(__traits(hasMember, val, "accept") &&
                   __traits(compiles, val.accept(this))) {
             //custom serialisation, let the aggreagate do its thing
@@ -163,7 +163,7 @@ public:
         }
     }
 
-    void grainMemberWithAttr(string member, T)(ref T val) @trusted {
+    final void grainMemberWithAttr(string member, T)(ref T val) @trusted {
         /**(De)serialises one member taking into account its attributes*/
         import std.typetuple;
         enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
@@ -191,7 +191,7 @@ public:
         }
     }
 
-    void grainRawArray(T)(ref T[] val) @trusted {
+    final void grainRawArray(T)(ref T[] val) @trusted {
         //can't use virtual functions due to template parameter
         if(type == Type.Read) {
             val.length = 0;
@@ -204,7 +204,7 @@ public:
         }
     }
 
-    static void registerChildClass(T)() @safe {
+    static final void registerChildClass(T)() @safe {
         _childCerealisers[T.classinfo.name] = (Cereal cereal, ref Object val){
             T child = cast(T)val;
             cereal.grainClassImpl(child);
