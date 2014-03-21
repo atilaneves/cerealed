@@ -223,10 +223,19 @@ private:
     }
 
     final void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
+        pragma(msg, "ActualType is ", ActualType, "  ValType is ", ValType);
         foreach(member; __traits(derivedMembers, ActualType)) {
+            pragma(msg, "member is ", member);
             //makes sure to only serialise members that make sense, i.e. data
             static if(__traits(compiles, grainMemberWithAttr!member(val))) {
-                grainMemberWithAttr!member(val);
+                static if(isPointer!(typeof(__traits(getMember, val, member)))) {
+                    pragma(msg, "but!!! fasffasafsaff");
+                    //grainMemberWithAttr!member(*val);
+                    grain(val.member);
+                } else {
+                    pragma(msg, "nope, no pointer");
+                    grainMemberWithAttr!member(val);
+                }
             }
         }
     }
