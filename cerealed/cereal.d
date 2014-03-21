@@ -142,27 +142,6 @@ public:
         }
     }
 
-    private final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
-        //do base classes first or else the order is wrong
-        grainBaseClasses(val);
-        grainAllMembersImpl!T(val);
-    }
-
-    private final void grainBaseClasses(T)(ref T val) @safe if(is(T == class)) {
-        foreach(base; BaseTypeTuple!T) {
-            grainAllMembersImpl!base(val);
-        }
-    }
-
-    private void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
-        foreach(member; __traits(derivedMembers, ActualType)) {
-            //makes sure to only serialise members that make sense, i.e. data
-            static if(__traits(compiles, grainMemberWithAttr!member(val))) {
-                grainMemberWithAttr!member(val);
-            }
-        }
-    }
-
     final void grainMemberWithAttr(string member, T)(ref T val) @trusted {
         /**(De)serialises one member taking into account its attributes*/
         import std.typetuple;
@@ -220,15 +199,36 @@ private:
 
     static void function(Cereal cereal, ref Object val)[string] _childCerealisers;
 
-    void grainBitsT(T)(ref T val, int bits) @safe {
+    final void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
         grainBits(realVal, bits);
         val = cast(T)realVal;
     }
 
-    void grainReinterpret(T)(ref T val) @trusted {
+    final void grainReinterpret(T)(ref T val) @trusted {
         auto ptr = cast(CerealPtrType!T)(&val);
         grain(*ptr);
+    }
+
+    final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
+        //do base classes first or else the order is wrong
+        grainBaseClasses(val);
+        grainAllMembersImpl!T(val);
+    }
+
+    final void grainBaseClasses(T)(ref T val) @safe if(is(T == class)) {
+        foreach(base; BaseTypeTuple!T) {
+            grainAllMembersImpl!base(val);
+        }
+    }
+
+    final void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
+        foreach(member; __traits(derivedMembers, ActualType)) {
+            //makes sure to only serialise members that make sense, i.e. data
+            static if(__traits(compiles, grainMemberWithAttr!member(val))) {
+                grainMemberWithAttr!member(val);
+            }
+        }
     }
 }
 
