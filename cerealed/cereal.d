@@ -4,6 +4,7 @@ public import cerealed.attrs;
 import std.traits;
 import std.conv;
 import std.algorithm;
+import std.stdio;
 
 class Cereal {
 public:
@@ -129,8 +130,7 @@ public:
     }
 
     final void grain(T)(ref T val) @safe if(isPointer!T) {
-        //import std.stdio;
-        //writeln("legrain for lepointer");
+        //writeln("grain pointer");
         //type();
         import std.traits;
         alias ValueType = PointerTarget!T;
@@ -141,6 +141,7 @@ public:
     }
 
     final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
+        //writeln("grain struct");
         grainAllMembersImpl!T(val);
     }
 
