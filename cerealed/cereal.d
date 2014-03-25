@@ -129,6 +129,14 @@ public:
     }
 
     final void grain(T)(ref T val) @safe if(isPointer!T) {
+        //import std.stdio;
+        //writeln("legrain for lepointer");
+        //type();
+        import std.traits;
+        alias ValueType = PointerTarget!T;
+        pragma(msg, "Type of ptr is ", T);
+        import std.traits;
+        pragma(msg, "target is ", ValueType);
         grain(*val);
     }
 
