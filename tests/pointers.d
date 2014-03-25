@@ -17,19 +17,18 @@ private struct OuterStruct {
 }
 
 void testPointerToStruct() {
-    const bytes = [ 0, 3, 7, 0, 2, 5];
     auto enc = new Cerealiser;
-
     auto outer = OuterStruct(3, new InnerStruct(7, 2), 5);
     enc ~= outer;
+
+    const bytes = [ 0, 3, 7, 0, 2, 5];
     checkEqual(enc.bytes, bytes);
-    checkEqual(enc.type(), Cereal.Type.Write);
 
     auto dec = new Decerealiser(bytes);
+    const decOuter = dec.value!OuterStruct;
 
     //can't compare the two structs directly since the pointers
     //won't match but the values will.
-    const decOuter = dec.value!OuterStruct;
     checkEqual(decOuter.s, outer.s);
     checkEqual(*decOuter.inner, *outer.inner);
     checkNotEqual(decOuter.inner, outer.inner); //ptrs shouldn't match
