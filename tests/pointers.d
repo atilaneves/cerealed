@@ -26,12 +26,8 @@ void testPointerToStruct() {
     checkEqual(enc.type(), Cereal.Type.Write);
 
     auto dec = new Decerealiser(bytes);
-    auto decOuter = OuterStruct();
-    dec.grain(decOuter.s);
-    checkEqual(decOuter.s, 3);
-    dec.grainPointer(decOuter.inner);
-    checkEqual(*decOuter.inner, InnerStruct(7, 2));
-    dec.grain(decOuter.b);
-    checkEqual(decOuter.b, 5);
+    checkEqual(dec.value!ushort, 3);
+    checkEqual(*dec.valuePointer!InnerStruct, InnerStruct(7, 2));
+    checkEqual(dec.value!ubyte, 5);
     checkThrown!RangeError(dec.value!ubyte); //no bytes
 }

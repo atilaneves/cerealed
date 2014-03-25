@@ -66,6 +66,12 @@ public:
         grain(*ptr);
     }
 
+    final auto valuePointer(T)() {
+        auto ptr = new T;
+        grainPointer(ptr);
+        return ptr;
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) @safe {
