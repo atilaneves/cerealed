@@ -18,6 +18,7 @@ private struct OuterStruct {
 
 void testPointerToStruct() {
     auto enc = new Cerealiser;
+    //outer not const because not copyable from const
     auto outer = OuterStruct(3, new InnerStruct(7, 2), 5);
     enc ~= outer;
 
