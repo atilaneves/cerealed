@@ -4,7 +4,6 @@ public import cerealed.attrs;
 import std.traits;
 import std.conv;
 import std.algorithm;
-import std.stdio;
 
 class Cereal {
 public:
@@ -130,18 +129,12 @@ public:
     }
 
     final void grain(T)(ref T val) @safe if(isPointer!T) {
-        //writeln("grain pointer");
-        //type();
         import std.traits;
         alias ValueType = PointerTarget!T;
-        pragma(msg, "Type of ptr is ", T);
-        import std.traits;
-        pragma(msg, "target is ", ValueType);
         grain(*val);
     }
 
-    final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
-        //writeln("grain struct");
+    final void grainAllMembers(T)(ref T val) @trusted if(is(T == struct)) {
         grainAllMembersImpl!T(val);
     }
 
