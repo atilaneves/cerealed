@@ -234,10 +234,6 @@ private:
             //makes sure to only serialise members that make sense, i.e. data
             static if(__traits(compiles, grainMemberWithAttr!member(val))) {
                 grainMemberWithAttr!member(val);
-            } else {
-                static if(member == "inner") {
-                    grainMemberWithAttr!member(val);
-                }
             }
         }
     }
