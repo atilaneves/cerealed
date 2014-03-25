@@ -10,8 +10,8 @@ public:
 
     enum Type { Write, Read }
 
-    abstract Type type() const;
-    abstract ulong bytesLeft() const;
+    abstract Type type() @safe const;
+    abstract ulong bytesLeft() @safe const;
 
     //catch all signed numbers and forward to reinterpret
     final void grain(T)(ref T val) @safe if(!is(T == enum) &&
