@@ -128,14 +128,22 @@ public:
         }
     }
 
-    final void grain(T)(ref T val) @safe if(isPointer!T) {
+    final void grain(T)(ref T val) @trusted if(isPointer!T) {
         import std.traits;
         alias ValueType = PointerTarget!T;
         type();
+        debug {
+            import std.stdio;
+            writeln("grain pointer");
+        }
         grain(*val);
     }
 
     final void grainAllMembers(T)(ref T val) @trusted if(is(T == struct)) {
+        debug {
+            import std.stdio;
+            writeln("grain struct");
+        }
         grainAllMembersImpl!T(val);
     }
 
