@@ -26,8 +26,14 @@ void testPointerToStruct() {
     checkEqual(enc.type(), Cereal.Type.Write);
 
     auto dec = new Decerealiser(bytes);
-    checkEqual(dec.value!ushort, 3);
-    checkEqual(*dec.valuePointer!InnerStruct, InnerStruct(7, 2));
-    checkEqual(dec.value!ubyte, 5);
+
+    //can't compare the two structs directly since the pointers
+    //won't match but the values will.
+    const decOuter = dec.value!OuterStruct;
+    checkEqual(decOuter.s, outer.s);
+    checkEqual(*decOuter.inner, *outer.inner);
+    checkNotEqual(decOuter.inner, outer.inner); //ptrs shouldn't match
+    checkEqual(decOuter.b, outer.b);
+
     checkThrown!RangeError(dec.value!ubyte); //no bytes
 }
