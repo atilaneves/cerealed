@@ -61,17 +61,6 @@ public:
         setBytes(bytes);
     }
 
-    final void grainPointer(T)(ref T* ptr) {
-        if(ptr is null) ptr = new T;
-        grain(*ptr);
-    }
-
-    final auto valuePointer(T)() {
-        auto ptr = new T;
-        grainPointer(ptr);
-        return ptr;
-    }
-
 protected:
 
     override void grainUByte(ref ubyte val) @safe {
