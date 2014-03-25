@@ -131,6 +131,7 @@ public:
     final void grain(T)(ref T val) @safe if(isPointer!T) {
         import std.traits;
         alias ValueType = PointerTarget!T;
+        type();
         grain(*val);
     }
 
