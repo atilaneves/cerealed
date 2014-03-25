@@ -135,7 +135,7 @@ public:
         grain(*val);
     }
 
-    final void grainAllMembers(T)(ref T val) @trusted if(is(T == struct)) {
+    final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
         grainAllMembersImpl!T(val);
     }
 
