@@ -6,6 +6,7 @@ public import cerealed.attrs;
 import std.traits;
 import std.exception;
 import std.conv;
+import std.range;
 
 
 class Cerealiser: Cereal {
@@ -21,7 +22,7 @@ public:
         grain(realVal);
     }
 
-    final void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
+    final void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T && !isInputRange!T) {
         Unqual!T lval = val;
         grain(lval);
     }
@@ -34,6 +35,12 @@ public:
     final void write(K, V)(const(V[K]) val) @trusted {
         auto lval = cast(V[K])val.dup;
         grain(lval);
+    }
+
+    final void write(R, U = ushort)(R val) @trusted if(isInputRange!R && !isInfinite!R && !isArray!R) {
+        U length = cast(U)val.length;
+        grain(length);
+        foreach(ref e; val) grain(e);
     }
 
     final void writeBits(in int value, in int bits) @safe {
