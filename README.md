@@ -135,6 +135,8 @@ child class must be registered first:
     enc ~= new obj;
     assert(enc.bytes == [0, 0, 0, 3, 0, 0, 0, 7]);
 
+There is now support for InputRange and OutputRange objects. Examples can
+be found in the [tests directory](tests/range.d)
 
 Related Projects
 ----------------
