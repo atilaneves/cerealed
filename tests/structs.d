@@ -125,7 +125,7 @@ void testNoCereal() {
 private struct CustomStruct {
     ubyte mybyte;
     ushort myshort;
-    void accept(Cereal cereal) {
+    void accept(Cereal)(ref Cereal cereal) {
         //can't call grain(this), that would cause an infinite loop
         cereal.grainAllMembers(this);
         ubyte otherbyte = 4;
@@ -186,7 +186,7 @@ struct PostBlitStruct {
     ubyte foo;
     @NoCereal ubyte bar;
     ubyte baz;
-    void postBlit(Cereal cereal) {
+    void postBlit(Cereal)(ref Cereal cereal) {
         ushort foo = 4;
         cereal.grain(foo);
     }

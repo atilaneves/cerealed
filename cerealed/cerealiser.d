@@ -11,7 +11,7 @@ import std.conv;
 class Cerealiser: Cereal {
 public:
 
-    override Type type() const pure nothrow @safe { return Cereal.Type.Write; }
+    override CerealType type() const pure nothrow @safe { return CerealType.Write; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
     final void write(T)(const ref T val) @safe if(!isArray!T &&
