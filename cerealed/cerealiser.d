@@ -72,6 +72,13 @@ public:
         }
     }
 
+    static void registerChildClass(T)() @safe {
+        _childCerealisers[T.classinfo.name] = (Cereal cereal, Object val){
+            T child = cast(T)val;
+            cereal.grainClassImpl(child);
+        };
+    }
+
 protected:
 
     override void grainUByte(ref ubyte val) @safe {

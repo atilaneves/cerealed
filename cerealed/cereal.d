@@ -221,21 +221,20 @@ public:
         }
     }
 
-    static final void registerChildClass(T)() @safe {
-        _childCerealisers[T.classinfo.name] = (Cereal cereal, Object val){
-            T child = cast(T)val;
-            cereal.grainClassImpl(child);
-        };
-    }
-
 protected:
 
     abstract void grainUByte(ref ubyte val) @safe;
     abstract void grainBits(ref uint val, int bits) @safe;
 
-private:
+    final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
+        //do base classes first or else the order is wrong
+        grainBaseClasses(val);
+        grainAllMembersImpl!T(val);
+    }
 
     static void function(Cereal cereal, Object val)[string] _childCerealisers;
+
+private:
 
     final void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
@@ -246,12 +245,6 @@ private:
     final void grainReinterpret(T)(ref T val) @trusted {
         auto ptr = cast(CerealPtrType!T)(&val);
         grain(*ptr);
-    }
-
-    final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
-        //do base classes first or else the order is wrong
-        grainBaseClasses(val);
-        grainAllMembersImpl!T(val);
     }
 
     final void grainBaseClasses(T)(ref T val) @safe if(is(T == class)) {

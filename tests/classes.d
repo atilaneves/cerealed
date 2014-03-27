@@ -1,7 +1,6 @@
 module tests.classes;
 
 import unit_threaded.check;
-import cerealed.cereal;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
 import core.exception;
@@ -99,7 +98,7 @@ void testSerialisationViaBaseClass() {
     enc ~= klass;
     checkEqual(enc.bytes, baseBytes);
 
-    Cereal.registerChildClass!DerivedClass;
+    Cerealiser.registerChildClass!DerivedClass;
     enc.reset();
     enc ~= klass;
     checkEqual(enc.bytes, childBytes);
