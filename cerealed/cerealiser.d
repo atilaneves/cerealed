@@ -79,7 +79,7 @@ public:
     }
 
     static void registerChildClass(T)() @safe {
-        _childCerealisers[T.classinfo.name] = (Cereal cereal, Object val){
+        _childCerealisers[T.classinfo.name] = (Cerealiser cereal, Object val){
             T child = cast(T)val;
             cereal.grainClassImpl(child);
         };
@@ -101,5 +101,5 @@ private:
     ubyte[] _bytes;
     ubyte _currentByte;
     int _bitIndex;
-    static void function(Cereal cereal, Object val)[string] _childCerealisers;
+    static void function(Cerealiser cereal, Object val)[string] _childCerealisers;
 }
