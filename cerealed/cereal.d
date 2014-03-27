@@ -4,6 +4,7 @@ public import cerealed.attrs;
 import std.traits;
 import std.conv;
 import std.algorithm;
+import std.range;
 
 class Cereal {
 public:
@@ -69,6 +70,28 @@ public:
         grain(*cast(uint*)&val);
     }
 
+    final void grain(T, U = ushort)(ref T val) @trusted if(isInputRange!T && !isInfinite!T && !isArray!T) {
+        enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
+        static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
+                                      fullyQualifiedName!T));
+        assert(type() == Cereal.Type.Write, "InputRange cannot be deserialised");
+        U length = cast(U)val.length;
+        grain(length);
+        foreach(ref e; val) grain(e);
+    }
+
+    final void grain(R, U = ushort)(ref R output) @trusted if(isOutputRange!(R, ubyte) && !isArray!R) {
+        assert(type() == Cereal.Type.Read, "OutputRanges can only be deserialised");
+        U length = void;
+        grain(length);
+        for(U i = 0; i < length; ++i) {
+            ubyte b = void;
+            grain(b);
+            output.put(b);
+        }
+    }
+
+
     final void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
@@ -110,7 +133,7 @@ public:
         }
     }
 
-    final void grain(T)(ref T val) @trusted if(isAggregateType!T) {
+    final void grain(T)(ref T val) @trusted if(isAggregateType!T && !isInputRange!T && !isOutputRange!(T, ubyte)) {
 
         enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
         enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(this); }));
