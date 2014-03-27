@@ -28,6 +28,30 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == us
     val = (valh << 8) + vall;
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == uint)) {
+    ubyte val0 = (val >> 24);
+    ubyte val1 = cast(ubyte)(val >> 16);
+    ubyte val2 = cast(ubyte)(val >> 8);
+    ubyte val3 = val & 0xff;
+    cereal.grainUByte(val0);
+    cereal.grainUByte(val1);
+    cereal.grainUByte(val2);
+    cereal.grainUByte(val3);
+    val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ulong)) {
+    immutable oldVal = val;
+    val = 0;
+
+    for(int i = T.sizeof - 1; i >= 0; --i) {
+        immutable shift = (T.sizeof - i) * 8;
+        ubyte byteVal = (oldVal >> shift) & 0xff;
+        cereal.grainUByte(byteVal);
+        val |= cast(T)byteVal << shift;
+    }
+}
+
 
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
     auto ptr = cast(CerealPtrType!T)(&val);
