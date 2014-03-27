@@ -15,7 +15,7 @@ public:
         super(this);
     }
 
-    override CerealType type() const pure nothrow @safe { return CerealType.Write; }
+    CerealType type() const pure nothrow @safe { return CerealType.Write; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
     final void write(T)(const ref T val) @safe if(!isArray!T &&

@@ -7,7 +7,7 @@ import std.traits;
 class Decerealiser: CerealT!Decerealiser {
 public:
 
-    override CerealType type() const pure nothrow @safe { return CerealType.Read; }
+    CerealType type() const pure nothrow @safe { return CerealType.Read; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 
     this() @safe {
