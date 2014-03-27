@@ -28,14 +28,14 @@ public:
     }
 
     final void grain(T)(ref T val) @safe if(is(T == ubyte)) {
-        grainUByte(val);
+        _cereal.grainUByte(val);
     }
 
     final void grain(T)(ref T val) @safe if(is(T == ushort)) {
         ubyte valh = (val >> 8);
         ubyte vall = val & 0xff;
-        grainUByte(valh);
-        grainUByte(vall);
+        _cereal.grainUByte(valh);
+        _cereal.grainUByte(vall);
         val = (valh << 8) + vall;
     }
 
@@ -44,10 +44,10 @@ public:
         ubyte val1 = cast(ubyte)(val >> 16);
         ubyte val2 = cast(ubyte)(val >> 8);
         ubyte val3 = val & 0xff;
-        grainUByte(val0);
-        grainUByte(val1);
-        grainUByte(val2);
-        grainUByte(val3);
+        _cereal.grainUByte(val0);
+        _cereal.grainUByte(val1);
+        _cereal.grainUByte(val2);
+        _cereal.grainUByte(val3);
         val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
     }
 
@@ -58,7 +58,7 @@ public:
         for(int i = T.sizeof - 1; i >= 0; --i) {
             immutable shift = (T.sizeof - i) * 8;
             ubyte byteVal = (oldVal >> shift) & 0xff;
-            grainUByte(byteVal);
+            _cereal.grainUByte(byteVal);
             val |= cast(T)byteVal << shift;
         }
     }
@@ -221,7 +221,6 @@ public:
 
 protected:
 
-    abstract void grainUByte(ref ubyte val) @safe;
     abstract void grainBits(ref uint val, int bits) @safe;
     abstract bool grainChildClass(Object val) @trusted;
 

@@ -10,6 +10,11 @@ public:
     final CerealType type() const pure nothrow @safe { return CerealType.Read; }
     final ulong bytesLeft() const @safe { return bytes.length; }
 
+    final void grainUByte(ref ubyte val) @safe {
+        val = _bytes[0];
+        _bytes = _bytes[1..$];
+    }
+
     this() @safe {
         static const ubyte[] empty;
         this(empty);
@@ -66,11 +71,6 @@ public:
     }
 
 protected:
-
-    override void grainUByte(ref ubyte val) @safe {
-        val = _bytes[0];
-        _bytes = _bytes[1..$];
-    }
 
     override void grainBits(ref uint value, int bits) @safe {
         value = readBits(bits);

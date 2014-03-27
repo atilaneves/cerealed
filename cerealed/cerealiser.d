@@ -18,6 +18,10 @@ public:
     final CerealType type() const pure nothrow @safe { return CerealType.Write; }
     final ulong bytesLeft() const @safe { return bytes.length; }
 
+    final void grainUByte(ref ubyte val) @safe {
+        _bytes ~= val;
+    }
+
     final void write(T)(const ref T val) @safe if(!isArray!T &&
                                                   !isAssociativeArray!T &&
                                                   !isAggregateType!T) {
@@ -90,10 +94,6 @@ public:
     }
 
 protected:
-
-    override void grainUByte(ref ubyte val) @safe {
-        _bytes ~= val;
-    }
 
     override void grainBits(ref uint value, int bits) @safe {
         writeBits(value, bits);
