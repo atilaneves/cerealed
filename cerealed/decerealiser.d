@@ -3,7 +3,6 @@ module cerealed.decerealiser;
 import cerealed.cereal;
 public import cerealed.attrs;
 import std.traits;
-import std.range;
 
 class Decerealiser: Cereal {
 public:
@@ -21,7 +20,7 @@ public:
     }
 
     @property @safe final T value(T)() if(!isArray!T && !isAssociativeArray!T &&
-                                          !is(T == class) && !isOutputRange!(T, ubyte)) {
+                                          !is(T == class)) {
         T val;
         grain(val);
         return val;
@@ -39,16 +38,7 @@ public:
         return val;
     }
 
-    @property @safe final R value(R, U = ushort)() if(isOutputRange!(R, ubyte) && !isArray!R) {
-        auto output = R();
-        read(output);
-        return output;
-    }
-
-    @trusted final void read(R, U = ushort)(ref R output) if(isOutputRange!(R, ubyte)) {
-        U length = value!U;
-        for(U i = 0; i < length; ++i) output.put(value!ubyte);
-    }
+    alias read = grain;
 
     final const(ubyte[]) bytes() const nothrow @safe @property {
         return _bytes;

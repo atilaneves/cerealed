@@ -91,7 +91,6 @@ public:
         }
     }
 
-
     final void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
         U length = cast(U)val.length;
         grain(length);
