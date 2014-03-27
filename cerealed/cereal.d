@@ -15,8 +15,6 @@ public:
         _cereal = cereal;
     }
 
-    abstract ulong bytesLeft() @safe const;
-
     //catch all signed numbers and forward to reinterpret
     final void grain(T)(ref T val) @safe if(!is(T == enum) &&
                                             (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
@@ -212,7 +210,7 @@ public:
         //can't use virtual functions due to template parameter
         if(_cereal.type() == CerealType.Read) {
             val.length = 0;
-            while(bytesLeft) {
+            while(_cereal.bytesLeft()) {
                 val.length++;
                 grain(val[$ - 1]);
             }
