@@ -239,12 +239,6 @@ private:
                 }));
             static if(isMemberVariable) {
                 grainMemberWithAttr!member(val);
-            } else {
-                static if(__traits(compiles, grainMemberWithAttr!member(val))) {
-                    pragma(msg, "Member ", member, " of ActualType ", ActualType,
-                           " and ValType ", ValType, " should not compile.");
-                    static assert(false);
-                }
             }
         }
     }
