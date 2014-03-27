@@ -26,6 +26,12 @@ public:
         writeBits(value, bits);
     }
 
+    final bool grainChildClass(Object val) @trusted {
+        if(val.classinfo.name !in _childCerealisers) return false;
+        _childCerealisers[val.classinfo.name](this, val);
+        return true;
+    }
+
     final void write(T)(const ref T val) @safe if(!isArray!T &&
                                                   !isAssociativeArray!T &&
                                                   !isAggregateType!T) {
@@ -82,12 +88,6 @@ public:
             _bytes = _bytes[0..0];
             _bytes.assumeSafeAppend();
         }
-    }
-
-    override bool grainChildClass(Object val) @trusted {
-        if(val.classinfo.name !in _childCerealisers) return false;
-        _childCerealisers[val.classinfo.name](this, val);
-        return true;
     }
 
     static void registerChildClass(T)() @safe {

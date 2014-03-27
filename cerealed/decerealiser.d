@@ -19,6 +19,10 @@ public:
         value = readBits(bits);
     }
 
+    final bool grainChildClass(Object val) @trusted {
+        return false;
+    }
+
     this() @safe {
         static const ubyte[] empty;
         this(empty);
@@ -73,13 +77,6 @@ public:
         _currentByte = 0;
         setBytes(bytes);
     }
-
-protected:
-
-    override bool grainChildClass(Object val) @trusted {
-        return false;
-    }
-
 
 private:
 

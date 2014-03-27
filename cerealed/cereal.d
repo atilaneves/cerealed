@@ -173,7 +173,7 @@ public:
         }
 
         //check to see if child class that was registered
-        if(!grainChildClass(val)) {
+        if(!_cereal.grainChildClass(val)) {
             grainClassImpl(val);
         }
     }
@@ -220,8 +220,6 @@ public:
     }
 
 protected:
-
-    abstract bool grainChildClass(Object val) @trusted;
 
     final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
         //do base classes first or else the order is wrong
