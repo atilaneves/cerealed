@@ -72,6 +72,12 @@ public:
         }
     }
 
+    override bool grainChildClass(Object val) @trusted {
+        if(val.classinfo.name !in _childCerealisers) return false;
+        _childCerealisers[val.classinfo.name](this, val);
+        return true;
+    }
+
     static void registerChildClass(T)() @safe {
         _childCerealisers[T.classinfo.name] = (Cereal cereal, Object val){
             T child = cast(T)val;
@@ -95,4 +101,5 @@ private:
     ubyte[] _bytes;
     ubyte _currentByte;
     int _bitIndex;
+    static void function(Cereal cereal, Object val)[string] _childCerealisers;
 }

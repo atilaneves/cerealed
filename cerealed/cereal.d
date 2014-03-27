@@ -172,10 +172,7 @@ public:
         }
 
         //check to see if child class that was registered
-        if(type() == CerealType.Write && val.classinfo.name in _childCerealisers) {
-            Object obj = val;
-            _childCerealisers[val.classinfo.name](this, obj);
-        } else {
+        if(!grainChildClass(val)) {
             grainClassImpl(val);
         }
     }
@@ -226,13 +223,15 @@ protected:
     abstract void grainUByte(ref ubyte val) @safe;
     abstract void grainBits(ref uint val, int bits) @safe;
 
+    bool grainChildClass(Object val) @trusted {
+        return false;
+    }
+
     final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
         //do base classes first or else the order is wrong
         grainBaseClasses(val);
         grainAllMembersImpl!T(val);
     }
-
-    static void function(Cereal cereal, Object val)[string] _childCerealisers;
 
 private:
 
