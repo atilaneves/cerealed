@@ -8,7 +8,7 @@ import std.exception;
 import std.conv;
 
 
-class Cerealiser: Cereal {
+class Cerealiser: CerealT!Cerealiser {
 public:
 
     override CerealType type() const pure nothrow @safe { return CerealType.Write; }

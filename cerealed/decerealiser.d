@@ -4,7 +4,7 @@ import cerealed.cereal;
 public import cerealed.attrs;
 import std.traits;
 
-class Decerealiser: Cereal {
+class Decerealiser: CerealT!Decerealiser {
 public:
 
     override CerealType type() const pure nothrow @safe { return CerealType.Read; }

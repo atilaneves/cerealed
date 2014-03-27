@@ -8,7 +8,7 @@ import std.range;
 
 enum CerealType { Write, Read };
 
-class Cereal {
+class CerealT(T) {
 public:
 
     abstract CerealType type() @safe const;
