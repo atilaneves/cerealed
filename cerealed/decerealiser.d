@@ -16,6 +16,7 @@ public:
     }
 
     this(T)(in T[] bytes) @safe if(isNumeric!T) {
+        super(this);
         setBytes(bytes);
     }
 

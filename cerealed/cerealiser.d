@@ -11,6 +11,10 @@ import std.conv;
 class Cerealiser: CerealT!Cerealiser {
 public:
 
+    this() {
+        super(this);
+    }
+
     override CerealType type() const pure nothrow @safe { return CerealType.Write; }
     override ulong bytesLeft() const @safe { return bytes.length; }
 

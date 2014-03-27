@@ -8,8 +8,12 @@ import std.range;
 
 enum CerealType { Write, Read };
 
-class CerealT(T) {
+class CerealT(Cereal) {
 public:
+
+    this(Cereal cereal) {
+        _cereal = cereal;
+    }
 
     abstract CerealType type() @safe const;
     abstract ulong bytesLeft() @safe const;
@@ -231,6 +235,8 @@ protected:
     }
 
 private:
+
+    Cereal _cereal;
 
     final void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
