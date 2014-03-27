@@ -10,23 +10,23 @@ private struct InnerStruct {
     ushort s;
 }
 
-private struct OuterStruct {
+private struct OuterStructWithPointerToStruct {
     ushort s;
     InnerStruct* inner;
     ubyte b;
 }
 
-void testPointerToStruct() {
+void testStructWithPointerToStruct() {
     auto enc = new Cerealiser;
     //outer not const because not copyable from const
-    auto outer = OuterStruct(3, new InnerStruct(7, 2), 5);
+    auto outer = OuterStructWithPointerToStruct(3, new InnerStruct(7, 2), 5);
     enc ~= outer;
 
     const bytes = [ 0, 3, 7, 0, 2, 5];
     checkEqual(enc.bytes, bytes);
 
     auto dec = new Decerealiser(bytes);
-    const decOuter = dec.value!OuterStruct;
+    const decOuter = dec.value!OuterStructWithPointerToStruct;
 
     //can't compare the two structs directly since the pointers
     //won't match but the values will.
@@ -57,7 +57,7 @@ private struct OuterStructWithClass {
     ubyte b;
 }
 
-void testClassReference() {
+void testStructWithClassReference() {
     auto enc = new Cerealiser;
     auto outer = OuterStructWithClass(2, new InnerClass(3, 5), 8);
     enc ~= outer;
