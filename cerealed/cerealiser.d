@@ -2,11 +2,52 @@ module cerealed.cerealiser;
 
 
 import cerealed.cereal;
+import cerealed.traits;
 public import cerealed.attrs;
 import std.traits;
 import std.exception;
 import std.conv;
 
+struct Cerealiser {
+    //interface
+    CerealType type() const pure nothrow @safe {
+        return CerealType.Write;
+    }
+
+    ulong bytesLeft() const @safe {
+        return 0;
+    }
+
+    void grainUByte(ref ubyte val) @safe {
+        _bytes ~= val;
+    }
+
+    void grainBits(ref uint value, int bits) @safe {
+    }
+
+    bool grainChildClass(Object val) @safe {
+        return true;
+    }
+
+    const(ubyte[]) bytes() const nothrow @property @safe {
+        return _bytes;
+    }
+
+    ref Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
+        write(val);
+        return this;
+    }
+
+    void write(T)(auto ref T val) @safe {
+        this.grain(val);
+    }
+
+private:
+
+    ubyte[] _bytes;
+
+    static assert(isCereal!Cerealiser);
+}
 
 class OldCerealiser: CerealT!OldCerealiser {
 public:

@@ -23,7 +23,7 @@ void testEncodeByte() {
 }
 
 void testEncodeUByte() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     ubyte[] ins = [ 2, 3, 12, 10];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x2, 0x3, 0xc, 0xa ]);

@@ -1,12 +1,17 @@
 module cerealed.cereal;
 
 public import cerealed.attrs;
+import cerealed.traits;
 import std.traits;
 import std.conv;
 import std.algorithm;
 import std.range;
 
 enum CerealType { Write, Read };
+
+void grain(C, T)(auto ref C cereal, ref T val) if(isCereal!C && is(T == ubyte)) {
+    cereal.grainUByte(val);
+}
 
 class CerealT(Cereal) {
 public:
