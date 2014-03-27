@@ -141,7 +141,12 @@ public:
 
     final void grainAllMembers(T)(ref T val) @trusted if(is(T == class)) {
         assert(type() == Cereal.Type.Read || val !is null);
-        if(type() == Cereal.Type.Read && val is null) val = new T;
+        if(type() == Cereal.Type.Read && val is null) {
+            static assert(is(typeof((inout int = 0) { val = new T; })),
+                          text("Class ", T.stringof, " does not have a default constructor",
+                              " and therefore cannot be deserialised"));
+            val = new T;
+        }
         //check to see if child class that was registered
         if(type() == Cereal.Type.Write && val.classinfo.name in _childCerealisers) {
             Object obj = val;
