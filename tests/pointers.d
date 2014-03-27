@@ -75,3 +75,14 @@ void testStructWithClassReference() {
     checkNotEqual(decOuter.inner, outer.inner); //ptrs shouldn't match
     checkEqual(decOuter.b, outer.b);
 }
+
+void testPointerToInt() {
+    auto enc = new Cerealiser;
+    auto i = new int; *i = 4;
+    enc ~= i;
+    const bytes = [0, 0, 0, 4];
+    checkEqual(enc.bytes, bytes);
+
+    auto dec = new Decerealiser(bytes);
+    checkEqual(*dec.value!(int*), *i);
+}
