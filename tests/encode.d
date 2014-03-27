@@ -5,7 +5,7 @@ import cerealed.cerealiser;
 
 
 void testEncodeBool() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal.write(false);
     cereal.write(true);
     cereal.write(false);
@@ -16,75 +16,75 @@ void testEncodeBool() {
 }
 
 void testEncodeByte() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     byte[] ins = [ 1, 3, -2, 5, -4];
     foreach(i; ins) cereal.write(i);
     checkEqual(cereal.bytes, [ 0x1, 0x3, 0xfe, 0x5, 0xfc ]);
 }
 
 void testEncodeUByte() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     ubyte[] ins = [ 2, 3, 12, 10];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x2, 0x3, 0xc, 0xa ]);
 }
 
 void testEncodeShort() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
 }
 
 void testEncodeUShort() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     ushort[] ins = [ 2, 3, cast(short)65535, 0];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);
 }
 
 void testEncodeInt() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     int[] ins = [ 3, -1_000_000];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x0, 0x0, 0x0, 0x3, 0xff, 0xf0, 0xbd, 0xc0 ]);
 }
 
 void testEncodeUInt() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     uint[] ins = [ 1_000_000, 0];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
 }
 
 void testEncodeLong() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     long[] ins = [1, 2];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
 }
 
 void testEncodeULong() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal ~= 45L;
     checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 45 ]);
-    cereal = new Cerealiser();
+    cereal = new OldCerealiser();
     cereal ~= 42L;
     checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 42 ]);
 }
 
 void testEncodeFloat() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal ~= 1.0f;
 }
 
 void testEncodeDouble() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal ~= 1.0;
 }
 
 void testEncodeChars() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     char  c; cereal ~= c;
     wchar w; cereal ~= w;
     dchar d; cereal ~= d;
@@ -92,7 +92,7 @@ void testEncodeChars() {
 }
 
 void testEncodeArray() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     const ints = [ 2, 6, 9];
     cereal ~= ints;
     //encoding should be a short with the length, plus payload
@@ -100,7 +100,7 @@ void testEncodeArray() {
 }
 
 void testEncodeAssocArray() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     const intToInt = [ 1:2, 3:6];
     cereal ~= intToInt;
     //short with length, then payload
@@ -108,7 +108,7 @@ void testEncodeAssocArray() {
 }
 
 void testEncodeString() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     const str = "foobarbaz";
     cereal ~= str;
     //short with length, then payload
@@ -116,14 +116,14 @@ void testEncodeString() {
 }
 
 void testEncodeNibble() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal.writeBits(0x4, 4);
     cereal.writeBits(0xf, 4);
     checkEqual(cereal.bytes, [ 0x4f ]);
 }
 
 void testEncodeSubByte() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal.writeBits(1, 1);
     cereal.writeBits(3, 2);
     cereal.writeBits(0, 1);
@@ -133,7 +133,7 @@ void testEncodeSubByte() {
 }
 
 void testEncodeSubWord() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     cereal.writeBits(4, 3);
     cereal.writeBits(7, 3);
     cereal.writeBits(23, 5);
@@ -144,13 +144,13 @@ void testEncodeSubWord() {
 
 void testEncodeMoreThan8Bits() {
     {
-        auto cereal = new Cerealiser();
+        auto cereal = new OldCerealiser();
         cereal.writeBits(1, 9);
         cereal.writeBits(15, 7);
         checkEqual(cereal.bytes, [ 0x00, 0x8f]);
     }
     {
-        auto cereal = new Cerealiser();
+        auto cereal = new OldCerealiser();
         cereal.writeBits((0x9e << 1) | 1, 9);
         cereal.writeBits(0xea & 0x7f, 7);
         checkEqual(cereal.bytes, [ 0x9e, 0xea]);
@@ -158,7 +158,7 @@ void testEncodeMoreThan8Bits() {
 }
 
 void testEncodeFailsIfTooBigForBits() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     checkNotThrown(cereal.writeBits(1, 1));
     checkThrown(cereal.writeBits(2, 1));
     checkNotThrown(cereal.writeBits(3, 2));
@@ -166,7 +166,7 @@ void testEncodeFailsIfTooBigForBits() {
 }
 
 void testEncodeTwoBytesBits() {
-    auto cereal = new Cerealiser();
+    auto cereal = new OldCerealiser();
     immutable uint value = 5;
     cereal.writeBits(3, 4);
     cereal.writeBits(1, 1);

@@ -7,7 +7,7 @@ import core.exception;
 
 
 void testInputRange() {
-    auto enc = new Cerealiser;
+    auto enc = new OldCerealiser;
     enc ~= iota(cast(ubyte)5);
     checkEqual(enc.bytes, [0, 5, 0, 1, 2, 3, 4]);
 }
@@ -28,7 +28,7 @@ void testMyOutputRange() {
 void testOutputRangeValue() {
     gOutputBytes = [];
 
-    auto dec = new Decerealiser([0, 5, 2, 3, 9, 6, 1]);
+    auto dec = new OldDecerealiser([0, 5, 2, 3, 9, 6, 1]);
     auto output = dec.value!MyOutputRange;
 
     checkEqual(gOutputBytes, [2, 3, 9, 6, 1]);
@@ -38,7 +38,7 @@ void testOutputRangeValue() {
 void testOutputRangeRead() {
     gOutputBytes = [];
 
-    auto dec = new Decerealiser([0, 5, 2, 3, 9, 6, 1]);
+    auto dec = new OldDecerealiser([0, 5, 2, 3, 9, 6, 1]);
     auto output = MyOutputRange();
     dec.read(output);
 
@@ -64,14 +64,14 @@ private struct StructWithInputRange {
 
 @SingleThreaded
 void testEmbeddedInputRange() {
-    auto enc = new Cerealiser;
+    auto enc = new OldCerealiser;
     auto str = StructWithInputRange(2, MyInputRange([9, 7, 6]));
     enc ~= str;
     const bytes = [2, 0, 3, 9, 7, 6];
     checkEqual(enc.bytes, bytes);
 
     //no deserialisation for InputRange
-    auto dec = new Decerealiser(bytes);
+    auto dec = new OldDecerealiser(bytes);
     checkThrown!AssertError(dec.value!StructWithInputRange);
 }
 
@@ -83,9 +83,9 @@ private struct StructWithOutputRange {
 
 @SingleThreaded
 void testEmbeddedOutputRange() {
-    auto enc = new Cerealiser;
+    auto enc = new OldCerealiser;
     checkThrown!AssertError(enc ~= StructWithOutputRange());
-    auto dec = new Decerealiser([255, //1st byte
+    auto dec = new OldDecerealiser([255, //1st byte
                                  0, 3, 9, 7, 6, //length, values
                                  12]); //2nd byte
     gOutputBytes = [];

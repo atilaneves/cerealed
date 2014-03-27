@@ -8,7 +8,7 @@ import std.exception;
 import std.conv;
 
 
-class Cerealiser: CerealT!Cerealiser {
+class OldCerealiser: CerealT!OldCerealiser {
 public:
 
     this() {
@@ -27,8 +27,8 @@ public:
     }
 
     final bool grainChildClass(Object val) @trusted {
-        if(val.classinfo.name !in _childCerealisers) return false;
-        _childCerealisers[val.classinfo.name](this, val);
+        if(val.classinfo.name !in _childOldCerealisers) return false;
+        _childOldCerealisers[val.classinfo.name](this, val);
         return true;
     }
 
@@ -74,7 +74,7 @@ public:
         _bitIndex += bits;
     }
 
-    final Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
+    final OldCerealiser opOpAssign(string op : "~", T)(T val) @safe {
         write(val);
         return this;
     }
@@ -91,7 +91,7 @@ public:
     }
 
     static void registerChildClass(T)() @safe {
-        _childCerealisers[T.classinfo.name] = (Cerealiser cereal, Object val){
+        _childOldCerealisers[T.classinfo.name] = (OldCerealiser cereal, Object val){
             T child = cast(T)val;
             cereal.grainClassImpl(child);
         };
@@ -102,5 +102,5 @@ private:
     ubyte[] _bytes;
     ubyte _currentByte;
     int _bitIndex;
-    static void function(Cerealiser cereal, Object val)[string] _childCerealisers;
+    static void function(OldCerealiser cereal, Object val)[string] _childOldCerealisers;
 }

@@ -4,6 +4,6 @@ import unit_threaded;
 import cerealed;
 
 void testType() {
-    checkEqual(new Cerealiser().type, CerealType.Write);
-    checkEqual(new Decerealiser([1]).type, CerealType.Read);
+    checkEqual(new OldCerealiser().type, CerealType.Write);
+    checkEqual(new OldDecerealiser([1]).type, CerealType.Read);
 }
