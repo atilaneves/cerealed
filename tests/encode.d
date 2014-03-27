@@ -30,14 +30,14 @@ void testEncodeUByte() {
 }
 
 void testEncodeShort() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
 }
 
 void testEncodeUShort() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     ushort[] ins = [ 2, 3, cast(short)65535, 0];
     foreach(i; ins) cereal ~= i;
     checkEqual(cereal.bytes, [ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);

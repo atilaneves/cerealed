@@ -20,8 +20,16 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
     cereal.grainReinterpret(val);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ushort)) {
+    ubyte valh = (val >> 8);
+    ubyte vall = val & 0xff;
+    cereal.grainUByte(valh);
+    cereal.grainUByte(vall);
+    val = (valh << 8) + vall;
+}
 
-void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
+
+private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
     auto ptr = cast(CerealPtrType!T)(&val);
     cereal.grain(*ptr);
 }
