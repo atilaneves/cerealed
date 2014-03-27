@@ -252,7 +252,6 @@ private template CerealPtrType(T) {
     } else static if(is(T == double)) {
         alias ulong* CerealPtrType;
     } else {
-       import std.traits;
        alias Unsigned!T* CerealPtrType;
     }
 }
