@@ -222,10 +222,7 @@ protected:
 
     abstract void grainUByte(ref ubyte val) @safe;
     abstract void grainBits(ref uint val, int bits) @safe;
-
-    bool grainChildClass(Object val) @trusted {
-        return false;
-    }
+    abstract bool grainChildClass(Object val) @trusted;
 
     final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
         //do base classes first or else the order is wrong

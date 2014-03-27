@@ -75,6 +75,11 @@ protected:
         value = readBits(bits);
     }
 
+    override bool grainChildClass(Object val) @trusted {
+        return false;
+    }
+
+
 private:
 
     const (ubyte)[] _originalBytes;
