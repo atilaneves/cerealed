@@ -111,18 +111,16 @@ public:
     }
 
     final void grain(T)(ref T val) @trusted if(isAggregateType!T) {
-        static if(__traits(hasMember, val, "accept") &&
-                  __traits(compiles, val.accept(this))) {
-            //custom serialisation, let the aggreagate do its thing
-            static assert(!__traits(hasMember, val, "postBlit"),
-                          "Cannot define both accept and postBlit");
+
+        enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
+        enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(this); }));
+
+        static if(hasAccept) { //custom serialisation
+            static assert(!hasPostBlit, "Cannot define both accept and postBlit");
             val.accept(this);
-        } else {
-            //normal serialisation, go through each member and possibly serialise
+        } else { //normal serialisation, go through each member and possibly serialise
             grainAllMembers(val);
-            static if(__traits(hasMember, val, "postBlit") &&
-                      __traits(compiles, val.postBlit(this))) {
-                //semi-custom serialisation, do post blit
+            static if(hasPostBlit) { //semi-custom serialisation, do post blit
                 val.postBlit(this);
             }
         }
