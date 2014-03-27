@@ -131,7 +131,7 @@ public:
     final void grain(T)(ref T val) @safe if(isPointer!T) {
         import std.traits;
         alias ValueType = PointerTarget!T;
-        if(type() == Cereal.Type.Read) val = new ValueType;
+        if(type() == Cereal.Type.Read && val is null) val = new ValueType;
         grain(*val);
     }
 
@@ -140,8 +140,10 @@ public:
     }
 
     final void grainAllMembers(T)(ref T val) @trusted if(is(T == class)) {
+        assert(type() == Cereal.Type.Read || val !is null);
+        if(type() == Cereal.Type.Read && val is null) val = new T;
         //check to see if child class that was registered
-        if(val.classinfo.name in _childCerealisers) {
+        if(type() == Cereal.Type.Write && val.classinfo.name in _childCerealisers) {
             Object obj = val;
             _childCerealisers[val.classinfo.name](this, obj);
         } else {

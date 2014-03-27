@@ -55,6 +55,7 @@ void testClassWithStruct() {
 class BaseClass {
     ubyte byte1;
     ubyte byte2;
+    this() { } //needed for deserialisation
     this(ubyte byte1, ubyte byte2) {
         this.byte1 = byte1;
         this.byte2 = byte2;
