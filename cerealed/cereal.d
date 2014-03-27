@@ -222,7 +222,7 @@ public:
     }
 
     static final void registerChildClass(T)() @safe {
-        _childCerealisers[T.classinfo.name] = (Cereal cereal, ref Object val){
+        _childCerealisers[T.classinfo.name] = (Cereal cereal, Object val){
             T child = cast(T)val;
             cereal.grainClassImpl(child);
         };
@@ -235,7 +235,7 @@ protected:
 
 private:
 
-    static void function(Cereal cereal, ref Object val)[string] _childCerealisers;
+    static void function(Cereal cereal, Object val)[string] _childCerealisers;
 
     final void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
