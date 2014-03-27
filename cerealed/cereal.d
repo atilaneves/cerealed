@@ -221,7 +221,6 @@ public:
 
 protected:
 
-    abstract void grainBits(ref uint val, int bits) @safe;
     abstract bool grainChildClass(Object val) @trusted;
 
     final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
@@ -236,7 +235,7 @@ private:
 
     final void grainBitsT(T)(ref T val, int bits) @safe {
         uint realVal = val;
-        grainBits(realVal, bits);
+        _cereal.grainBits(realVal, bits);
         val = cast(T)realVal;
     }
 

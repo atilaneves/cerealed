@@ -22,6 +22,10 @@ public:
         _bytes ~= val;
     }
 
+    final void grainBits(ref uint value, int bits) @safe {
+        writeBits(value, bits);
+    }
+
     final void write(T)(const ref T val) @safe if(!isArray!T &&
                                                   !isAssociativeArray!T &&
                                                   !isAggregateType!T) {
@@ -92,13 +96,6 @@ public:
             cereal.grainClassImpl(child);
         };
     }
-
-protected:
-
-    override void grainBits(ref uint value, int bits) @safe {
-        writeBits(value, bits);
-    }
-
 
 private:
 

@@ -15,6 +15,10 @@ public:
         _bytes = _bytes[1..$];
     }
 
+    final void grainBits(ref uint value, int bits) @safe {
+        value = readBits(bits);
+    }
+
     this() @safe {
         static const ubyte[] empty;
         this(empty);
@@ -71,10 +75,6 @@ public:
     }
 
 protected:
-
-    override void grainBits(ref uint value, int bits) @safe {
-        value = readBits(bits);
-    }
 
     override bool grainChildClass(Object val) @trusted {
         return false;
