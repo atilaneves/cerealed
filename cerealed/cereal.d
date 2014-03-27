@@ -229,11 +229,15 @@ private:
         }
     }
 
+
     final void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
         foreach(member; __traits(derivedMembers, ActualType)) {
             //makes sure to only serialise members that make sense, i.e. data
-            static if(is(typeof((inout int = 0) {
-                            __traits(getMember, val, member) = __traits(getMember, val, member).init;}))) {
+            enum isMemberVariable = is(typeof(
+                (inout int = 0) {
+                    __traits(getMember, val, member) = __traits(getMember, val, member).init;
+                }));
+            static if(isMemberVariable) {
                 grainMemberWithAttr!member(val);
             } else {
                 static if(__traits(compiles, grainMemberWithAttr!member(val))) {
