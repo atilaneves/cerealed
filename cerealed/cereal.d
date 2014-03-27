@@ -13,6 +13,20 @@ void grain(C, T)(auto ref C cereal, ref T val) if(isCereal!C && is(T == ubyte)) 
     cereal.grainUByte(val);
 }
 
+//catch all signed numbers and forward to reinterpret
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == enum) &&
+                                                        (isSigned!T || isBoolean!T ||
+                                                         is(T == char) || isFloatingPoint!T)) {
+    cereal.grainReinterpret(val);
+}
+
+
+void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
+    auto ptr = cast(CerealPtrType!T)(&val);
+    cereal.grain(*ptr);
+}
+
+
 class CerealT(Cereal) {
 public:
 

@@ -5,7 +5,7 @@ import cerealed.cerealiser;
 
 
 void testEncodeBool() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     cereal.write(false);
     cereal.write(true);
     cereal.write(false);
@@ -16,7 +16,7 @@ void testEncodeBool() {
 }
 
 void testEncodeByte() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     byte[] ins = [ 1, 3, -2, 5, -4];
     foreach(i; ins) cereal.write(i);
     checkEqual(cereal.bytes, [ 0x1, 0x3, 0xfe, 0x5, 0xfc ]);
