@@ -71,16 +71,42 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputCerea
     foreach(ref e; val) cereal.grain(e);
 }
 
-void grain(C, R, U = ushort)(auto ref C cereal, ref R output) @trusted if(isOutputCereal!C &&
-                                                                          isOutputRange!(R, ubyte) &&
-                                                                          !isArray!R) {
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isOutputCereal!C &&
+                                                                       isOutputRange!(T, ubyte)) {
     U length = void;
     cereal.grain(length);
-    for(U i = 0; i < length; ++i) {
-        ubyte b = void;
-        cereal.grain(b);
-        output.put(b);
+
+    static if(isArray!T) {
+        if(val.length < length) val.length = cast(uint)length;
+        foreach(ref e; val) cereal.grain(e);
+    } else {
+        for(U i = 0; i < cereal.bytesRemaining; ++i) {
+            ubyte b = void;
+            cereal.grain(b);
+
+            enum hasOpOpAssign = is(typeof((inout int = 0) { val ~= b; }));
+            static if(hasOpOpAssign) {
+                val ~= b;
+            } else {
+                val.put(b);
+            }
+        }
     }
+}
+
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(is(T == string)) {
+    U length = cast(U)val.length;
+    cereal.grain(length);
+
+    auto values = new char[length];
+    if(val.length != 0) { //copy string
+        values[] = val[];
+    }
+
+    foreach(ref e; values) {
+        cereal.grain(e);
+    }
+    val = cast(string)values;
 }
 
 

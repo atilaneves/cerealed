@@ -105,52 +105,52 @@ void testDecodeRefChar() {
 
 
 void testDecodeArray() {
-    auto cereal = new OldDecerealiser([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
+    auto cereal = Decerealiser([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
     checkEqual(cereal.value!(int[]), [ 2, 6, 9 ]);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 void testDecodeRefArray() {
-    auto cereal = new OldDecerealiser([0, 1, 0, 0, 0, 2]);
+    auto cereal = Decerealiser([0, 1, 0, 0, 0, 2]);
     int[] val;
     cereal.grain(val);
     checkEqual(val, [2]);
 }
 
 void testDecodeArrayLongLength() {
-    auto cereal = new OldDecerealiser([ 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
+    auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
     checkEqual(cereal.value!(int[], long), [ 2, 6, 9 ]);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 void testDecodeAssocArray() {
-    auto cereal = new OldDecerealiser([ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
+    auto cereal = Decerealiser([ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
     checkEqual(cereal.value!(int[int]), [ 1:2, 3:6]);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 
 void testDecodeRefAssocArray() {
-    auto cereal = new OldDecerealiser([0, 1, 0, 0, 0, 2, 0, 0, 0, 3]);
+    auto cereal = Decerealiser([0, 1, 0, 0, 0, 2, 0, 0, 0, 3]);
     int[int] val;
     cereal.grain(val);
     checkEqual(val, [2:3]);
 }
 
 void testDecodeAssocArrayIntLength() {
-    auto cereal = new OldDecerealiser([ 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
+    auto cereal = Decerealiser([ 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
     checkEqual(cereal.value!(int[int], int), [ 1:2, 3:6]);
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 void testDecodeString() {
-    auto cereal = new OldDecerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
+    auto cereal = Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
     checkEqual(cereal.value!(string), "atoyn");
     checkThrown!RangeError(cereal.value!ubyte); //no more bytes
 }
 
 void testDecodeRefString() {
-    auto cereal = new OldDecerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
+    auto cereal = Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
     string val;
     cereal.grain(val);
     checkEqual(val, "atoyn");
@@ -158,7 +158,7 @@ void testDecodeRefString() {
 }
 
 void testDecodeBits() {
-    auto cereal = new OldDecerealiser([ 0x9e, 0xea]);
+    auto cereal = Decerealiser([ 0x9e, 0xea]);
     //1001 1110 1110 1010 or
     //100 111 10111 01 010
     checkEqual(cereal.readBits(3), 4);
@@ -176,7 +176,7 @@ void testDecodeBits() {
 }
 
 void testDecodeBitsMultiByte() {
-    auto cereal = new OldDecerealiser([ 0x9e, 0xea]);
+    auto cereal = Decerealiser([ 0x9e, 0xea]);
     checkEqual(cereal.readBits(9), 317);
     checkEqual(cereal.readBits(7), 0x6a);
 }

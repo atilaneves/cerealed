@@ -49,12 +49,24 @@ struct Decerealiser {
 
     @property @safe final T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
         T val;
-        grain!(T, U)(this, val);
+        grain!(typeof(this), T, U)(this, val);
         return val;
     }
 
-    alias read = grain;
+    void reset() @safe {
+        /**resets the decerealiser to read from the beginning again*/
+        reset(_originalBytes);
+    }
 
+    void reset(T)(in T[] bytes) @safe if(isNumeric!T) {
+        /**resets the decerealiser to use the new slice*/
+        _bitIndex = 0;
+        _currentByte = 0;
+        setBytes(bytes);
+    }
+
+
+    alias read = grain;
 
     final uint readBits(int bits) @safe {
         if(_bitIndex == 0) {
