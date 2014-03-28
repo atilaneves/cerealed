@@ -92,7 +92,7 @@ void testEncodeChars() {
 }
 
 void testEncodeArray() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     const ints = [ 2, 6, 9];
     cereal ~= ints;
     //encoding should be a short with the length, plus payload

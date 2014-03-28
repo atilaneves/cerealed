@@ -7,7 +7,9 @@ public import cerealed.attrs;
 import std.traits;
 import std.exception;
 import std.conv;
+import std.range;
 
+//algorithm:
 struct Cerealiser {
     //interface
     CerealType type() const pure nothrow @safe {
@@ -25,7 +27,7 @@ struct Cerealiser {
         return true;
     }
 
-    //specific
+    //specific:
     const(ubyte[]) bytes() const nothrow @property @safe {
         return _bytes;
     }
@@ -35,8 +37,21 @@ struct Cerealiser {
         return this;
     }
 
-    void write(T)(auto ref T val) @safe {
-        this.grain(val);
+    void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
+        Unqual!T lval = val;
+        grain(this, lval);
+    }
+
+    void write(T)(const ref T val) @safe if(!isArray!T &&
+                                            !isAssociativeArray!T &&
+                                            !isAggregateType!T) {
+        T lval = val;
+        grain(this, lval);
+    }
+
+    void write(T)(const(T)[] val) @safe {
+        T[] lval = val.dup;
+        grain(this, lval);
     }
 
 private:

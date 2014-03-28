@@ -20,6 +20,14 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
     cereal.grainReinterpret(val);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == wchar)) {
+    cereal.grain(*cast(ushort*)&val);
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == dchar)) {
+    cereal.grain(*cast(uint*)&val);
+}
+
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ushort)) {
     ubyte valh = (val >> 8);
     ubyte vall = val & 0xff;
@@ -52,15 +60,14 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == wchar)) {
-    cereal.grain(*cast(ushort*)&val);
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange!T && !isInfinite!T) {
+    enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
+    static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
+                                  fullyQualifiedName!T));
+    U length = cast(U)val.length;
+    cereal.grain(length);
+    foreach(ref e; val) cereal.grain(e);
 }
-
-void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == dchar)) {
-    cereal.grain(*cast(uint*)&val);
-}
-
-
 
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
     auto ptr = cast(CerealPtrType!T)(&val);
