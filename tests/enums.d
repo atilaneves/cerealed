@@ -14,7 +14,7 @@ void testEnum() {
     enc ~= MyEnum.Foo;
     checkEqual(enc.bytes,  [0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0]);
 
-    auto dec = new Decerealizer(enc.bytes);
+    auto dec = Decerealizer(enc.bytes);
     checkEqual(dec.value!MyEnum, MyEnum.Bar);
     checkEqual(dec.value!MyEnum, MyEnum.Baz);
     checkEqual(dec.value!MyEnum, MyEnum.Foo);

@@ -75,13 +75,13 @@ private struct StructWithNoCereal {
 }
 
 void testNoCereal() {
-    auto cerealizer = new Cerealizer();
+    auto cerealizer = Cerealizer();
     cerealizer ~= StructWithNoCereal(3, 14, 42, 5, 12);
     //only nibble1, nibble2 and value should show up in bytes
     immutable bytes = [0x3e, 0x00, 0x05];
     checkEqual(cerealizer.bytes, bytes);
 
-    auto decerealizer = new Decerealizer(bytes);
+    auto decerealizer = Decerealizer(bytes);
     //won't be the same as the serialised struct, since the members
     //marked with NoCereal will be set to T.init
     checkEqual(decerealizer.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
@@ -111,7 +111,7 @@ void testCustomCereal() {
 
 void testAttrMember() {
     //test that attributes work when calling grain member by member
-    auto cereal = new Cerealizer();
+    auto cereal = Cerealizer();
     auto str = StructWithNoCereal(3, 14, 42, 5, 12);
     cereal.grainMemberWithAttr!"nibble1"(str);
     cereal.grainMemberWithAttr!"nibble2"(str);
@@ -199,7 +199,7 @@ void testReadmeCode() {
     import std.conv;
     assert(enc.bytes == [ 3, 0xea /*1110 1 010*/, 42], text("bytes were ", enc.bytes));
 
-    auto dec = new Decerealizer([ 3, 0xea, 42]); //US spelling works too
+    auto dec = Decerealizer([ 3, 0xea, 42]); //US spelling works too
     //the 2nd value is 0 and not 123 since that value
     //doesn't get serialised/deserialised
     auto val = dec.value!MyStruct;

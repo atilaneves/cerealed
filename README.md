@@ -8,12 +8,12 @@ The tests in the [tests directory](tests) depend on
 
 Example usage:
 
-    auto cerealiser = new Cerealiser(); //UK spelling
+    auto cerealiser = Cerealiser(); //UK spelling
     cerealiser ~= 5; //int
     cerealiser ~= cast(ubyte)42;
     assert(cerealiser.bytes == [ 0, 0, 0, 5, 42]);
 
-    auto deceralizer = new Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
+    auto deceralizer = Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
     assert(decerealizer.value!int == 5);
     assert(decerealizer.value!ubyte == 42);
 
@@ -34,7 +34,7 @@ number of bits to use.
         ubyte mybyte2;
     }
 
-    auto cereal = new Cerealiser();
+    auto cereal = Cerealiser();
     cereal ~= MyStruct(3, 123, 14, 1, 42);
     assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 42]);
 
@@ -59,12 +59,12 @@ the scenes.
         }
     }
 
-    auto cerealiser = new Cerealiser();
+    auto cerealiser = Cerealiser();
     cerealiser ~= CustomStruct(1, 2);
     assert(cerealiser.bytes == [ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
-    auto decerealiser = new Decerealiser([1, 0, 2, 4]);
+    auto decerealiser = Decerealiser([1, 0, 2, 4]);
     assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
 
 
@@ -87,13 +87,13 @@ define both `accept` and `postBlit`. Example below.
     }
 
     {
-        auto cereal = new Cerealiser();
+        auto cereal = Cerealiser();
         cereal ~= CustomStruct(1, 2);
         assert(cereal.bytes == [ 1, 0, 2, 4]);
     }
 
     {
-        auto cereal = new Cerealiser();
+        auto cereal = Cerealiser();
         cereal ~= CustomStruct(3, 2);
         assert(cereal.bytes == [ 1, 0, 2]);
     }
@@ -113,7 +113,7 @@ attribute tells `cerealed` to not add the length parameter.
         @RawArray string[] strings;
     }
 
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
     enc ~= strs;
     //no length encoding for the array, but strings still get a length each
@@ -121,7 +121,7 @@ attribute tells `cerealed` to not add the length parameter.
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
     assert(enc.bytes == bytes);
 
-    auto dec = new Decerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     assert(dec.value!StringsStruct ==  strs);
 
 Derived classes can be serialised via a reference to the base class, but the
@@ -130,9 +130,9 @@ child class must be registered first:
     class BaseClass  { int a; this(int a) { this.a = a; }}
     class ChildClass { int b; this(int b) { this.b = b; }}
     Cereal.registerChildClass!ChildClass;
-    auto enc = new Cerealiser;
-    BaseClass obj = new ChildClass(3, 7);
-    enc ~= new obj;
+    auto enc = Cerealiser();
+    BaseClass obj = ChildClass(3, 7);
+    enc ~= obj;
     assert(enc.bytes == [0, 0, 0, 3, 0, 0, 0, 7]);
 
 There is now support for InputRange and OutputRange objects. Examples can
