@@ -37,3 +37,30 @@ enum hasPostBlit(T) = is(typeof((inout int = 0) {
             auto dec = Decerealiser();
             obj.postBlit(dec);
 }));
+
+
+
+mixin template assertHasPostBlit(T) {
+    static if(!hasPostBlit!T) {
+        void func(inout int = 0) {
+            auto obj = T.init;
+            auto enc = Cerealiser();
+            obj.postBlit(enc);
+            auto dec = Decerealiser();
+            obj.postBlit(dec);
+        }
+    }
+}
+
+
+mixin template assertHasAccept(T) {
+    static if(!hasAccept!T) {
+        void func(inout int = 0) {
+            auto obj = T.init;
+            auto enc = Cerealiser();
+            obj.accept(enc);
+            auto dec = Decerealiser();
+            obj.accept(dec);
+        }
+    }
+}

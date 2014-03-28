@@ -269,6 +269,9 @@ void testAcceptPostBlitAttrs() {
     import cerealed.traits;
     static assert(hasPostBlit!MqttFixedHeader);
     static assert(hasAccept!CustomStruct);
+    mixin assertHasPostBlit!MqttFixedHeader;
+    mixin assertHasAccept!CustomStruct;
+
 }
 
 void testCerealiseMqttHeader() {
