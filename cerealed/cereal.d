@@ -185,7 +185,7 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 
     //check to see if child class that was registered
     if(!cereal.grainChildClass(val)) {
-        grain.grainClassImpl(val);
+        cereal.grainClassImpl(val);
     }
 }
 

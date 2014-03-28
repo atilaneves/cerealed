@@ -13,11 +13,9 @@ private class DummyClass {
 }
 
 void testDummyClass() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     auto dummy = new DummyClass();
     enc ~= dummy;
-
-    auto dec = new OldDecerealiser(enc.bytes);
 }
 
 private struct DummyStruct {
@@ -41,13 +39,13 @@ private class ClassWithStruct {
 }
 
 void testClassWithStruct() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     auto klass = new ClassWithStruct(DummyStruct(2, 3), 4);
     enc ~= klass;
     const bytes = [2, 0, 3, 4];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!ClassWithStruct, klass);
 }
 
@@ -78,13 +76,13 @@ class DerivedClass: BaseClass {
 }
 
 void testDerivedClass() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     auto klass = new DerivedClass(2, 4, 8, 9);
     enc ~= klass;
     const bytes = [2, 4, 8, 9];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!DerivedClass, klass);
 }
 
@@ -94,15 +92,15 @@ void testSerialisationViaBaseClass() {
     const baseBytes = [2, 4];
     const childBytes = [2, 4, 8, 9];
 
-    auto enc = new OldCerealiser;
+    auto enc = Cerealiser();
     enc ~= klass;
     checkEqual(enc.bytes, baseBytes);
 
-    OldCerealiser.registerChildClass!DerivedClass;
+    Cerealiser.registerChildClass!DerivedClass;
     enc.reset();
     enc ~= klass;
     checkEqual(enc.bytes, childBytes);
 
-    auto dec = new OldDecerealiser(childBytes);
+    auto dec = Decerealiser(childBytes);
     checkEqual(dec.value!DerivedClass, cast(DerivedClass)klass);
 }
