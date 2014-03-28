@@ -147,6 +147,12 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
 }
 
 
+package void grainClassImpl(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
+    //do base classes first or else the order is wrong
+    cereal.grainBaseClasses(val);
+    cereal.grainAllMembersImpl!T(val);
+}
+
 private void grainBitsT(C, T)(auto ref C cereal, ref T val, int bits) @safe if(!isCereal!C) {
     uint realVal = val;
     cereal.grainBits(realVal, bits);
