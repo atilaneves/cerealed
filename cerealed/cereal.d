@@ -60,7 +60,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange!T && !isInfinite!T) {
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange!T && !isInfinite!T &&
+                                                                    !isAssociativeArray!T) {
     enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -68,6 +69,22 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange
     cereal.grain(length);
     foreach(ref e; val) cereal.grain(e);
 }
+
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isAssociativeArray!T) {
+    U length = cast(U)val.length;
+    cereal.grain(length);
+    const keys = val.keys;
+
+    for(U i = 0; i < length; ++i) {
+        KeyType!T k = keys.length ? keys[i] : KeyType!T.init;
+        auto v = keys.length ? val[k] : ValueType!T.init;
+
+        cereal.grain(k);
+        cereal.grain(v);
+        val[k] = v;
+    }
+}
+
 
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
     auto ptr = cast(CerealPtrType!T)(&val);

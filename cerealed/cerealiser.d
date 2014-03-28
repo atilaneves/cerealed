@@ -54,6 +54,12 @@ struct Cerealiser {
         grain(this, lval);
     }
 
+    void write(K, V)(const(V[K]) val) @trusted {
+        auto lval = cast(V[K])val.dup;
+        grain(this, lval);
+    }
+
+
 private:
 
     ubyte[] _bytes;

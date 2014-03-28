@@ -100,8 +100,10 @@ void testEncodeArray() {
 }
 
 void testEncodeAssocArray() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     const intToInt = [ 1:2, 3:6];
+    import std.traits;
+    import std.range;
     cereal ~= intToInt;
     //short with length, then payload
     checkEqual(cereal.bytes, [ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
