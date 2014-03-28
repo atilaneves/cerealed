@@ -146,6 +146,19 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
     cereal.grain(*val);
 }
 
+void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
+    //can't use virtual functions due to template parameter
+    static if(isOutputCereal!C) {
+        val.length = 0;
+        while(cereal.bytesLeft()) {
+            val.length++;
+            cereal.grain(val[$ - 1]);
+        }
+    } else {
+        foreach(ref t; val) grain(t);
+    }
+}
+
 
 package void grainClassImpl(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
     //do base classes first or else the order is wrong
@@ -312,6 +325,13 @@ public:
         }
     }
 
+    final void grain(T)(ref T val) @safe if(isPointer!T) {
+        import std.traits;
+        alias ValueType = PointerTarget!T;
+        if(_cereal.type() == CerealType.ReadBytes && val is null) val = new ValueType;
+        grain(*val);
+    }
+
     final void grain(T)(ref T val) @trusted if(isAggregateType!T && !isInputRange!T && !isOutputRange!(T, ubyte)) {
 
         enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
@@ -326,13 +346,6 @@ public:
                 val.postBlit(this);
             }
         }
-    }
-
-    final void grain(T)(ref T val) @safe if(isPointer!T) {
-        import std.traits;
-        alias ValueType = PointerTarget!T;
-        if(_cereal.type() == CerealType.ReadBytes && val is null) val = new ValueType;
-        grain(*val);
     }
 
     final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
