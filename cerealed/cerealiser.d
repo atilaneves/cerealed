@@ -25,6 +25,7 @@ struct Cerealiser {
         return true;
     }
 
+    //specific
     const(ubyte[]) bytes() const nothrow @property @safe {
         return _bytes;
     }

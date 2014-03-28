@@ -52,6 +52,15 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == wchar)) {
+    cereal.grain(*cast(ushort*)&val);
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == dchar)) {
+    cereal.grain(*cast(uint*)&val);
+}
+
+
 
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
     auto ptr = cast(CerealPtrType!T)(&val);

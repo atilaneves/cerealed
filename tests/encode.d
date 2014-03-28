@@ -84,7 +84,7 @@ void testEncodeDouble() {
 }
 
 void testEncodeChars() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     char  c; cereal ~= c;
     wchar w; cereal ~= w;
     dchar d; cereal ~= d;
