@@ -146,6 +146,34 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
     cereal.grain(*val);
 }
 
+void grainMemberWithAttr(string member, C, T)(auto ref C, ref T val) @trusted if(isCereal!C) {
+    /**(De)serialises one member taking into account its attributes*/
+    import std.typetuple;
+    enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
+                                                           __traits(getMember, val, member)));
+    enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
+                                                           __traits(getMember, val, member)));
+    //only serialise if the member doesn't have @NoCereal
+    static if(noCerealIndex == -1) {
+        alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
+                                                      __traits(getMember, val, member)));
+        static assert(attrs.length == 0 || attrs.length == 1,
+                      "Too many Bits!N attributes!");
+        static if(attrs.length == 0) {
+            //normal case, no Bits attributes
+            static if(rawArrayIndex == -1) {
+                cereal.grain(__traits(getMember, val, member));
+            } else {
+                cereal.grainRawArray(__traits(getMember, val, member));
+            }
+        } else {
+            //Bits attributes, store it in less bits than fits
+            enum bits = getNumBits!(attrs[0]);
+            cereal.grainBitsT(__traits(getMember, val, member), bits);
+        }
+    }
+}
+
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
     //can't use virtual functions due to template parameter
     static if(isOutputCereal!C) {
