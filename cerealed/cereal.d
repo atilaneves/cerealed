@@ -94,19 +94,24 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isOutputC
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(is(T == string)) {
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
     U length = cast(U)val.length;
     cereal.grain(length);
 
-    auto values = new char[length];
-    if(val.length != 0) { //copy string
-        values[] = val[];
-    }
+    static if(is(isInputCereal!C)) {
+        //easier to read from a string
+        foreach(e; val) cereal.grain(e);
+    } else {
+        auto values = new char[length];
+        if(val.length != 0) { //copy string
+            values[] = val[];
+        }
 
-    foreach(ref e; values) {
-        cereal.grain(e);
+        foreach(ref e; values) {
+            cereal.grain(e);
+        }
+        val = cast(string)values;
     }
-    val = cast(string)values;
 }
 
 
