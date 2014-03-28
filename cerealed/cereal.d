@@ -137,6 +137,15 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
     }
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!T) {
+    import std.traits;
+    alias ValueType = PointerTarget!T;
+    static if(isOutputCereal!C) {
+        if(val is null) val = new ValueType;
+    }
+    cereal.grain(*val);
+}
+
 
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     auto ptr = cast(CerealPtrType!T)(&val);
