@@ -110,7 +110,7 @@ void testEncodeAssocArray() {
 }
 
 void testEncodeString() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     const str = "foobarbaz";
     cereal ~= str;
     //short with length, then payload
