@@ -146,6 +146,28 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
     cereal.grain(*val);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggregateType!T &&
+                                                           !isInputRange!T && !isOutputRange!(T, ubyte)) {
+
+    enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
+    enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(this); }));
+
+    static if(hasAccept) { //custom serialisation
+        static assert(!hasPostBlit, "Cannot define both accept and postBlit");
+        val.accept(this);
+    } else { //normal serialisation, go through each member and possibly serialise
+        cereal.grainAllMembers(val);
+        static if(hasPostBlit) { //semi-custom serialisation, do post blit
+            val.postBlit(this);
+        }
+    }
+}
+
+void grainAllMembers(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == struct)) {
+    cereal.grainAllMembersImpl!T(val);
+}
+
+
 void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == class)) {
     static if(isInputCereal!C) {
         assert(val !is null, "null value cannot be serialised");
