@@ -147,10 +147,38 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
 }
 
 
+private void grainBitsT(C, T)(auto ref C cereal, ref T val, int bits) @safe if(!isCereal!C) {
+    uint realVal = val;
+    cereal.grainBits(realVal, bits);
+    val = cast(T)realVal;
+}
+
 private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     auto ptr = cast(CerealPtrType!T)(&val);
     cereal.grain(*ptr);
 }
+
+private void grainBaseClasses(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
+    foreach(base; BaseTypeTuple!T) {
+        cereal.grainAllMembersImpl!base(val);
+    }
+}
+
+
+private void grainAllMembersImpl(ActualType, C, ValType)(auto ref C cereal, ref ValType val) @trusted
+if(isCereal!C) {
+    foreach(member; __traits(derivedMembers, ActualType)) {
+        //makes sure to only serialise members that make sense, i.e. data
+        enum isMemberVariable = is(typeof(
+                                       (inout int = 0) {
+                                           __traits(getMember, val, member) = __traits(getMember, val, member).init;
+                                       }));
+        static if(isMemberVariable) {
+            cereal.grainMemberWithAttr!member(val);
+        }
+    }
+}
+
 
 
 class CerealT(Cereal) {
