@@ -14,10 +14,6 @@ struct Cerealiser {
         return CerealType.Write;
     }
 
-    ulong bytesLeft() const @safe {
-        return 0;
-    }
-
     void grainUByte(ref ubyte val) @safe {
         _bytes ~= val;
     }

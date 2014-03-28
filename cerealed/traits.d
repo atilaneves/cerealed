@@ -10,6 +10,5 @@ enum isCereal(T) = is(typeof((inout int = 0) {
         cereal.grainBits(val, 3);
         static class Widget{}
         bool child = cereal.grainChildClass(new Widget);
-        ulong left = cereal.bytesLeft();
         CerealType type = cereal.type();
     }));
