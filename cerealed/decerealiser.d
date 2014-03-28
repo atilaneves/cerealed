@@ -2,7 +2,7 @@ module cerealed.decerealiser;
 
 public import cerealed.cereal;
 public import cerealed.attrs;
-import cerealed.traits;
+public import cerealed.traits;
 import std.traits;
 
 

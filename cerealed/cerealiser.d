@@ -3,7 +3,7 @@ module cerealed.cerealiser;
 
 public import cerealed.cereal;
 public import cerealed.attrs;
-import cerealed.traits;
+public import cerealed.traits;
 import std.traits;
 import std.exception;
 import std.conv;
