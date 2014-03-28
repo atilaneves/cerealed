@@ -5,8 +5,8 @@ import cerealed.cerealiser;
 import cerealed.decerealiser;
 
 
-void testResetOldCerealiser() {
-    auto enc = new OldCerealiser;
+void testResetCerealiser() {
+    auto enc = Cerealiser();
     enc ~= 5;
     enc ~= 'a';
     checkEqual(enc.bytes, [0, 0, 0, 5, 'a']);
@@ -23,9 +23,9 @@ void testResetOldCerealiser() {
 }
 
 
-void testResetOldDecerealiser() {
+void testResetDecerealiser() {
     const ubyte[] bytes1 = [1, 2, 3, 5, 8, 13];
-    auto dec = new OldDecerealiser(bytes1);
+    auto dec = Decerealiser(bytes1);
 
     dec.value!int; //get rid of 4 bytes
     checkEqual(dec.bytes, [8, 13]);
@@ -42,8 +42,8 @@ void testResetOldDecerealiser() {
 }
 
 
-void testEmptyOldDecerealiser() {
+void testEmptyDecerealiser() {
     import core.exception: RangeError;
-    auto dec = new OldDecerealiser;
+    auto dec = Decerealiser();
     checkThrown!RangeError(dec.value!ubyte); //no bytes
 }

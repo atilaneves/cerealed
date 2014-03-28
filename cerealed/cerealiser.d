@@ -77,6 +77,13 @@ struct Cerealiser {
         _bitIndex += bits;
     }
 
+    void reset() @trusted {
+        if(_bytes !is null) {
+            _bytes = _bytes[0..0];
+            _bytes.assumeSafeAppend();
+        }
+    }
+
 private:
 
     ubyte[] _bytes;
