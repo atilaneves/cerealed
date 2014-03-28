@@ -19,6 +19,7 @@ struct Cerealiser {
     }
 
     void grainBits(ref uint value, int bits) @safe {
+        writeBits(value, bits);
     }
 
     bool grainChildClass(Object val) @safe {

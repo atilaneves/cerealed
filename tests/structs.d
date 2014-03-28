@@ -18,11 +18,11 @@ private struct DummyStruct {
 
 
 void testDummyStruct() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0], "dummy!");
     enc ~= dummy;
 
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!DummyStruct, dummy);
 
     checkThrown!RangeError(dec.value!ubyte);
@@ -33,7 +33,7 @@ private struct StringStruct {
 }
 
 void testDecodeStringStruct() {
-    auto dec = new OldDecerealiser([0, 3, 'f', 'o', 'o']);
+    auto dec = Decerealiser([0, 3, 'f', 'o', 'o']);
     auto str = StringStruct();
     dec.grain(str);
     checkEqual(str.s, "foo");
@@ -41,7 +41,7 @@ void testDecodeStringStruct() {
 }
 
 void testEncodeStringStruct() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     const str = StringStruct("foo");
     enc ~= str;
     checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
@@ -58,11 +58,11 @@ private struct ProtoHeaderStruct {
 
 void testEncDecProtoHeaderStruct() {
     const hdr = ProtoHeaderStruct(6, 1, 3, 254);
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     enc ~= hdr; //1101 0011, 254
     checkEqual(enc.bytes, [0xd3, 254]);
 
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!ProtoHeaderStruct, hdr);
 }
 
@@ -90,13 +90,13 @@ private struct MqttFixedHeader {
 }
 
 void testCerealiseMqttHeader() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
     checkEqual(cereal.bytes, [0x3c, 0x5]);
 }
 
 void testDecerealiseMqttHeader() {
-    auto cereal = new OldDecerealiser([0x3c, 0x5]);
+    auto cereal = Decerealiser([0x3c, 0x5]);
     checkEqual(cereal.value!MqttFixedHeader,
                MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
@@ -134,14 +134,14 @@ private struct CustomStruct {
 }
 
 void testCustomCereal() {
-    auto cerealiser = new OldCerealiser();
+    auto cerealiser = Cerealiser();
     import std.stdio;
     writeln("Serialising custom struct ");
     cerealiser ~= CustomStruct(1, 2);
     checkEqual(cerealiser.bytes, [ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
-    auto decerealiser = new OldDecerealiser([1, 0, 2, 4]);
+    auto decerealiser = Decerealiser([1, 0, 2, 4]);
     checkEqual(decerealiser.value!CustomStruct, CustomStruct(1, 2));
 }
 
@@ -172,13 +172,13 @@ struct EnumStruct {
 }
 
 void testEnum() {
-    auto cerealiser = new OldCerealiser();
+    auto cerealiser = Cerealiser();
     const e = EnumStruct(1, EnumStruct.Enum.Baz);
     cerealiser ~= e;
     const bytes = [1, 2];
     checkEqual(cerealiser.bytes, bytes);
 
-    auto decerealiser = new OldDecerealiser(bytes);
+    auto decerealiser = Decerealiser(bytes);
     checkEqual(decerealiser.value!EnumStruct, e);
 }
 
@@ -193,12 +193,12 @@ struct PostBlitStruct {
 }
 
 void testPostBlit() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     enc ~= PostBlitStruct(3, 5, 8);
     const bytes = [ 3, 8, 0, 4];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!PostBlitStruct, PostBlitStruct(3, 0, 8));
 }
 
@@ -208,7 +208,7 @@ private struct StringsStruct {
 }
 
 void testRawArray() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
     enc ~= strs;
     //no length encoding for the array, but strings still get a length each
@@ -216,7 +216,7 @@ void testRawArray() {
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!StringsStruct, strs);
 }
 
@@ -231,7 +231,7 @@ void testReadmeCode() {
         ubyte mybyte2;
     }
 
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     enc ~= MyStruct(3, 123, 14, 1, 2, 42);
     import std.conv;
     assert(enc.bytes == [ 3, 0xea /*1110 1 010*/, 42], text("bytes were ", enc.bytes));

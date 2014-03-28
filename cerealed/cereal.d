@@ -69,7 +69,7 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputCereal!C &&
                                                                     isInputRange!T && !isInfinite!T &&
-                                                                    !isAssociativeArray!T) {
+                                                                    !is(T == string) && !isAssociativeArray!T) {
     enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -149,16 +149,16 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
 void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggregateType!T &&
                                                            !isInputRange!T && !isOutputRange!(T, ubyte)) {
 
-    enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
-    enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(this); }));
+    enum hasAccept   = is(typeof((inout int = 0) { val.accept(cereal); }));
+    enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(cereal); }));
 
     static if(hasAccept) { //custom serialisation
         static assert(!hasPostBlit, "Cannot define both accept and postBlit");
-        val.accept(this);
+        val.accept(cereal);
     } else { //normal serialisation, go through each member and possibly serialise
         cereal.grainAllMembers(val);
         static if(hasPostBlit) { //semi-custom serialisation, do post blit
-            val.postBlit(this);
+            val.postBlit(cereal);
         }
     }
 }
@@ -189,7 +189,7 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 }
 
 
-void grainMemberWithAttr(string member, C, T)(auto ref C, ref T val) @trusted if(isCereal!C) {
+void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     /**(De)serialises one member taking into account its attributes*/
     import std.typetuple;
     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
@@ -226,7 +226,7 @@ void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C)
             cereal.grain(val[$ - 1]);
         }
     } else {
-        foreach(ref t; val) grain(t);
+        foreach(ref t; val) cereal.grain(t);
     }
 }
 
@@ -237,7 +237,7 @@ package void grainClassImpl(C, T)(auto ref C cereal, ref T val) @safe if(isCerea
     cereal.grainAllMembersImpl!T(val);
 }
 
-private void grainBitsT(C, T)(auto ref C cereal, ref T val, int bits) @safe if(!isCereal!C) {
+private void grainBitsT(C, T)(auto ref C cereal, ref T val, int bits) @safe if(isCereal!C) {
     uint realVal = val;
     cereal.grainBits(realVal, bits);
     val = cast(T)realVal;
