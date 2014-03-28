@@ -14,5 +14,5 @@ enum isCereal(T) = is(typeof((inout int = 0) {
     }));
 
 
-enum isOutputCereal(T) = isCereal!T && T.type == CerealType.Write;
-enum isInputCereal(T)  = isCereal!T && T.type == CerealType.Read;
+enum isInputCereal(T) = isCereal!T && T.type == CerealType.WriteBytes;
+enum isOutputCereal(T)  = isCereal!T && T.type == CerealType.ReadBytes;

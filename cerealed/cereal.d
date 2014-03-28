@@ -7,7 +7,7 @@ import std.conv;
 import std.algorithm;
 import std.range;
 
-enum CerealType { Write, Read };
+enum CerealType { WriteBytes, ReadBytes };
 
 void grain(C, T)(auto ref C cereal, ref T val) if(isCereal!C && is(T == ubyte)) {
     cereal.grainUByte(val);
@@ -60,7 +60,7 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isOutputCereal!C &&
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputCereal!C &&
                                                                     isInputRange!T && !isInfinite!T &&
                                                                     !isAssociativeArray!T) {
     enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
@@ -71,7 +71,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isOutputCere
     foreach(ref e; val) cereal.grain(e);
 }
 
-void grain(C, R, U = ushort)(auto ref C cereal, ref R output) @trusted if(isInputCereal!C &&
+void grain(C, R, U = ushort)(auto ref C cereal, ref R output) @trusted if(isOutputCereal!C &&
                                                                           isOutputRange!(R, ubyte) &&
                                                                           !isArray!R) {
     U length = void;
@@ -173,14 +173,14 @@ public:
         enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
         static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                       fullyQualifiedName!T));
-        assert(_cereal.type() == CerealType.Write, "InputRange cannot be deserialised");
+        assert(_cereal.type() == CerealType.WriteBytes, "InputRange cannot be deserialised");
         U length = cast(U)val.length;
         grain(length);
         foreach(ref e; val) grain(e);
     }
 
     final void grain(R, U = ushort)(ref R output) @trusted if(isOutputRange!(R, ubyte) && !isArray!R) {
-        assert(_cereal.type() == CerealType.Read, "OutputRanges can only be deserialised");
+        assert(_cereal.type() == CerealType.ReadBytes, "OutputRanges can only be deserialised");
         U length = void;
         grain(length);
         for(U i = 0; i < length; ++i) {
@@ -250,7 +250,7 @@ public:
     final void grain(T)(ref T val) @safe if(isPointer!T) {
         import std.traits;
         alias ValueType = PointerTarget!T;
-        if(_cereal.type() == CerealType.Read && val is null) val = new ValueType;
+        if(_cereal.type() == CerealType.ReadBytes && val is null) val = new ValueType;
         grain(*val);
     }
 
@@ -259,11 +259,11 @@ public:
     }
 
     final void grainAllMembers(T)(ref T val) @trusted if(is(T == class)) {
-        assert(_cereal.type() == CerealType.Read || val !is null, "null value cannot be serialised");
+        assert(_cereal.type() == CerealType.ReadBytes || val !is null, "null value cannot be serialised");
 
         enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
         static if(hasDefaultConstructor) {
-            if(_cereal.type() == CerealType.Read && val is null) val = new T;
+            if(_cereal.type() == CerealType.ReadBytes && val is null) val = new T;
         } else {
             assert(val !is null, text("Cannot deserialise into null value. ",
                                       "Possible cause: no default constructor for ",
@@ -306,7 +306,7 @@ public:
 
     final void grainRawArray(T)(ref T[] val) @trusted {
         //can't use virtual functions due to template parameter
-        if(_cereal.type() == CerealType.Read) {
+        if(_cereal.type() == CerealType.ReadBytes) {
             val.length = 0;
             while(_cereal.bytesLeft()) {
                 val.length++;

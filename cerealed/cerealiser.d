@@ -12,7 +12,7 @@ import std.range;
 //algorithm:
 struct Cerealiser {
     //interface
-    enum type = CerealType.Write;
+    enum type = CerealType.WriteBytes;
 
     void grainUByte(ref ubyte val) @safe {
         _bytes ~= val;
@@ -84,7 +84,7 @@ private:
     int _bitIndex;
 
     static assert(isCereal!Cerealiser);
-    static assert(isOutputCereal!Cerealiser);
+    static assert(isInputCereal!Cerealiser);
 }
 
 class OldCerealiser: CerealT!OldCerealiser {
@@ -94,7 +94,7 @@ public:
         super(this);
     }
 
-    final CerealType type() const pure nothrow @safe { return CerealType.Write; }
+    final CerealType type() const pure nothrow @safe { return CerealType.WriteBytes; }
     final ulong bytesLeft() const @safe { return bytes.length; }
 
     final void grainUByte(ref ubyte val) @safe {

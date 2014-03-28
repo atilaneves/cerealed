@@ -8,7 +8,7 @@ import std.traits;
 
 struct Decerealiser {
     //interface:
-    enum type = CerealType.Read;
+    enum type = CerealType.ReadBytes;
 
     void grainUByte(ref ubyte val) @safe {
         val = _bytes[0];
@@ -100,14 +100,14 @@ private:
     }
 
     static assert(isCereal!Decerealiser);
-    static assert(isInputCereal!Decerealiser);
+    static assert(isOutputCereal!Decerealiser);
 }
 
 
 class OldDecerealiser: CerealT!OldDecerealiser {
 public:
 
-    final CerealType type() const pure nothrow @safe { return CerealType.Read; }
+    final CerealType type() const pure nothrow @safe { return CerealType.ReadBytes; }
     final ulong bytesLeft() const @safe { return bytes.length; }
 
     final void grainUByte(ref ubyte val) @safe {
