@@ -20,11 +20,11 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
     cereal.grainReinterpret(val);
 }
 
-void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == wchar)) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == wchar)) {
     cereal.grain(*cast(ushort*)&val);
 }
 
-void grain(C, T)(auto ref C cereal, ref T val) @trusted if(is(T == dchar)) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == dchar)) {
     cereal.grain(*cast(uint*)&val);
 }
 
@@ -60,7 +60,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange!T && !isInfinite!T &&
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isOutputCereal!C &&
+                                                                    isInputRange!T && !isInfinite!T &&
                                                                     !isAssociativeArray!T) {
     enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
@@ -70,7 +71,20 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputRange
     foreach(ref e; val) cereal.grain(e);
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isAssociativeArray!T) {
+void grain(C, R, U = ushort)(auto ref C cereal, ref R output) @trusted if(isInputCereal!C &&
+                                                                          isOutputRange!(R, ubyte) &&
+                                                                          !isArray!R) {
+    U length = void;
+    cereal.grain(length);
+    for(U i = 0; i < length; ++i) {
+        ubyte b = void;
+        cereal.grain(b);
+        output.put(b);
+    }
+}
+
+
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
     U length = cast(U)val.length;
     cereal.grain(length);
     const keys = val.keys;
@@ -86,7 +100,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isAssocia
 }
 
 
-private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted {
+private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     auto ptr = cast(CerealPtrType!T)(&val);
     cereal.grain(*ptr);
 }

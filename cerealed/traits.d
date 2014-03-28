@@ -10,5 +10,9 @@ enum isCereal(T) = is(typeof((inout int = 0) {
         cereal.grainBits(val, 3);
         static class Widget{}
         bool child = cereal.grainChildClass(new Widget);
-        CerealType type = cereal.type();
+        CerealType type = cereal.type;
     }));
+
+
+enum isOutputCereal(T) = isCereal!T && T.type == CerealType.Write;
+enum isInputCereal(T)  = isCereal!T && T.type == CerealType.Read;
