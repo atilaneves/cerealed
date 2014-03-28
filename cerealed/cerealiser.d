@@ -59,10 +59,31 @@ struct Cerealiser {
         grain(this, lval);
     }
 
+    final void writeBits(in int value, in int bits) @safe {
+        enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
+        enum bitsInByte = 8;
+        if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
+            const remainingBits = _bitIndex + bits - bitsInByte;
+            const thisByteValue = (value >> remainingBits);
+            _currentByte |= thisByteValue;
+            this ~= _currentByte;
+            _currentByte = 0;
+            _bitIndex = 0;
+            if(remainingBits > 0) {
+                ubyte remainingValue = value & (0xff >> (bitsInByte - remainingBits));
+                writeBits(remainingValue, remainingBits);
+            }
+            return;
+        }
+        _currentByte |= (value << (bitsInByte - bits - _bitIndex));
+        _bitIndex += bits;
+    }
 
 private:
 
     ubyte[] _bytes;
+    ubyte _currentByte;
+    int _bitIndex;
 
     static assert(isCereal!Cerealiser);
 }

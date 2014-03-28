@@ -118,14 +118,14 @@ void testEncodeString() {
 }
 
 void testEncodeNibble() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     cereal.writeBits(0x4, 4);
     cereal.writeBits(0xf, 4);
     checkEqual(cereal.bytes, [ 0x4f ]);
 }
 
 void testEncodeSubByte() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     cereal.writeBits(1, 1);
     cereal.writeBits(3, 2);
     cereal.writeBits(0, 1);
@@ -135,7 +135,7 @@ void testEncodeSubByte() {
 }
 
 void testEncodeSubWord() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     cereal.writeBits(4, 3);
     cereal.writeBits(7, 3);
     cereal.writeBits(23, 5);
@@ -146,13 +146,13 @@ void testEncodeSubWord() {
 
 void testEncodeMoreThan8Bits() {
     {
-        auto cereal = new OldCerealiser();
+        auto cereal = Cerealiser();
         cereal.writeBits(1, 9);
         cereal.writeBits(15, 7);
         checkEqual(cereal.bytes, [ 0x00, 0x8f]);
     }
     {
-        auto cereal = new OldCerealiser();
+        auto cereal = Cerealiser();
         cereal.writeBits((0x9e << 1) | 1, 9);
         cereal.writeBits(0xea & 0x7f, 7);
         checkEqual(cereal.bytes, [ 0x9e, 0xea]);
@@ -160,7 +160,7 @@ void testEncodeMoreThan8Bits() {
 }
 
 void testEncodeFailsIfTooBigForBits() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     checkNotThrown(cereal.writeBits(1, 1));
     checkThrown(cereal.writeBits(2, 1));
     checkNotThrown(cereal.writeBits(3, 2));
@@ -168,7 +168,7 @@ void testEncodeFailsIfTooBigForBits() {
 }
 
 void testEncodeTwoBytesBits() {
-    auto cereal = new OldCerealiser();
+    auto cereal = Cerealiser();
     immutable uint value = 5;
     cereal.writeBits(3, 4);
     cereal.writeBits(1, 1);
