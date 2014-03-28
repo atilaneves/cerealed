@@ -8,7 +8,7 @@ import core.exception;
 private enum MyEnum { Foo, Bar, Baz };
 
 void testEnum() {
-    auto enc = new OldCerealiser;
+    auto enc = Cerealiser();
     enc ~= MyEnum.Bar;
     enc ~= MyEnum.Baz;
     enc ~= MyEnum.Foo;
@@ -27,7 +27,7 @@ void testDecodeEnum() {
         Baz = 1
     }
 
-    auto cereal = new OldDecerealiser([ 0, 1 ]);
+    auto cereal = Decerealiser([ 0, 1 ]);
     checkEqual(cereal.value!Foo, Foo.Bar);
     checkEqual(cereal.value!Foo, Foo.Baz);
     checkThrown!RangeError(cereal.value!ubyte);

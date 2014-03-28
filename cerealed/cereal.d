@@ -20,6 +20,13 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
     cereal.grainReinterpret(val);
 }
 
+// If the type is an enum, get the unqualified base type and cast it to that.
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == enum)) {
+    alias Unqual!(OriginalType!(T)) BaseType;
+    cereal.grain( cast(BaseType)val );
+}
+
+
 void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == wchar)) {
     cereal.grain(*cast(ushort*)&val);
 }
