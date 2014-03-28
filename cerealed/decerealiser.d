@@ -1,8 +1,109 @@
 module cerealed.decerealiser;
 
-import cerealed.cereal;
+public import cerealed.cereal;
 public import cerealed.attrs;
+import cerealed.traits;
 import std.traits;
+
+
+struct Decerealiser {
+    //interface:
+    CerealType type() const pure nothrow @safe {
+        return CerealType.Read;
+    }
+
+    void grainUByte(ref ubyte val) @safe {
+        val = _bytes[0];
+        _bytes = _bytes[1..$];
+    }
+
+    void grainBits(ref uint value, int bits) @safe {
+        value = readBits(bits);
+    }
+
+    bool grainChildClass(Object val) @safe {
+        return false;
+    }
+
+    //specific:
+    this(T)(in T[] bytes) @safe if(isNumeric!T) {
+        setBytes(bytes);
+    }
+
+    const(ubyte[]) bytes() const nothrow @property @safe {
+        return _bytes;
+    }
+
+    ulong bytesLeft() const @safe { return bytes.length; }
+
+    @property @safe final T value(T)() if(!isArray!T && !isAssociativeArray!T &&
+                                          !is(T == class)) {
+        T val;
+        grain(this, val);
+        return val;
+    }
+
+    @property @trusted final T value(T, A...)(A args) if(is(T == class)) {
+        auto val = new T(args);
+        grain(this, val);
+        return val;
+    }
+
+    @property @safe final T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
+        T val;
+        grain!(T, U)(this, val);
+        return val;
+    }
+
+    alias read = grain;
+
+
+    final uint readBits(int bits) @safe {
+        if(_bitIndex == 0) {
+            _currentByte = this.value!ubyte;
+        }
+
+        return readBitsHelper(bits);
+    }
+
+private:
+
+    const (ubyte)[] _originalBytes;
+    const (ubyte)[] _bytes;
+    ubyte _currentByte;
+    int _bitIndex;
+
+    uint readBitsHelper(int bits) @safe {
+        enum bitsInByte = 8;
+        if(_bitIndex + bits > bitsInByte) { //have to carry on to the next byte
+            immutable bits1stTime = bitsInByte - _bitIndex; //what's left of this byte
+            immutable bits2ndTime = (_bitIndex + bits) - bitsInByte; //bits to read from next byte
+            immutable value1 = readBitsHelper(bits1stTime);
+            _bitIndex = 0;
+            _currentByte = this.value!ubyte;
+            immutable value2 = readBitsHelper(bits2ndTime);
+            return (value1 << bits2ndTime) | value2;
+        }
+
+        _bitIndex += bits;
+
+        auto shift =  _currentByte >> (bitsInByte - _bitIndex);
+        return shift & (0xff >> (bitsInByte - bits));
+    }
+
+    final void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
+        static if(is(T == ubyte)) {
+            _bytes = bytes;
+        } else {
+            foreach(b; bytes) _bytes ~= cast(ubyte)b;
+        }
+
+        _originalBytes = _bytes;
+    }
+
+    static assert(isCereal!Decerealiser);
+}
+
 
 class OldDecerealiser: CerealT!OldDecerealiser {
 public:
