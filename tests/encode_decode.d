@@ -8,13 +8,13 @@ import core.exception;
 
 
 private void implEncDec(T)(T[] values) {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     import std.stdio;
     foreach(b; values) {
         writelnUt("Encoding ", b);
         enc ~= b;
     }
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     writelnUt("Decoding ", values);
     foreach(b; values) checkEqual(dec.value!T, b);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
@@ -74,9 +74,9 @@ void testEncDecChars() {
     char c = 5;
     wchar w = 300;
     dchar d = 1_000_000;
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     enc ~= c; enc ~= w; enc ~= d;
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!char, c);
     checkEqual(dec.value!wchar, w);
     checkEqual(dec.value!dchar, d);
@@ -84,19 +84,19 @@ void testEncDecChars() {
 }
 
 void testEncDecArray() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     const ints = [ 2, 6, 9];
     enc ~= ints;
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!(int[]), ints);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
 }
 
 void testEncDecAssocArray() {
-    auto enc = new OldCerealiser();
+    auto enc = Cerealiser();
     const intToInts = [ 1:2, 3:6, 9:18];
     enc ~= intToInts;
-    auto dec = new OldDecerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!(int[int]), intToInts);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes
 }
