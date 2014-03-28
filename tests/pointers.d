@@ -17,7 +17,7 @@ private struct OuterStructWithPointerToStruct {
 }
 
 void testStructWithPointerToStruct() {
-    auto enc = new OldCerealiser;
+    auto enc = Cerealiser();
     //outer not const because not copyable from const
     auto outer = OuterStructWithPointerToStruct(3, new InnerStruct(7, 2), 5);
     enc ~= outer;
@@ -25,7 +25,7 @@ void testStructWithPointerToStruct() {
     const bytes = [ 0, 3, 7, 0, 2, 5];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     const decOuter = dec.value!OuterStructWithPointerToStruct;
 
     //can't compare the two structs directly since the pointers
@@ -58,14 +58,14 @@ private struct OuterStructWithClass {
 }
 
 void testStructWithClassReference() {
-    auto enc = new OldCerealiser;
+    auto enc = Cerealiser();
     auto outer = OuterStructWithClass(2, new InnerClass(3, 5), 8);
     enc ~= outer;
 
     const bytes = [ 0, 2, 0, 3, 5, 8];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     const decOuter = dec.value!OuterStructWithClass;
 
     //can't compare the two structs directly since the pointers
@@ -77,12 +77,12 @@ void testStructWithClassReference() {
 }
 
 void testPointerToInt() {
-    auto enc = new OldCerealiser;
+    auto enc = Cerealiser();
     auto i = new int; *i = 4;
     enc ~= i;
     const bytes = [0, 0, 0, 4];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new OldDecerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(*dec.value!(int*), *i);
 }
