@@ -65,8 +65,9 @@ struct Decerealiser {
         setBytes(bytes);
     }
 
-
-    alias read = grain;
+    void read(T)(ref T val) @trusted {
+        grain(this, val);
+    }
 
     final uint readBits(int bits) @safe {
         if(_bitIndex == 0) {

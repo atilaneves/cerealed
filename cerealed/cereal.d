@@ -67,9 +67,10 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @safe if(isInputCereal!C &&
-                                                                    isInputRange!T && !isInfinite!T &&
-                                                                    !is(T == string) && !isAssociativeArray!T) {
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isInputCereal!C &&
+                                                                       isInputRange!T && !isInfinite!T &&
+                                                                       !is(T == string) &&
+                                                                       !isAssociativeArray!T) {
     enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -87,7 +88,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isOutputC
         if(val.length < length) val.length = cast(uint)length;
         foreach(ref e; val) cereal.grain(e);
     } else {
-        for(U i = 0; i < cereal.bytesRemaining; ++i) {
+        for(U i = 0; i < length; ++i) {
             ubyte b = void;
             cereal.grain(b);
 
