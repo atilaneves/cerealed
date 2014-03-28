@@ -146,6 +146,27 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
     cereal.grain(*val);
 }
 
+void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == class)) {
+    static if(isInputCereal!C) {
+        assert(val !is null, "null value cannot be serialised");
+    }
+
+    enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
+    static if(hasDefaultConstructor && isOutputCereal!C) {
+        if(val is null) val = new T;
+    } else {
+        assert(val !is null, text("Cannot deserialise into null value. ",
+                                  "Possible cause: no default constructor for ",
+                                  fullyQualifiedName!T, "."));
+    }
+
+    //check to see if child class that was registered
+    if(!cereal.grainChildClass(val)) {
+        grain.grainClassImpl(val);
+    }
+}
+
+
 void grainMemberWithAttr(string member, C, T)(auto ref C, ref T val) @trusted if(isCereal!C) {
     /**(De)serialises one member taking into account its attributes*/
     import std.typetuple;
