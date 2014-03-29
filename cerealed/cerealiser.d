@@ -10,19 +10,46 @@ import std.conv;
 import std.range;
 import std.array;
 
-alias Cerealiser = CerealiserImpl!(Appender!(ubyte[]));
 
-template isCerealiserImplange(R) {
-    enum isCerealiserImplange = isOutputRange!(R, ubyte) &&
+alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
+alias ArrayCerealiser = CerealiserImpl!Array;
+alias Cerealiser = AppenderCerealiser;
+
+
+template isCerealiserRange(R) {
+    enum isCerealiserRange = isOutputRange!(R, ubyte) &&
         is(typeof((inout int = 0) { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
 }
 
-struct CerealiserImpl(R) if(isCerealiserImplange!R) {
+
+struct Array {
+    void put(in ubyte val) nothrow @safe {
+        _bytes ~= val;
+    }
+
+    const(ubyte)[] data() pure const nothrow @property @safe {
+        return _bytes;
+    }
+
+    void clear() @trusted {
+        if(_bytes !is null) {
+            _bytes = _bytes[0..0];
+            _bytes.assumeSafeAppend();
+        }
+    }
+
+private:
+    ubyte[] _bytes;
+    static assert(isCerealiserRange!Array);
+}
+
+
+struct CerealiserImpl(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
     void grainUByte(ref ubyte val) @safe {
-        _bytes ~= val;
+        _output.put(val);
     }
 
     void grainBits(ref uint value, int bits) @safe {
@@ -39,8 +66,7 @@ struct CerealiserImpl(R) if(isCerealiserImplange!R) {
 
     //specific:
     const(ubyte[]) bytes() const nothrow @property @safe {
-        //return _bytes.toArray();
-        return _bytes.data;
+        return _output.data;
     }
 
     ref CerealiserImpl opOpAssign(string op : "~", T)(T val) @safe {
@@ -90,12 +116,8 @@ struct CerealiserImpl(R) if(isCerealiserImplange!R) {
         _bitIndex += bits;
     }
 
-    void reset() @trusted {
-        _bytes.clear();
-        // if(_bytes !is null) {
-        //     _bytes = _bytes[0..0];
-        //     _bytes.assumeSafeAppend();
-        // }
+    void reset() @safe {
+        _output.clear();
     }
 
     static void registerChildClass(T)() @safe {
@@ -107,7 +129,7 @@ struct CerealiserImpl(R) if(isCerealiserImplange!R) {
 
 private:
 
-    R _bytes;
+    R _output;
     ubyte _currentByte;
     int _bitIndex;
     static void function(ref CerealiserImpl cereal, Object val)[string] _childCerealisers;
