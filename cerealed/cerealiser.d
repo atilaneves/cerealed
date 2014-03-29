@@ -102,5 +102,5 @@ private:
     static void function(ref Cerealiser cereal, Object val)[string] _childCerealisers;
 
     static assert(isCereal!Cerealiser);
-    static assert(isInputCereal!Cerealiser);
+    static assert(isCerealiser!Cerealiser);
 }

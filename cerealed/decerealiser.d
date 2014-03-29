@@ -113,5 +113,5 @@ private:
     }
 
     static assert(isCereal!Decerealiser);
-    static assert(isOutputCereal!Decerealiser);
+    static assert(isDecerealiser!Decerealiser);
 }

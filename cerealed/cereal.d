@@ -67,7 +67,7 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isInputCereal!C &&
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
                                                                        !isAssociativeArray!T) {
@@ -79,7 +79,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isInputCe
     foreach(ref e; val) cereal.grain(e);
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isOutputCereal!C &&
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                                        isOutputRange!(T, ubyte)) {
     U length = void;
     cereal.grain(length);
@@ -106,7 +106,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
     U length = cast(U)val.length;
     cereal.grain(length);
 
-    static if(is(isInputCereal!C)) {
+    static if(is(isCerealiser!C)) {
         //easier to read from a string
         foreach(e; val) cereal.grain(e);
     } else {
@@ -141,7 +141,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!T) {
     import std.traits;
     alias ValueType = PointerTarget!T;
-    static if(isOutputCereal!C) {
+    static if(isDecerealiser!C) {
         if(val is null) val = new ValueType;
     }
     cereal.grain(*val);
@@ -170,12 +170,12 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && 
 
 
 void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == class)) {
-    static if(isInputCereal!C) {
+    static if(isCerealiser!C) {
         assert(val !is null, "null value cannot be serialised");
     }
 
     enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
-    static if(hasDefaultConstructor && isOutputCereal!C) {
+    static if(hasDefaultConstructor && isDecerealiser!C) {
         if(val is null) val = new T;
     } else {
         assert(val !is null, text("Cannot deserialise into null value. ",
@@ -220,7 +220,7 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
 
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
     //can't use virtual functions due to template parameter
-    static if(isOutputCereal!C) {
+    static if(isDecerealiser!C) {
         val.length = 0;
         while(cereal.bytesLeft()) {
             val.length++;
