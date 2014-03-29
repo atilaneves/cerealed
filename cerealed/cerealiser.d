@@ -8,6 +8,7 @@ import std.traits;
 import std.exception;
 import std.conv;
 import std.range;
+import std.array;
 
 alias Cerealiser = CerealiserRange!(ubyte[]);
 
@@ -33,7 +34,7 @@ struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
 
     //specific:
     const(ubyte[]) bytes() const nothrow @property @safe {
-        return _bytes;
+        return _bytes.toArray();
     }
 
     ref CerealiserRange opOpAssign(string op : "~", T)(T val) @safe {
@@ -106,4 +107,13 @@ private:
 
     static assert(isCereal!CerealiserRange);
     static assert(isCerealiser!CerealiserRange);
+}
+
+
+private const(ubyte[]) toArray(T)(T val) nothrow pure @safe {
+    static if(isArray!T) {
+        return val;
+    } else {
+        return val.array;
+    }
 }
