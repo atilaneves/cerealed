@@ -3,7 +3,6 @@ module tests.classes;
 import unit_threaded.check;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
-import core.exception;
 
 private class DummyClass {
     int i;

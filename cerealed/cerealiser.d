@@ -9,11 +9,22 @@ import std.exception;
 import std.conv;
 import std.range;
 import std.array;
-
+import core.exception;
 
 alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
 alias DynamicArrayCerealiser = CerealiserImpl!DynamicArrayRange;
 alias Cerealiser = AppenderCerealiser;
+
+struct StaticArrayCerealiser(T) {
+    CerealiserImpl!(StaticArrayRange!(T.sizeof)) cereal;
+    alias cereal this;
+}
+
+const(ubyte)[] cerealise(T)(auto ref T val) {
+    auto enc = StaticArrayCerealiser!T();
+    enc ~= val;
+    return enc.bytes;
+}
 
 
 template isCerealiserRange(R) {
@@ -41,6 +52,30 @@ struct DynamicArrayRange {
 private:
     ubyte[] _bytes;
     static assert(isCerealiserRange!DynamicArrayRange);
+}
+
+
+struct StaticArrayRange(uint N) {
+    import std.stdio;
+    //void put(in ubyte val) @safe {
+    void put(in ubyte val) @trusted {
+        writeln("putting into static array of size ", N);
+        if(_index >= N) throw new RangeError();
+        _bytes[_index++] = val;
+    }
+
+    const(ubyte)[] data() pure const nothrow @property @safe {
+        return _bytes[0 .. _index];
+    }
+
+    void clear() @trusted {
+        _index = 0;
+    }
+
+private:
+    ubyte[N] _bytes;
+    uint _index;
+    static assert(isCerealiserRange!StaticArrayRange);
 }
 
 
