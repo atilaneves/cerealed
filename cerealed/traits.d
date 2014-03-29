@@ -18,7 +18,8 @@ enum isCereal(T) = is(typeof((inout int = 0) {
 
 
 enum isCerealiser(T) = isCereal!T && T.type == CerealType.WriteBytes;
-enum isDecerealiser(T)  = isCereal!T && T.type == CerealType.ReadBytes;
+enum isDecerealiser(T) = isCereal!T && T.type == CerealType.ReadBytes &&
+    is(typeof((inout int = 0) { auto dec = T(); ulong bl = dec.bytesLeft; }));
 
 
 enum hasAccept(T) = is(typeof((inout int = 0) {
