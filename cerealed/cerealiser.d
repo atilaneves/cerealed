@@ -67,7 +67,7 @@ struct Cerealiser {
             const remainingBits = _bitIndex + bits - bitsInByte;
             const thisByteValue = (value >> remainingBits);
             _currentByte |= thisByteValue;
-            this ~= _currentByte;
+            grainUByte(_currentByte);
             _currentByte = 0;
             _bitIndex = 0;
             if(remainingBits > 0) {
