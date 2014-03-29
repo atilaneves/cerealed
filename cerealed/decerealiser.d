@@ -19,8 +19,8 @@ struct Decerealiser {
         value = readBits(bits);
     }
 
-    bool grainChildClass(Object val) @safe {
-        return false;
+    void grainClass(T)(T val) @trusted if(is(T == class)) {
+        grainClassImpl(this, val);
     }
 
     //specific:
@@ -35,7 +35,7 @@ struct Decerealiser {
     ulong bytesLeft() const @safe { return bytes.length; }
 
     @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T &&
-                                          !is(T == class)) {
+                                    !is(T == class)) {
         T val;
         grain(this, val);
         return val;

@@ -7,12 +7,10 @@ import cerealed.decerealiser;
 
 enum isCereal(T) = is(typeof((inout int = 0) {
         ubyte b;
-        auto cereal = T();
+        auto cereal = T.init;
         cereal.grainUByte(b);
         uint val;
         cereal.grainBits(val, 3);
-        static class Widget{}
-        bool child = cereal.grainChildClass(new Widget);
         CerealType type = cereal.type;
     }));
 

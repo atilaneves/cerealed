@@ -22,10 +22,12 @@ struct Cerealiser {
         writeBits(value, bits);
     }
 
-    bool grainChildClass(Object val) @trusted {
-        if(val.classinfo.name !in _childCerealisers) return false;
-        _childCerealisers[val.classinfo.name](this, val);
-        return true;
+    void grainClass(T)(T val) @trusted if(is(T == class)) {
+        if(val.classinfo.name in _childCerealisers) {
+            _childCerealisers[val.classinfo.name](this, val);
+        } else {
+            grainClassImpl(this, val);
+        }
     }
 
     //specific:
