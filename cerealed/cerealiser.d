@@ -12,7 +12,7 @@ import std.array;
 
 
 alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
-alias ArrayCerealiser = CerealiserImpl!Array;
+alias DynamicArrayCerealiser = CerealiserImpl!DynamicArrayRange;
 alias Cerealiser = AppenderCerealiser;
 
 
@@ -22,7 +22,7 @@ template isCerealiserRange(R) {
 }
 
 
-struct Array {
+struct DynamicArrayRange {
     void put(in ubyte val) nothrow @safe {
         _bytes ~= val;
     }
@@ -40,7 +40,7 @@ struct Array {
 
 private:
     ubyte[] _bytes;
-    static assert(isCerealiserRange!Array);
+    static assert(isCerealiserRange!DynamicArrayRange);
 }
 
 
