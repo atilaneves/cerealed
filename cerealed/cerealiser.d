@@ -10,14 +10,14 @@ import std.conv;
 import std.range;
 import std.array;
 
-alias Cerealiser = CerealiserRange!(Appender!(ubyte[]));
+alias Cerealiser = CerealiserImpl!(Appender!(ubyte[]));
 
-template isCerealiserRange(R) {
-    enum isCerealiserRange = isOutputRange!(R, ubyte) &&
+template isCerealiserImplange(R) {
+    enum isCerealiserImplange = isOutputRange!(R, ubyte) &&
         is(typeof((inout int = 0) { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
 }
 
-struct CerealiserRange(R) if(isCerealiserRange!R) {
+struct CerealiserImpl(R) if(isCerealiserImplange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
@@ -43,7 +43,7 @@ struct CerealiserRange(R) if(isCerealiserRange!R) {
         return _bytes.data;
     }
 
-    ref CerealiserRange opOpAssign(string op : "~", T)(T val) @safe {
+    ref CerealiserImpl opOpAssign(string op : "~", T)(T val) @safe {
         write(val);
         return this;
     }
@@ -110,10 +110,10 @@ private:
     R _bytes;
     ubyte _currentByte;
     int _bitIndex;
-    static void function(ref CerealiserRange cereal, Object val)[string] _childCerealisers;
+    static void function(ref CerealiserImpl cereal, Object val)[string] _childCerealisers;
 
-    static assert(isCereal!CerealiserRange);
-    static assert(isCerealiser!CerealiserRange);
+    static assert(isCereal!CerealiserImpl);
+    static assert(isCerealiser!CerealiserImpl);
 }
 
 
