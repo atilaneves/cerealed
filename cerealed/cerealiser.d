@@ -9,9 +9,9 @@ import std.exception;
 import std.conv;
 import std.range;
 
-alias Cerealiser = CerealiserT!(ubyte[]);
+alias Cerealiser = CerealiserRange!(ubyte[]);
 
-struct CerealiserT(Appender) {
+struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
     //interface
     enum type = CerealType.WriteBytes;
 
@@ -36,7 +36,7 @@ struct CerealiserT(Appender) {
         return _bytes;
     }
 
-    ref CerealiserT opOpAssign(string op : "~", T)(T val) @safe {
+    ref CerealiserRange opOpAssign(string op : "~", T)(T val) @safe {
         write(val);
         return this;
     }
@@ -102,8 +102,8 @@ private:
     ubyte[] _bytes;
     ubyte _currentByte;
     int _bitIndex;
-    static void function(ref CerealiserT cereal, Object val)[string] _childCerealisers;
+    static void function(ref CerealiserRange cereal, Object val)[string] _childCerealisers;
 
-    static assert(isCereal!CerealiserT);
-    static assert(isCerealiser!CerealiserT);
+    static assert(isCereal!CerealiserRange);
+    static assert(isCerealiser!CerealiserRange);
 }
