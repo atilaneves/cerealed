@@ -10,9 +10,14 @@ import std.conv;
 import std.range;
 import std.array;
 
-alias Cerealiser = CerealiserRange!(ubyte[]);
+alias Cerealiser = CerealiserRange!(Appender!(ubyte[]));
 
-struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
+template isCerealiserRange(R) {
+    enum isCerealiserRange = isOutputRange!(R, ubyte) &&
+        is(typeof((inout int = 0) { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
+}
+
+struct CerealiserRange(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
@@ -34,7 +39,8 @@ struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
 
     //specific:
     const(ubyte[]) bytes() const nothrow @property @safe {
-        return _bytes.toArray();
+        //return _bytes.toArray();
+        return _bytes.data;
     }
 
     ref CerealiserRange opOpAssign(string op : "~", T)(T val) @safe {
@@ -85,10 +91,11 @@ struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
     }
 
     void reset() @trusted {
-        if(_bytes !is null) {
-            _bytes = _bytes[0..0];
-            _bytes.assumeSafeAppend();
-        }
+        _bytes.clear();
+        // if(_bytes !is null) {
+        //     _bytes = _bytes[0..0];
+        //     _bytes.assumeSafeAppend();
+        // }
     }
 
     static void registerChildClass(T)() @safe {
@@ -113,7 +120,11 @@ private:
 private const(ubyte[]) toArray(T)(T val) nothrow pure @safe {
     static if(isArray!T) {
         return val;
-    } else {
-        return val.array;
+    }
+    static if(is(typeof((inout int = 0) { return val.array; }))) {
+        return val.val;
+    }
+    static if(is(T == Appender!(ubyte[]))) {
+        return val.data;
     }
 }
