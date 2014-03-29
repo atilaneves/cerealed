@@ -147,18 +147,25 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
     cereal.grain(*val);
 }
 
+private template canCall(C, T, string func) {
+    enum canCall = is(typeof(() { auto cer = C(); auto val = T.init; mixin("val." ~ func ~ "(cer);"); }));
+    static if(!canCall && __traits(hasMember, T, func)) {
+        pragma(msg, "Warning: '" ~ func ~ "' function defined for ", T, ", but does not compile.");
+    }
+}
+
 void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggregateType!T &&
                                                            !isInputRange!T && !isOutputRange!(T, ubyte)) {
 
-    enum hasAccept   = is(typeof((inout int = 0) { val.accept(cereal); }));
-    enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(cereal); }));
+    enum canAccept   = canCall!(C, T, "accept");
+    enum canPostBlit = canCall!(C, T, "postBlit");
 
-    static if(hasAccept) { //custom serialisation
-        static assert(!hasPostBlit, "Cannot define both accept and postBlit");
+    static if(canAccept) { //custom serialisation
+        static assert(!canPostBlit, "Cannot define both accept and postBlit");
         val.accept(cereal);
     } else { //normal serialisation, go through each member and possibly serialise
         cereal.grainAllMembers(val);
-        static if(hasPostBlit) { //semi-custom serialisation, do post blit
+        static if(canPostBlit) { //semi-custom serialisation, do post blit
             val.postBlit(cereal);
         }
     }
