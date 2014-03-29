@@ -34,20 +34,20 @@ struct Decerealiser {
 
     ulong bytesLeft() const @safe { return bytes.length; }
 
-    @property @safe final T value(T)() if(!isArray!T && !isAssociativeArray!T &&
+    @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T &&
                                           !is(T == class)) {
         T val;
         grain(this, val);
         return val;
     }
 
-    @property @trusted final T value(T, A...)(A args) if(is(T == class)) {
+    @property @trusted T value(T, A...)(A args) if(is(T == class)) {
         auto val = new T(args);
         grain(this, val);
         return val;
     }
 
-    @property @safe final T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
+    @property @safe T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
         T val;
         grain!(typeof(this), T, U)(this, val);
         return val;
@@ -69,7 +69,7 @@ struct Decerealiser {
         grain(this, val);
     }
 
-    final uint readBits(int bits) @safe {
+    uint readBits(int bits) @safe {
         if(_bitIndex == 0) {
             _currentByte = this.value!ubyte;
         }
@@ -102,7 +102,7 @@ private:
         return shift & (0xff >> (bitsInByte - bits));
     }
 
-    final void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
+    void setBytes(T)(in T[] bytes) @trusted if(isNumeric!T) {
         static if(is(T == ubyte)) {
             _bytes = bytes;
         } else {

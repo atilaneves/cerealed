@@ -60,7 +60,7 @@ struct Cerealiser {
         grain(this, lval);
     }
 
-    final void writeBits(in int value, in int bits) @safe {
+    void writeBits(in int value, in int bits) @safe {
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
