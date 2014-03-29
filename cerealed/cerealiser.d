@@ -100,7 +100,7 @@ struct CerealiserRange(R) if(isOutputRange!(R, ubyte)) {
 
 private:
 
-    ubyte[] _bytes;
+    R _bytes;
     ubyte _currentByte;
     int _bitIndex;
     static void function(ref CerealiserRange cereal, Object val)[string] _childCerealisers;
