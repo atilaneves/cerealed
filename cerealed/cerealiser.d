@@ -4,71 +4,20 @@ module cerealed.cerealiser;
 public import cerealed.cereal;
 public import cerealed.attrs;
 public import cerealed.traits;
+import cerealed.range;
 import std.traits;
 import std.exception;
-import std.conv;
-import std.range;
 import std.array;
-import core.exception;
+
 
 alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
 alias DynamicArrayCerealiser = CerealiserImpl!DynamicArrayRange;
+alias ScopeBufferCerealiser = CerealiserImpl!ScopeBufferRange;
+
 alias Cerealiser = AppenderCerealiser; //the default, easy option
 
 
-template isCerealiserRange(R) {
-    enum isCerealiserRange = isOutputRange!(R, ubyte) &&
-        is(typeof((inout int = 0) { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
-}
-
-
-struct DynamicArrayRange {
-    void put(in ubyte val) nothrow @safe {
-        _bytes ~= val;
-    }
-
-    const(ubyte)[] data() pure const nothrow @property @safe {
-        return _bytes;
-    }
-
-    void clear() @trusted {
-        if(_bytes !is null) {
-            _bytes = _bytes[0..0];
-            _bytes.assumeSafeAppend();
-        }
-    }
-
-private:
-    ubyte[] _bytes;
-    static assert(isCerealiserRange!DynamicArrayRange);
-}
-
-struct ScopeBufferRange {
-    import cerealed.scopebuffer;
-    ScopeBuffer!ubyte sbuf;
-    this(ubyte[] buf) {
-        sbuf = ScopeBuffer!ubyte(buf);
-    }
-    alias sbuf this;
-
-    const(ubyte)[] data() pure const nothrow @property @trusted {
-        return sbuf[];
-    }
-
-    void clear() @trusted {
-        sbuf.length = 0;
-    }
-
-    void free() {
-        sbuf.free();
-    }
-
-    static assert(isCerealiserRange!ScopeBufferRange);
-}
-
-
-
-struct CerealiserImpl(R) {//if(isCerealiserRange!R) {
+struct CerealiserImpl(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
@@ -125,6 +74,7 @@ struct CerealiserImpl(R) {//if(isCerealiserRange!R) {
     }
 
     void writeBits(in int value, in int bits) @safe {
+        import std.conv;
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
