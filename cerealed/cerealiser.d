@@ -54,36 +54,40 @@ private:
     static assert(isCerealiserRange!DynamicArrayRange);
 }
 
-
-struct StaticArrayRange(uint N) {
-    import std.stdio;
-    //void put(in ubyte val) @safe {
-    void put(in ubyte val) @trusted {
-        writeln("putting into static array of size ", N);
-        if(_index >= N) throw new RangeError();
-        _bytes[_index++] = val;
+struct ScopeBufferRange {
+    import cerealed.scopebuffer;
+    ScopeBuffer!ubyte sbuf;
+    this(ubyte[] buf) {
+        sbuf = ScopeBuffer!ubyte(buf);
     }
+    alias sbuf this;
 
-    const(ubyte)[] data() pure const nothrow @property @safe {
-        return _bytes[0 .. _index];
+    const(ubyte)[] data() pure const nothrow @property @trusted {
+        return sbuf[];
     }
 
     void clear() @trusted {
-        _index = 0;
+        sbuf.length = 0;
     }
 
-private:
-    ubyte[N] _bytes;
-    uint _index;
-    static assert(isCerealiserRange!StaticArrayRange);
+    void free() {
+        sbuf.free();
+    }
+
+    static assert(isCerealiserRange!ScopeBufferRange);
 }
 
 
-struct CerealiserImpl(R) if(isCerealiserRange!R) {
+
+struct CerealiserImpl(R) {//if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
-    void grainUByte(ref ubyte val) @safe {
+    this(R r) {
+        _output = r;
+    }
+
+    void grainUByte(ref ubyte val) @trusted {
         _output.put(val);
     }
 
