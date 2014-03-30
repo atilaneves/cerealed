@@ -19,7 +19,7 @@ void testOldCerealiser() {
 }
 
 void testScopeBufferCerealiser() {
-    ubyte[6] buf = void;
+    ubyte[32] buf = void;
 
     writelnUt("Creating the range");
     auto sbufRange = ScopeBufferRange(buf);
@@ -31,4 +31,10 @@ void testScopeBufferCerealiser() {
 
     enc ~= WhateverStruct(5, "blargh");
     checkEqual(enc.bytes, [ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
+}
+
+
+void testCerealise() {
+    WhateverStruct(5, "blargh").cerealise!(bytes => checkEqual(bytes,
+                                                               [0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h']));
 }

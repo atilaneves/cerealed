@@ -17,6 +17,20 @@ alias ScopeBufferCerealiser = CerealiserImpl!ScopeBufferRange;
 alias Cerealiser = AppenderCerealiser; //the default, easy option
 
 
+auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
+    static assert(N % 2 == 0, "cerealise must be passed an even number of bytes");
+    ubyte[N] buf = void;
+    auto sbufRange = ScopeBufferRange(buf);
+    scope(exit) sbufRange.free();
+    auto enc = CerealiserImpl!ScopeBufferRange(sbufRange);
+    enc ~= val;
+    static if(is(ReturnType!F == void)) {
+         F(enc.bytes);
+    } else {
+         return F(enc.bytes);
+    }
+}
+
 struct CerealiserImpl(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
