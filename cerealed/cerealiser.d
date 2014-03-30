@@ -13,18 +13,7 @@ import core.exception;
 
 alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
 alias DynamicArrayCerealiser = CerealiserImpl!DynamicArrayRange;
-alias Cerealiser = AppenderCerealiser;
-
-struct StaticArrayCerealiser(T) {
-    CerealiserImpl!(StaticArrayRange!(T.sizeof)) cereal;
-    alias cereal this;
-}
-
-const(ubyte)[] cerealise(T)(auto ref T val) {
-    auto enc = StaticArrayCerealiser!T();
-    enc ~= val;
-    return enc.bytes;
-}
+alias Cerealiser = AppenderCerealiser; //the default, easy option
 
 
 template isCerealiserRange(R) {
@@ -175,17 +164,4 @@ private:
 
     static assert(isCereal!CerealiserImpl);
     static assert(isCerealiser!CerealiserImpl);
-}
-
-
-private const(ubyte[]) toArray(T)(T val) nothrow pure @safe {
-    static if(isArray!T) {
-        return val;
-    }
-    static if(is(typeof((inout int = 0) { return val.array; }))) {
-        return val.val;
-    }
-    static if(is(T == Appender!(ubyte[]))) {
-        return val.data;
-    }
 }
