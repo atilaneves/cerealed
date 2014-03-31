@@ -2,6 +2,12 @@ cerealed
 =============
 [![Build Status](https://travis-ci.org/atilaneves/cerealed.png?branch=master)](https://travis-ci.org/atilaneves/cerealed)
 
+**Warning**: Backward compatibility is broken with the old (V0.4.x) version of Cerealed.
+This new code uses structs instead of classes, which means changing any existing
+`accept` and `postBlit` functions (see below) to be template functions, and not
+using the `new` operator to create instances. `new` might still work in some
+cases but will use GC-allocated memory when it's not actually needed.
+
 Binary serialisation library for D. Minimal to no boilerplate necessary.
 The tests in the [tests directory](tests) depend on
 [unit-threaded](https://github.com/atilaneves/unit-threaded) to run.
@@ -39,7 +45,7 @@ number of bits to use.
     assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 42]);
 
 What if custom serialisation is needed and the default, even with opt-outs, won't work?
-If an aggregate type defines a member function `void accept(Cereal)` it will be used
+If an aggregate type defines a member function `void accept(C)(ref C cereal)` it will be used
 instead. To get the usual automatic serialisation from within the custom `accept`,
 the `grainAllMembers` member function of Cereal can be called, as shown in the
 example below. This function takes a ref argument so rvalues need not apply.
@@ -51,7 +57,7 @@ the scenes.
     struct CustomStruct {
         ubyte mybyte;
         ushort myshort;
-        void accept(Cereal cereal) {
+        void accept(C)(auto ref C cereal) {
              //do NOT call cereal.grain(this), that would cause an infinite loop
              cereal.grainAllMembers(this);
              ubyte otherbyte = 4; //make it an lvalue
@@ -69,7 +75,7 @@ the scenes.
 
 
 The other option when custom serialisation is needed, to avoid boilerplate, is to
-define a `void postBlit(Cereal cereal)` function instead of `accept`. The
+define a `void postBlit(C)(ref C cereal)` function instead of `accept`. The
 marshalling or unmarshalling is done as it would in the absence of customisation,
 and postBlit is called to fix things up. It is a compile-time error to
 define both `accept` and `postBlit`. Example below.
@@ -78,7 +84,7 @@ define both `accept` and `postBlit`. Example below.
         ubyte mybyte;
         ushort myshort;
         @NoCereal ubyte otherByte;
-        void postBlit(Cereal cereal) {
+        void postBlit(C)(auto ref C cereal) {
              //no need to handle mybyte and myshort, already done
              if(mybyte == 1) {
                  cereal.grain(otherByte);
