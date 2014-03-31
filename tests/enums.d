@@ -8,13 +8,13 @@ import core.exception;
 private enum MyEnum { Foo, Bar, Baz };
 
 void testEnum() {
-    auto enc = new Cerealiser;
+    auto enc = Cerealiser();
     enc ~= MyEnum.Bar;
     enc ~= MyEnum.Baz;
     enc ~= MyEnum.Foo;
     checkEqual(enc.bytes,  [0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0]);
 
-    auto dec = new Decerealizer(enc.bytes);
+    auto dec = Decerealizer(enc.bytes);
     checkEqual(dec.value!MyEnum, MyEnum.Bar);
     checkEqual(dec.value!MyEnum, MyEnum.Baz);
     checkEqual(dec.value!MyEnum, MyEnum.Foo);
@@ -27,7 +27,7 @@ void testDecodeEnum() {
         Baz = 1
     }
 
-    auto cereal = new Decerealiser([ 0, 1 ]);
+    auto cereal = Decerealiser([ 0, 1 ]);
     checkEqual(cereal.value!Foo, Foo.Bar);
     checkEqual(cereal.value!Foo, Foo.Baz);
     checkThrown!RangeError(cereal.value!ubyte);

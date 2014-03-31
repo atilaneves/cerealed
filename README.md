@@ -2,18 +2,24 @@ cerealed
 =============
 [![Build Status](https://travis-ci.org/atilaneves/cerealed.png?branch=master)](https://travis-ci.org/atilaneves/cerealed)
 
+**Warning**: Backward compatibility is broken with the old (V0.4.x) version of Cerealed.
+This new code uses structs instead of classes, which means changing any existing
+`accept` and `postBlit` functions (see below) to be template functions, and not
+using the `new` operator to create instances. `new` might still work in some
+cases but will use GC-allocated memory when it's not actually needed.
+
 Binary serialisation library for D. Minimal to no boilerplate necessary.
 The tests in the [tests directory](tests) depend on
 [unit-threaded](https://github.com/atilaneves/unit-threaded) to run.
 
 Example usage:
 
-    auto cerealiser = new Cerealiser(); //UK spelling
+    auto cerealiser = Cerealiser(); //UK spelling
     cerealiser ~= 5; //int
     cerealiser ~= cast(ubyte)42;
     assert(cerealiser.bytes == [ 0, 0, 0, 5, 42]);
 
-    auto deceralizer = new Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
+    auto deceralizer = Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
     assert(decerealizer.value!int == 5);
     assert(decerealizer.value!ubyte == 42);
 
@@ -34,12 +40,12 @@ number of bits to use.
         ubyte mybyte2;
     }
 
-    auto cereal = new Cerealiser();
+    auto cereal = Cerealiser();
     cereal ~= MyStruct(3, 123, 14, 1, 42);
     assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 42]);
 
 What if custom serialisation is needed and the default, even with opt-outs, won't work?
-If an aggregate type defines a member function `void accept(Cereal)` it will be used
+If an aggregate type defines a member function `void accept(C)(ref C cereal)` it will be used
 instead. To get the usual automatic serialisation from within the custom `accept`,
 the `grainAllMembers` member function of Cereal can be called, as shown in the
 example below. This function takes a ref argument so rvalues need not apply.
@@ -51,7 +57,7 @@ the scenes.
     struct CustomStruct {
         ubyte mybyte;
         ushort myshort;
-        void accept(Cereal cereal) {
+        void accept(C)(auto ref C cereal) {
              //do NOT call cereal.grain(this), that would cause an infinite loop
              cereal.grainAllMembers(this);
              ubyte otherbyte = 4; //make it an lvalue
@@ -59,17 +65,17 @@ the scenes.
         }
     }
 
-    auto cerealiser = new Cerealiser();
+    auto cerealiser = Cerealiser();
     cerealiser ~= CustomStruct(1, 2);
     assert(cerealiser.bytes == [ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
-    auto decerealiser = new Decerealiser([1, 0, 2, 4]);
+    auto decerealiser = Decerealiser([1, 0, 2, 4]);
     assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
 
 
 The other option when custom serialisation is needed, to avoid boilerplate, is to
-define a `void postBlit(Cereal cereal)` function instead of `accept`. The
+define a `void postBlit(C)(ref C cereal)` function instead of `accept`. The
 marshalling or unmarshalling is done as it would in the absence of customisation,
 and postBlit is called to fix things up. It is a compile-time error to
 define both `accept` and `postBlit`. Example below.
@@ -78,7 +84,7 @@ define both `accept` and `postBlit`. Example below.
         ubyte mybyte;
         ushort myshort;
         @NoCereal ubyte otherByte;
-        void postBlit(Cereal cereal) {
+        void postBlit(C)(auto ref C cereal) {
              //no need to handle mybyte and myshort, already done
              if(mybyte == 1) {
                  cereal.grain(otherByte);
@@ -87,13 +93,13 @@ define both `accept` and `postBlit`. Example below.
     }
 
     {
-        auto cereal = new Cerealiser();
+        auto cereal = Cerealiser();
         cereal ~= CustomStruct(1, 2);
         assert(cereal.bytes == [ 1, 0, 2, 4]);
     }
 
     {
-        auto cereal = new Cerealiser();
+        auto cereal = Cerealiser();
         cereal ~= CustomStruct(3, 2);
         assert(cereal.bytes == [ 1, 0, 2]);
     }
@@ -113,7 +119,7 @@ attribute tells `cerealed` to not add the length parameter.
         @RawArray string[] strings;
     }
 
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
     enc ~= strs;
     //no length encoding for the array, but strings still get a length each
@@ -121,7 +127,7 @@ attribute tells `cerealed` to not add the length parameter.
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
     assert(enc.bytes == bytes);
 
-    auto dec = new Decerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     assert(dec.value!StringsStruct ==  strs);
 
 Derived classes can be serialised via a reference to the base class, but the
@@ -130,9 +136,9 @@ child class must be registered first:
     class BaseClass  { int a; this(int a) { this.a = a; }}
     class ChildClass { int b; this(int b) { this.b = b; }}
     Cereal.registerChildClass!ChildClass;
-    auto enc = new Cerealiser;
-    BaseClass obj = new ChildClass(3, 7);
-    enc ~= new obj;
+    auto enc = Cerealiser();
+    BaseClass obj = ChildClass(3, 7);
+    enc ~= obj;
     assert(enc.bytes == [0, 0, 0, 3, 0, 0, 0, 7]);
 
 There is now support for InputRange and OutputRange objects. Examples can

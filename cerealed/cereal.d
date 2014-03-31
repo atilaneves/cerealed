@@ -1,276 +1,275 @@
 module cerealed.cereal;
 
 public import cerealed.attrs;
+import cerealed.traits;
 import std.traits;
 import std.conv;
 import std.algorithm;
 import std.range;
 
-class Cereal {
-public:
+enum CerealType { WriteBytes, ReadBytes };
 
-    enum Type { Write, Read }
+void grain(C, T)(auto ref C cereal, ref T val) if(isCereal!C && is(T == ubyte)) {
+    cereal.grainUByte(val);
+}
 
-    abstract Type type() @safe const;
-    abstract ulong bytesLeft() @safe const;
+//catch all signed numbers and forward to reinterpret
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == enum) &&
+                                                        (isSigned!T || isBoolean!T ||
+                                                         is(T == char) || isFloatingPoint!T)) {
+    cereal.grainReinterpret(val);
+}
 
-    //catch all signed numbers and forward to reinterpret
-    final void grain(T)(ref T val) @safe if(!is(T == enum) &&
-                                            (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
-        grainReinterpret(val);
+// If the type is an enum, get the unqualified base type and cast it to that.
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == enum)) {
+    alias Unqual!(OriginalType!(T)) BaseType;
+    cereal.grain( cast(BaseType)val );
+}
+
+
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == wchar)) {
+    cereal.grain(*cast(ushort*)&val);
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == dchar)) {
+    cereal.grain(*cast(uint*)&val);
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ushort)) {
+    ubyte valh = (val >> 8);
+    ubyte vall = val & 0xff;
+    cereal.grainUByte(valh);
+    cereal.grainUByte(vall);
+    val = (valh << 8) + vall;
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == uint)) {
+    ubyte val0 = (val >> 24);
+    ubyte val1 = cast(ubyte)(val >> 16);
+    ubyte val2 = cast(ubyte)(val >> 8);
+    ubyte val3 = val & 0xff;
+    cereal.grainUByte(val0);
+    cereal.grainUByte(val1);
+    cereal.grainUByte(val2);
+    cereal.grainUByte(val3);
+    val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ulong)) {
+    immutable oldVal = val;
+    val = 0;
+
+    for(int i = T.sizeof - 1; i >= 0; --i) {
+        immutable shift = (T.sizeof - i) * 8;
+        ubyte byteVal = (oldVal >> shift) & 0xff;
+        cereal.grainUByte(byteVal);
+        val |= cast(T)byteVal << shift;
     }
+}
 
-    // If the type is an enum, get the unqualified base type and cast it to that.
-    final void grain(T)(ref T val) @safe if(is(T == enum)) {
-        alias Unqual!(OriginalType!(T)) BaseType;
-        grain( cast(BaseType)val );
-    }
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
+                                                                       isInputRange!T && !isInfinite!T &&
+                                                                       !is(T == string) &&
+                                                                       !isAssociativeArray!T) {
+    enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
+    static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
+                                  fullyQualifiedName!T));
+    U length = cast(U)val.length;
+    cereal.grain(length);
+    foreach(ref e; val) cereal.grain(e);
+}
 
-    final void grain(T)(ref T val) @safe if(is(T == ubyte)) {
-        grainUByte(val);
-    }
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                                       isOutputRange!(T, ubyte)) {
+    U length = void;
+    cereal.grain(length);
 
-    final void grain(T)(ref T val) @safe if(is(T == ushort)) {
-        ubyte valh = (val >> 8);
-        ubyte vall = val & 0xff;
-        grainUByte(valh);
-        grainUByte(vall);
-        val = (valh << 8) + vall;
-    }
-
-    final void grain(T)(ref T val) @safe if(is(T == uint)) {
-        ubyte val0 = (val >> 24);
-        ubyte val1 = cast(ubyte)(val >> 16);
-        ubyte val2 = cast(ubyte)(val >> 8);
-        ubyte val3 = val & 0xff;
-        grainUByte(val0);
-        grainUByte(val1);
-        grainUByte(val2);
-        grainUByte(val3);
-        val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
-    }
-
-    final void grain(T)(ref T val) @safe if(is(T == ulong)) {
-        immutable oldVal = val;
-        val = 0;
-
-        for(int i = T.sizeof - 1; i >= 0; --i) {
-            immutable shift = (T.sizeof - i) * 8;
-            ubyte byteVal = (oldVal >> shift) & 0xff;
-            grainUByte(byteVal);
-            val |= cast(T)byteVal << shift;
-        }
-    }
-
-    final void grain(T)(ref T val) @trusted if(is(T == wchar)) {
-        grain(*cast(ushort*)&val);
-    }
-
-    final void grain(T)(ref T val) @trusted if(is(T == dchar)) {
-        grain(*cast(uint*)&val);
-    }
-
-    final void grain(T, U = ushort)(ref T val) @trusted if(isInputRange!T && !isInfinite!T && !isArray!T) {
-        enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
-        static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
-                                      fullyQualifiedName!T));
-        assert(type() == Cereal.Type.Write, "InputRange cannot be deserialised");
-        U length = cast(U)val.length;
-        grain(length);
-        foreach(ref e; val) grain(e);
-    }
-
-    final void grain(R, U = ushort)(ref R output) @trusted if(isOutputRange!(R, ubyte) && !isArray!R) {
-        assert(type() == Cereal.Type.Read, "OutputRanges can only be deserialised");
-        U length = void;
-        grain(length);
+    static if(isArray!T) {
+        if(val.length < length) val.length = cast(uint)length;
+        foreach(ref e; val) cereal.grain(e);
+    } else {
         for(U i = 0; i < length; ++i) {
             ubyte b = void;
-            grain(b);
-            output.put(b);
-        }
-    }
+            cereal.grain(b);
 
-    final void grain(T, U = ushort)(ref T val) @safe if(isArray!T && !is(T == string)) {
-        U length = cast(U)val.length;
-        grain(length);
-        static if(isMutable!T) {
-            if(val.length == 0) { //decoding
-                val.length = cast(uint)length;
+            enum hasOpOpAssign = is(typeof((inout int = 0) { val ~= b; }));
+            static if(hasOpOpAssign) {
+                val ~= b;
+            } else {
+                val.put(b);
             }
         }
-        foreach(ref e; val) grain(e);
     }
+}
 
-    final void grain(T, U = ushort)(ref T val) @trusted if(is(T == string)) {
-        U length = cast(U)val.length;
-        grain(length);
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
+    U length = cast(U)val.length;
+    cereal.grain(length);
 
+    static if(is(isCerealiser!C)) {
+        //easier to read from a string
+        foreach(e; val) cereal.grain(e);
+    } else {
         auto values = new char[length];
         if(val.length != 0) { //copy string
             values[] = val[];
         }
 
         foreach(ref e; values) {
-            grain(e);
+            cereal.grain(e);
         }
         val = cast(string)values;
     }
+}
 
-    final void grain(T, U = ushort)(ref T val) @trusted if(isAssociativeArray!T) {
-        U length = cast(U)val.length;
-        grain(length);
-        const keys = val.keys;
 
-        for(U i = 0; i < length; ++i) {
-            KeyType!T k = keys.length ? keys[i] : KeyType!T.init;
-            auto v = keys.length ? val[k] : ValueType!T.init;
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
+    U length = cast(U)val.length;
+    cereal.grain(length);
+    const keys = val.keys;
 
-            grain(k);
-            grain(v);
-            val[k] = v;
+    for(U i = 0; i < length; ++i) {
+        KeyType!T k = keys.length ? keys[i] : KeyType!T.init;
+        auto v = keys.length ? val[k] : ValueType!T.init;
+
+        cereal.grain(k);
+        cereal.grain(v);
+        val[k] = v;
+    }
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!T) {
+    import std.traits;
+    alias ValueType = PointerTarget!T;
+    static if(isDecerealiser!C) {
+        if(val is null) val = new ValueType;
+    }
+    cereal.grain(*val);
+}
+
+private template canCall(C, T, string func) {
+    enum canCall = is(typeof(() { auto cer = C(); auto val = T.init; mixin("val." ~ func ~ "(cer);"); }));
+    static if(!canCall && __traits(hasMember, T, func)) {
+        pragma(msg, "Warning: '" ~ func ~ "' function defined for ", T, ", but does not compile.");
+    }
+}
+
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggregateType!T &&
+                                                           !isInputRange!T && !isOutputRange!(T, ubyte)) {
+
+    enum canAccept   = canCall!(C, T, "accept");
+    enum canPostBlit = canCall!(C, T, "postBlit");
+
+    static if(canAccept) { //custom serialisation
+        static assert(!canPostBlit, "Cannot define both accept and postBlit");
+        val.accept(cereal);
+    } else { //normal serialisation, go through each member and possibly serialise
+        cereal.grainAllMembers(val);
+        static if(canPostBlit) { //semi-custom serialisation, do post blit
+            val.postBlit(cereal);
         }
     }
+}
 
-    final void grain(T)(ref T val) @trusted if(isAggregateType!T && !isInputRange!T && !isOutputRange!(T, ubyte)) {
+void grainAllMembers(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == struct)) {
+    cereal.grainAllMembersImpl!T(val);
+}
 
-        enum hasAccept   = is(typeof((inout int = 0) { val.accept(this); }));
-        enum hasPostBlit = is(typeof((inout int = 0) { val.postBlit(this); }));
 
-        static if(hasAccept) { //custom serialisation
-            static assert(!hasPostBlit, "Cannot define both accept and postBlit");
-            val.accept(this);
-        } else { //normal serialisation, go through each member and possibly serialise
-            grainAllMembers(val);
-            static if(hasPostBlit) { //semi-custom serialisation, do post blit
-                val.postBlit(this);
-            }
-        }
+void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == class)) {
+    static if(isCerealiser!C) {
+        assert(val !is null, "null value cannot be serialised");
     }
 
-    final void grain(T)(ref T val) @safe if(isPointer!T) {
-        import std.traits;
-        alias ValueType = PointerTarget!T;
-        if(type() == Cereal.Type.Read && val is null) val = new ValueType;
-        grain(*val);
+    enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
+    static if(hasDefaultConstructor && isDecerealiser!C) {
+        if(val is null) val = new T;
+    } else {
+        assert(val !is null, text("Cannot deserialise into null value. ",
+                                  "Possible cause: no default constructor for ",
+                                  fullyQualifiedName!T, "."));
     }
 
-    final void grainAllMembers(T)(ref T val) @safe if(is(T == struct)) {
-        grainAllMembersImpl!T(val);
-    }
+    cereal.grainClass(val);
+}
 
-    final void grainAllMembers(T)(ref T val) @trusted if(is(T == class)) {
-        assert(type() == Cereal.Type.Read || val !is null, "null value cannot be serialised");
 
-        enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
-        static if(hasDefaultConstructor) {
-            if(type() == Cereal.Type.Read && val is null) val = new T;
-        } else {
-            assert(val !is null, text("Cannot deserialise into null value. ",
-                                      "Possible cause: no default constructor for ",
-                                      fullyQualifiedName!T, "."));
-        }
-
-        //check to see if child class that was registered
-        if(type() == Cereal.Type.Write && val.classinfo.name in _childCerealisers) {
-            Object obj = val;
-            _childCerealisers[val.classinfo.name](this, obj);
-        } else {
-            grainClassImpl(val);
-        }
-    }
-
-    final void grainMemberWithAttr(string member, T)(ref T val) @trusted {
-        /**(De)serialises one member taking into account its attributes*/
-        import std.typetuple;
-        enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
-                                                               __traits(getMember, val, member)));
-        enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
-                                                               __traits(getMember, val, member)));
-        //only serialise if the member doesn't have @NoCereal
-        static if(noCerealIndex == -1) {
-            alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
-                                                          __traits(getMember, val, member)));
-            static assert(attrs.length == 0 || attrs.length == 1,
-                                  "Too many Bits!N attributes!");
-            static if(attrs.length == 0) {
-                //normal case, no Bits attributes
-                static if(rawArrayIndex == -1) {
-                    grain(__traits(getMember, val, member));
-                } else {
-                    grainRawArray(__traits(getMember, val, member));
-                }
+void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+    /**(De)serialises one member taking into account its attributes*/
+    import std.typetuple;
+    enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
+                                                           __traits(getMember, val, member)));
+    enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
+                                                           __traits(getMember, val, member)));
+    //only serialise if the member doesn't have @NoCereal
+    static if(noCerealIndex == -1) {
+        alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
+                                                      __traits(getMember, val, member)));
+        static assert(attrs.length == 0 || attrs.length == 1,
+                      "Too many Bits!N attributes!");
+        static if(attrs.length == 0) {
+            //normal case, no Bits attributes
+            static if(rawArrayIndex == -1) {
+                cereal.grain(__traits(getMember, val, member));
             } else {
-                //Bits attributes, store it in less bits than fits
-                enum bits = getNumBits!(attrs[0]);
-                grainBitsT(__traits(getMember, val, member), bits);
-            }
-        }
-    }
-
-    final void grainRawArray(T)(ref T[] val) @trusted {
-        //can't use virtual functions due to template parameter
-        if(type == Type.Read) {
-            val.length = 0;
-            while(bytesLeft) {
-                val.length++;
-                grain(val[$ - 1]);
+                cereal.grainRawArray(__traits(getMember, val, member));
             }
         } else {
-            foreach(ref t; val) grain(t);
+            //Bits attributes, store it in less bits than fits
+            enum bits = getNumBits!(attrs[0]);
+            cereal.grainBitsT(__traits(getMember, val, member), bits);
         }
     }
+}
 
-    static final void registerChildClass(T)() @safe {
-        _childCerealisers[T.classinfo.name] = (Cereal cereal, ref Object val){
-            T child = cast(T)val;
-            cereal.grainClassImpl(child);
-        };
-    }
-
-protected:
-
-    abstract void grainUByte(ref ubyte val) @safe;
-    abstract void grainBits(ref uint val, int bits) @safe;
-
-private:
-
-    static void function(Cereal cereal, ref Object val)[string] _childCerealisers;
-
-    final void grainBitsT(T)(ref T val, int bits) @safe {
-        uint realVal = val;
-        grainBits(realVal, bits);
-        val = cast(T)realVal;
-    }
-
-    final void grainReinterpret(T)(ref T val) @trusted {
-        auto ptr = cast(CerealPtrType!T)(&val);
-        grain(*ptr);
-    }
-
-    final void grainClassImpl(T)(ref T val) @safe if(is(T == class)) {
-        //do base classes first or else the order is wrong
-        grainBaseClasses(val);
-        grainAllMembersImpl!T(val);
-    }
-
-    final void grainBaseClasses(T)(ref T val) @safe if(is(T == class)) {
-        foreach(base; BaseTypeTuple!T) {
-            grainAllMembersImpl!base(val);
+void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
+    //can't use virtual functions due to template parameter
+    static if(isDecerealiser!C) {
+        val.length = 0;
+        while(cereal.bytesLeft()) {
+            val.length++;
+            cereal.grain(val[$ - 1]);
         }
+    } else {
+        foreach(ref t; val) cereal.grain(t);
     }
+}
 
 
-    final void grainAllMembersImpl(ActualType, ValType)(ref ValType val) @trusted {
-        foreach(member; __traits(derivedMembers, ActualType)) {
-            //makes sure to only serialise members that make sense, i.e. data
-            enum isMemberVariable = is(typeof(
-                (inout int = 0) {
-                    __traits(getMember, val, member) = __traits(getMember, val, member).init;
-                }));
-            static if(isMemberVariable) {
-                grainMemberWithAttr!member(val);
-            }
+package void grainClassImpl(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
+    //do base classes first or else the order is wrong
+    cereal.grainBaseClasses(val);
+    cereal.grainAllMembersImpl!T(val);
+}
+
+private void grainBitsT(C, T)(auto ref C cereal, ref T val, int bits) @safe if(isCereal!C) {
+    uint realVal = val;
+    cereal.grainBits(realVal, bits);
+    val = cast(T)realVal;
+}
+
+private void grainReinterpret(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+    auto ptr = cast(CerealPtrType!T)(&val);
+    cereal.grain(*ptr);
+}
+
+private void grainBaseClasses(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
+    foreach(base; BaseTypeTuple!T) {
+        cereal.grainAllMembersImpl!base(val);
+    }
+}
+
+
+private void grainAllMembersImpl(ActualType, C, ValType)(auto ref C cereal, ref ValType val) @trusted
+if(isCereal!C) {
+    foreach(member; __traits(derivedMembers, ActualType)) {
+        //makes sure to only serialise members that make sense, i.e. data
+        enum isMemberVariable = is(typeof(
+                                       (inout int = 0) {
+                                           __traits(getMember, val, member) = __traits(getMember, val, member).init;
+                                       }));
+        static if(isMemberVariable) {
+            cereal.grainMemberWithAttr!member(val);
         }
     }
 }

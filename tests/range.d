@@ -7,7 +7,7 @@ import core.exception;
 
 
 void testInputRange() {
-    auto enc = new Cerealiser;
+    auto enc = Cerealiser();
     enc ~= iota(cast(ubyte)5);
     checkEqual(enc.bytes, [0, 5, 0, 1, 2, 3, 4]);
 }
@@ -28,7 +28,7 @@ void testMyOutputRange() {
 void testOutputRangeValue() {
     gOutputBytes = [];
 
-    auto dec = new Decerealiser([0, 5, 2, 3, 9, 6, 1]);
+    auto dec = Decerealiser([0, 5, 2, 3, 9, 6, 1]);
     auto output = dec.value!MyOutputRange;
 
     checkEqual(gOutputBytes, [2, 3, 9, 6, 1]);
@@ -38,7 +38,7 @@ void testOutputRangeValue() {
 void testOutputRangeRead() {
     gOutputBytes = [];
 
-    auto dec = new Decerealiser([0, 5, 2, 3, 9, 6, 1]);
+    auto dec = Decerealiser([0, 5, 2, 3, 9, 6, 1]);
     auto output = MyOutputRange();
     dec.read(output);
 
@@ -64,15 +64,16 @@ private struct StructWithInputRange {
 
 @SingleThreaded
 void testEmbeddedInputRange() {
-    auto enc = new Cerealiser;
+    auto enc = Cerealiser();
     auto str = StructWithInputRange(2, MyInputRange([9, 7, 6]));
     enc ~= str;
     const bytes = [2, 0, 3, 9, 7, 6];
     checkEqual(enc.bytes, bytes);
 
     //no deserialisation for InputRange
-    auto dec = new Decerealiser(bytes);
-    checkThrown!AssertError(dec.value!StructWithInputRange);
+    auto dec = Decerealiser(bytes);
+    enum compiles = __traits(compiles, { dec.value!StructWithInputRange; });
+    static assert(!compiles, "Should not be able to read into an InputRange");
 }
 
 private struct StructWithOutputRange {
@@ -83,12 +84,14 @@ private struct StructWithOutputRange {
 
 @SingleThreaded
 void testEmbeddedOutputRange() {
-    auto enc = new Cerealiser;
-    checkThrown!AssertError(enc ~= StructWithOutputRange());
-    auto dec = new Decerealiser([255, //1st byte
-                                 0, 3, 9, 7, 6, //length, values
-                                 12]); //2nd byte
+    auto enc = Cerealiser();
+    enum compiles = __traits(compiles, { enc ~= StructWithOutputRange(); });
+    static assert(!compiles, "Should not be able to read from an OutputRange");
     gOutputBytes = [];
+    auto dec = Decerealiser([255, //1st byte
+                             0, 3, 9, 7, 6, //length, values
+                             12]); //2nd byte
+    checkEqual(dec.bytes, [255, 0, 3, 9, 7, 6, 12]);
     const str = dec.value!StructWithOutputRange;
     writelnUt("dec bytes is ", dec.bytes);
     checkThrown!RangeError(dec.value!ubyte); //no more bytes

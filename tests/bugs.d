@@ -13,12 +13,12 @@ private struct Pair {
 void testAssocArrayWithPair() {
     auto p = Pair("foo", 5);
     auto map = [p: 105];
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
 
     enc ~= map;
     checkEqual(enc.bytes, [0, 1, 0, 3, 'f', 'o', 'o', 0, 0, 0, 5, 0, 0, 0, 105]);
 
-    auto dec = new Decerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     auto map2 = dec.value!(int[Pair]);
 
     checkEqual(map.keys, map2.keys);

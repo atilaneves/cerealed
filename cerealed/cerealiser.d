@@ -1,49 +1,101 @@
 module cerealed.cerealiser;
 
 
-import cerealed.cereal;
+public import cerealed.cereal;
 public import cerealed.attrs;
+public import cerealed.traits;
+import cerealed.range;
 import std.traits;
 import std.exception;
-import std.conv;
+import std.array;
 
 
-class Cerealiser: Cereal {
-public:
+alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
+alias DynamicArrayCerealiser = CerealiserImpl!DynamicArrayRange;
+alias ScopeBufferCerealiser = CerealiserImpl!ScopeBufferRange;
 
-    override Type type() const pure nothrow @safe { return Cereal.Type.Write; }
-    override ulong bytesLeft() const @safe { return bytes.length; }
+alias Cerealiser = AppenderCerealiser; //the default, easy option
 
-    final void write(T)(const ref T val) @safe if(!isArray!T &&
-                                                  !isAssociativeArray!T &&
-                                                  !isAggregateType!T) {
-        T realVal = val;
-        grain(realVal);
+
+auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
+    static assert(N % 2 == 0, "cerealise must be passed an even number of bytes");
+    ubyte[N] buf = void;
+    auto sbufRange = ScopeBufferRange(buf);
+    scope(exit) sbufRange.free();
+    auto enc = CerealiserImpl!ScopeBufferRange(sbufRange);
+    enc ~= val;
+    static if(is(ReturnType!F == void)) {
+         F(enc.bytes);
+    } else {
+         return F(enc.bytes);
+    }
+}
+
+struct CerealiserImpl(R) if(isCerealiserRange!R) {
+    //interface
+    enum type = CerealType.WriteBytes;
+
+    this(R r) {
+        _output = r;
     }
 
-    final void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
+    void grainUByte(ref ubyte val) @trusted {
+        _output.put(val);
+    }
+
+    void grainBits(ref uint value, int bits) @safe {
+        writeBits(value, bits);
+    }
+
+    void grainClass(T)(T val) @trusted if(is(T == class)) {
+        if(val.classinfo.name in _childCerealisers) {
+            _childCerealisers[val.classinfo.name](this, val);
+        } else {
+            grainClassImpl(this, val);
+        }
+    }
+
+    //specific:
+    const(ubyte[]) bytes() const nothrow @property @safe {
+        return _output.data;
+    }
+
+    ref CerealiserImpl opOpAssign(string op : "~", T)(T val) @safe {
+        write(val);
+        return this;
+    }
+
+    void write(T)(T val) @safe if(!isArray!T && !isAssociativeArray!T) {
         Unqual!T lval = val;
-        grain(lval);
+        grain(this, lval);
     }
 
-    final void write(T)(const(T)[] val) @safe {
+    void write(T)(const ref T val) @safe if(!isArray!T &&
+                                            !isAssociativeArray!T &&
+                                            !isAggregateType!T) {
+        T lval = val;
+        grain(this, lval);
+    }
+
+    void write(T)(const(T)[] val) @safe {
         T[] lval = val.dup;
-        grain(lval);
+        grain(this, lval);
     }
 
-    final void write(K, V)(const(V[K]) val) @trusted {
+    void write(K, V)(const(V[K]) val) @trusted {
         auto lval = cast(V[K])val.dup;
-        grain(lval);
+        grain(this, lval);
     }
 
-    final void writeBits(in int value, in int bits) @safe {
+    void writeBits(in int value, in int bits) @safe {
+        import std.conv;
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
             const remainingBits = _bitIndex + bits - bitsInByte;
             const thisByteValue = (value >> remainingBits);
             _currentByte |= thisByteValue;
-            this ~= _currentByte;
+            grainUByte(_currentByte);
             _currentByte = 0;
             _bitIndex = 0;
             if(remainingBits > 0) {
@@ -56,36 +108,24 @@ public:
         _bitIndex += bits;
     }
 
-    final Cerealiser opOpAssign(string op : "~", T)(T val) @safe {
-        write(val);
-        return this;
+    void reset() @safe {
+        _output.clear();
     }
 
-    final const(ubyte[]) bytes() const nothrow @property @safe {
-        return _bytes;
+    static void registerChildClass(T)() @safe {
+        _childCerealisers[T.classinfo.name] = (ref Cerealiser cereal, Object val) {
+            T child = cast(T)val;
+            cereal.grainClassImpl(child);
+        };
     }
-
-    final void reset() @trusted {
-        if(_bytes !is null) {
-            _bytes = _bytes[0..0];
-            _bytes.assumeSafeAppend();
-        }
-    }
-
-protected:
-
-    override void grainUByte(ref ubyte val) @safe {
-        _bytes ~= val;
-    }
-
-    override void grainBits(ref uint value, int bits) @safe {
-        writeBits(value, bits);
-    }
-
 
 private:
 
-    ubyte[] _bytes;
+    R _output;
     ubyte _currentByte;
     int _bitIndex;
+    static void function(ref CerealiserImpl cereal, Object val)[string] _childCerealisers;
+
+    static assert(isCereal!CerealiserImpl);
+    static assert(isCerealiser!CerealiserImpl);
 }

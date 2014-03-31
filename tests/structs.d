@@ -18,11 +18,11 @@ private struct DummyStruct {
 
 
 void testDummyStruct() {
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0], "dummy!");
     enc ~= dummy;
 
-    auto dec = new Decerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!DummyStruct, dummy);
 
     checkThrown!RangeError(dec.value!ubyte);
@@ -33,7 +33,7 @@ private struct StringStruct {
 }
 
 void testDecodeStringStruct() {
-    auto dec = new Decerealiser([0, 3, 'f', 'o', 'o']);
+    auto dec = Decerealiser([0, 3, 'f', 'o', 'o']);
     auto str = StringStruct();
     dec.grain(str);
     checkEqual(str.s, "foo");
@@ -41,7 +41,7 @@ void testDecodeStringStruct() {
 }
 
 void testEncodeStringStruct() {
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     const str = StringStruct("foo");
     enc ~= str;
     checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
@@ -58,47 +58,12 @@ private struct ProtoHeaderStruct {
 
 void testEncDecProtoHeaderStruct() {
     const hdr = ProtoHeaderStruct(6, 1, 3, 254);
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     enc ~= hdr; //1101 0011, 254
     checkEqual(enc.bytes, [0xd3, 254]);
 
-    auto dec = new Decerealiser(enc.bytes);
+    auto dec = Decerealiser(enc.bytes);
     checkEqual(dec.value!ProtoHeaderStruct, hdr);
-}
-
-private enum MqttType {
-    RESERVED1 = 0, CONNECT = 1, CONNACK = 2, PUBLISH = 3,
-    PUBACK = 4, PUBREC = 5, PUBREL = 6, PUBCOMP = 7,
-    SUBSCRIBE = 8, SUBACK = 9, UNSUBSCRIBE = 10, UNSUBACK = 11,
-    PINGREQ = 12, PINGRESP = 13, DISCONNECT = 14, RESERVED2 = 15
-}
-
-private struct MqttFixedHeader {
-    @Bits!4 MqttType type;
-    @Bits!1 bool dup;
-    @Bits!2 ubyte qos;
-    @Bits!1 bool retain;
-    @Bits!8 uint remaining;
-
-    this(MqttType type, bool dup, ubyte qos, bool retain, uint remaining = 0) {
-        this.type = type;
-        this.dup = dup;
-        this.qos = qos;
-        this.retain = retain;
-        this.remaining = remaining;
-    }
-}
-
-void testCerealiseMqttHeader() {
-    auto cereal = new Cerealiser();
-    cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
-    checkEqual(cereal.bytes, [0x3c, 0x5]);
-}
-
-void testDecerealiseMqttHeader() {
-    auto cereal = new Decerealiser([0x3c, 0x5]);
-    checkEqual(cereal.value!MqttFixedHeader,
-               MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
 
 private struct StructWithNoCereal {
@@ -110,13 +75,13 @@ private struct StructWithNoCereal {
 }
 
 void testNoCereal() {
-    auto cerealizer = new Cerealizer();
+    auto cerealizer = Cerealizer();
     cerealizer ~= StructWithNoCereal(3, 14, 42, 5, 12);
     //only nibble1, nibble2 and value should show up in bytes
     immutable bytes = [0x3e, 0x00, 0x05];
     checkEqual(cerealizer.bytes, bytes);
 
-    auto decerealizer = new Decerealizer(bytes);
+    auto decerealizer = Decerealizer(bytes);
     //won't be the same as the serialised struct, since the members
     //marked with NoCereal will be set to T.init
     checkEqual(decerealizer.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
@@ -125,7 +90,7 @@ void testNoCereal() {
 private struct CustomStruct {
     ubyte mybyte;
     ushort myshort;
-    void accept(Cereal cereal) {
+    void accept(Cereal)(ref Cereal cereal) {
         //can't call grain(this), that would cause an infinite loop
         cereal.grainAllMembers(this);
         ubyte otherbyte = 4;
@@ -134,21 +99,19 @@ private struct CustomStruct {
 }
 
 void testCustomCereal() {
-    auto cerealiser = new Cerealiser();
-    import std.stdio;
-    writeln("Serialising custom struct ");
+    auto cerealiser = Cerealiser();
     cerealiser ~= CustomStruct(1, 2);
     checkEqual(cerealiser.bytes, [ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
-    auto decerealiser = new Decerealiser([1, 0, 2, 4]);
+    auto decerealiser = Decerealiser([1, 0, 2, 4]);
     checkEqual(decerealiser.value!CustomStruct, CustomStruct(1, 2));
 }
 
 
 void testAttrMember() {
     //test that attributes work when calling grain member by member
-    auto cereal = new Cerealizer();
+    auto cereal = Cerealizer();
     auto str = StructWithNoCereal(3, 14, 42, 5, 12);
     cereal.grainMemberWithAttr!"nibble1"(str);
     cereal.grainMemberWithAttr!"nibble2"(str);
@@ -172,13 +135,13 @@ struct EnumStruct {
 }
 
 void testEnum() {
-    auto cerealiser = new Cerealiser();
+    auto cerealiser = Cerealiser();
     const e = EnumStruct(1, EnumStruct.Enum.Baz);
     cerealiser ~= e;
     const bytes = [1, 2];
     checkEqual(cerealiser.bytes, bytes);
 
-    auto decerealiser = new Decerealiser(bytes);
+    auto decerealiser = Decerealiser(bytes);
     checkEqual(decerealiser.value!EnumStruct, e);
 }
 
@@ -186,19 +149,19 @@ struct PostBlitStruct {
     ubyte foo;
     @NoCereal ubyte bar;
     ubyte baz;
-    void postBlit(Cereal cereal) {
+    void postBlit(Cereal)(ref Cereal cereal) {
         ushort foo = 4;
         cereal.grain(foo);
     }
 }
 
 void testPostBlit() {
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     enc ~= PostBlitStruct(3, 5, 8);
     const bytes = [ 3, 8, 0, 4];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new Decerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!PostBlitStruct, PostBlitStruct(3, 0, 8));
 }
 
@@ -208,7 +171,7 @@ private struct StringsStruct {
 }
 
 void testRawArray() {
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
     enc ~= strs;
     //no length encoding for the array, but strings still get a length each
@@ -216,7 +179,7 @@ void testRawArray() {
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
     checkEqual(enc.bytes, bytes);
 
-    auto dec = new Decerealiser(bytes);
+    auto dec = Decerealiser(bytes);
     checkEqual(dec.value!StringsStruct, strs);
 }
 
@@ -231,14 +194,94 @@ void testReadmeCode() {
         ubyte mybyte2;
     }
 
-    auto enc = new Cerealiser();
+    auto enc = Cerealiser();
     enc ~= MyStruct(3, 123, 14, 1, 2, 42);
     import std.conv;
     assert(enc.bytes == [ 3, 0xea /*1110 1 010*/, 42], text("bytes were ", enc.bytes));
 
-    auto dec = new Decerealizer([ 3, 0xea, 42]); //US spelling works too
+    auto dec = Decerealizer([ 3, 0xea, 42]); //US spelling works too
     //the 2nd value is 0 and not 123 since that value
     //doesn't get serialised/deserialised
     auto val = dec.value!MyStruct;
     assert(val == MyStruct(3, 0, 14, 1, 2, 42), text("struct was ", val));
+}
+
+
+private enum MqttType {
+    RESERVED1 = 0, CONNECT = 1, CONNACK = 2, PUBLISH = 3,
+    PUBACK = 4, PUBREC = 5, PUBREL = 6, PUBCOMP = 7,
+    SUBSCRIBE = 8, SUBACK = 9, UNSUBSCRIBE = 10, UNSUBACK = 11,
+    PINGREQ = 12, PINGRESP = 13, DISCONNECT = 14, RESERVED2 = 15
+}
+
+private struct MqttFixedHeader {
+public:
+    enum SIZE = 2;
+
+    @Bits!4 MqttType type;
+    @Bits!1 bool dup;
+    @Bits!2 ubyte qos;
+    @Bits!1 bool retain;
+    @NoCereal uint remaining;
+
+    void postBlit(Cereal)(ref Cereal cereal) if(isCerealiser!Cereal) {
+        setRemainingSize(cereal);
+    }
+
+    void postBlit(Cereal)(ref Cereal cereal) if(isDecerealiser!Cereal) {
+        remaining = getRemainingSize(cereal);
+    }
+
+private:
+
+    uint getRemainingSize(Cereal)(ref Cereal cereal) {
+        //algorithm straight from the MQTT spec
+        int multiplier = 1;
+        uint value = 0;
+        ubyte digit;
+        do {
+            cereal.grain(digit);
+            value += (digit & 127) * multiplier;
+            multiplier *= 128;
+        } while((digit & 128) != 0);
+
+        return value;
+    }
+
+    void setRemainingSize(Cereal)(ref Cereal cereal) const {
+        //algorithm straight from the MQTT spec
+        ubyte[] digits;
+        uint x = remaining;
+        do {
+            ubyte digit = x % 128;
+            x /= 128;
+            if(x > 0) {
+                digit = digit | 0x80;
+            }
+            digits ~= digit;
+        } while(x > 0);
+
+        foreach(b; digits) cereal.grain(b);
+    }
+}
+
+void testAcceptPostBlitAttrs() {
+    import cerealed.traits;
+    static assert(hasPostBlit!MqttFixedHeader);
+    static assert(hasAccept!CustomStruct);
+    mixin assertHasPostBlit!MqttFixedHeader;
+    mixin assertHasAccept!CustomStruct;
+
+}
+
+void testCerealiseMqttHeader() {
+    auto cereal = Cerealiser();
+    cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
+    checkEqual(cereal.bytes, [0x3c, 0x5]);
+}
+
+void testDecerealiseMqttHeader() {
+    auto cereal = Decerealiser([0x3c, 0x5]);
+    checkEqual(cereal.value!MqttFixedHeader,
+               MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
