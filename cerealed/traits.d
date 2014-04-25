@@ -5,7 +5,7 @@ import cerealed.cerealiser;
 import cerealed.decerealiser;
 
 
-enum isCereal(T) = is(typeof((inout int = 0) {
+enum isCereal(T) = is(typeof(() {
         ubyte b;
         auto cereal = T.init;
         cereal.grainUByte(b);
@@ -17,10 +17,10 @@ enum isCereal(T) = is(typeof((inout int = 0) {
 
 enum isCerealiser(T) = isCereal!T && T.type == CerealType.WriteBytes;
 enum isDecerealiser(T) = isCereal!T && T.type == CerealType.ReadBytes &&
-    is(typeof((inout int = 0) { auto dec = T(); ulong bl = dec.bytesLeft; }));
+    is(typeof(() { auto dec = T(); ulong bl = dec.bytesLeft; }));
 
 
-enum hasAccept(T) = is(typeof((inout int = 0) {
+enum hasAccept(T) = is(typeof(() {
             auto obj = T.init;
             auto enc = Cerealiser();
             obj.accept(enc);
@@ -29,7 +29,7 @@ enum hasAccept(T) = is(typeof((inout int = 0) {
 }));
 
 
-enum hasPostBlit(T) = is(typeof((inout int = 0) {
+enum hasPostBlit(T) = is(typeof(() {
             auto obj = T.init;
             auto enc = Cerealiser();
             obj.postBlit(enc);
@@ -41,7 +41,7 @@ enum hasPostBlit(T) = is(typeof((inout int = 0) {
 
 mixin template assertHasPostBlit(T) {
     static if(!hasPostBlit!T) {
-        void func(inout int = 0) {
+        void func() {
             auto obj = T.init;
             auto enc = Cerealiser();
             obj.postBlit(enc);
@@ -54,7 +54,7 @@ mixin template assertHasPostBlit(T) {
 
 mixin template assertHasAccept(T) {
     static if(!hasAccept!T) {
-        void func(inout int = 0) {
+        void func() {
             auto obj = T.init;
             auto enc = Cerealiser();
             obj.accept(enc);

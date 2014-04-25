@@ -71,7 +71,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
                                                                        !isAssociativeArray!T) {
-    enum hasLength = is(typeof((inout int = 0) { auto l = val.length; }));
+    enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
     U length = cast(U)val.length;
@@ -92,7 +92,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
             ubyte b = void;
             cereal.grain(b);
 
-            enum hasOpOpAssign = is(typeof((inout int = 0) { val ~= b; }));
+            enum hasOpOpAssign = is(typeof(() { val ~= b; }));
             static if(hasOpOpAssign) {
                 val ~= b;
             } else {
@@ -181,7 +181,7 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
         assert(val !is null, "null value cannot be serialised");
     }
 
-    enum hasDefaultConstructor = is(typeof((inout int = 0) { val = new T; }));
+    enum hasDefaultConstructor = is(typeof(() { val = new T; }));
     static if(hasDefaultConstructor && isDecerealiser!C) {
         if(val is null) val = new T;
     } else {
@@ -269,7 +269,7 @@ if(isCereal!C) {
     foreach(member; __traits(derivedMembers, ActualType)) {
         //makes sure to only serialise members that make sense, i.e. data
         enum isMemberVariable = is(typeof(
-                                       (inout int = 0) {
+                                       () {
                                            __traits(getMember, val, member) = __traits(getMember, val, member).init;
                                        }));
         static if(isMemberVariable) {

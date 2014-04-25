@@ -4,7 +4,7 @@ import std.range;
 
 template isCerealiserRange(R) {
     enum isCerealiserRange = isOutputRange!(R, ubyte) &&
-        is(typeof((inout int = 0) { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
+        is(typeof(() { auto r = R(); r.clear(); const(ubyte)[] d = r.data; }));
 }
 
 
