@@ -10,4 +10,4 @@ install:
  - cd dtest
  - dub build
  - cd ..
-script: dtest/dtest -u unit-threaded
+script: dtest/dtest -u unit-threaded/source
