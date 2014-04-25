@@ -268,8 +268,7 @@ private void grainAllMembersImpl(ActualType, C, ValType)(auto ref C cereal, ref 
 if(isCereal!C) {
     foreach(member; __traits(derivedMembers, ActualType)) {
         //makes sure to only serialise members that make sense, i.e. data
-        enum isMemberVariable = is(typeof(
-                                       () {
+        enum isMemberVariable = is(typeof(() {
                                            __traits(getMember, val, member) = __traits(getMember, val, member).init;
                                        }));
         static if(isMemberVariable) {
