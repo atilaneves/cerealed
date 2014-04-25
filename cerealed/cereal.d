@@ -216,8 +216,12 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
             }
         } else {
             //Bits attributes, store it in less bits than fits
-            enum bits = getNumBits!(attrs[0]);
-            cereal.grainBitsT(__traits(getMember, val, member), bits);
+            enum numBits = getNumBits!(attrs[0]);
+            enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
+            static assert(numBits <= sizeInBits,
+                          text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
+                               " bits long, which is not enough to store @Bits!", numBits));
+            cereal.grainBitsT(__traits(getMember, val, member), numBits);
         }
     }
 }

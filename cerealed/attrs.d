@@ -12,13 +12,8 @@ template getNumBits(T) {
     }
 }
 
-template isABitsStruct(T) {
-    static if(is(T:Bits!N, int N)) {
-        enum isABitsStruct = true;
-    } else {
-        enum isABitsStruct = false;
-    }
-}
+
+enum isABitsStruct(T) = is(T:Bits!N, int N);
 
 
 struct Bits(int N) if(N > 0 && N <= 32) {
