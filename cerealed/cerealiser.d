@@ -22,7 +22,7 @@ auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
     ubyte[N] buf = void;
     auto sbufRange = ScopeBufferRange(buf);
     scope(exit) sbufRange.free();
-    auto enc = CerealiserImpl!ScopeBufferRange(sbufRange);
+    auto enc = ScopeBufferCerealiser(sbufRange);
     enc ~= val;
     static if(is(ReturnType!F == void)) {
          F(enc.bytes);
@@ -124,7 +124,8 @@ private:
     R _output;
     ubyte _currentByte;
     int _bitIndex;
-    static void function(ref CerealiserImpl cereal, Object val)[string] _childCerealisers;
+    alias ChildCerealiser = void function(ref CerealiserImpl cereal, Object val);
+    static ChildCerealiser[string] _childCerealisers;
 
     static assert(isCereal!CerealiserImpl);
     static assert(isCerealiser!CerealiserImpl);
