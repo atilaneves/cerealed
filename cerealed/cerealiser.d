@@ -16,7 +16,13 @@ alias ScopeBufferCerealiser = CerealiserImpl!ScopeBufferRange;
 
 alias Cerealiser = AppenderCerealiser; //the default, easy option
 
-
+/**
+ * Uses a ScopeBufferCerealiaser to write the bytes. The reason
+ * it takes a function as a template parameter is to be able
+ * to do something with the bytes. The bytes shouldn't be used
+ * directly because once the function exits that is no longer
+ * valid memory (it's been popped off the stack or freed).
+ */
 auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
     static assert(N % 2 == 0, "cerealise must be passed an even number of bytes");
     ubyte[N] buf = void;
