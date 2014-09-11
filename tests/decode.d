@@ -180,3 +180,11 @@ void testDecodeBitsMultiByte() {
     checkEqual(cereal.readBits(9), 317);
     checkEqual(cereal.readBits(7), 0x6a);
 }
+
+void testDecodeStringArray() {
+    auto dec = Decerealiser([ 0, 3,
+                              0, 3, 'f', 'o', 'o',
+                              0, 4, 'w', '0', '0', 't',
+                              0, 2, 'l', 'i']);
+    checkEqual(dec.value!(string[]), ["foo", "w00t", "li"]);
+}

@@ -102,6 +102,18 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
     }
 }
 
+void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                                       !isOutputRange!(T, ubyte) &&
+                                                                       isArray!T && !is(T == string)) {
+    U length = void;
+    cereal.grain(length);
+
+    if(val.length < length) val.length = cast(uint)length;
+    foreach(ref e; val) {
+        cereal.grain(e);
+    }
+}
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
     U length = cast(U)val.length;
     cereal.grain(length);
