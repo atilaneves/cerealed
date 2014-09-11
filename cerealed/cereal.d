@@ -85,8 +85,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
     cereal.grain(length);
 
     static if(isArray!T) {
-        if(val.length < length) val.length = cast(uint)length;
-        foreach(ref e; val) cereal.grain(e);
+        decerealiseArrayImpl(cereal, val, length);
     } else {
         for(U i = 0; i < length; ++i) {
             ubyte b = void;
@@ -102,16 +101,19 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
     }
 }
 
+private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
+    if(is(T == E[], E)) {
+
+    if(val.length < length) val.length = cast(uint)length;
+    foreach(ref e; val) cereal.grain(e);
+}
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                                        !isOutputRange!(T, ubyte) &&
                                                                        isArray!T && !is(T == string)) {
     U length = void;
     cereal.grain(length);
-
-    if(val.length < length) val.length = cast(uint)length;
-    foreach(ref e; val) {
-        cereal.grain(e);
-    }
+    decerealiseArrayImpl(cereal, val, length);
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
