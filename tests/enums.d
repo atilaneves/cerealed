@@ -12,13 +12,13 @@ void testEnum() {
     enc ~= MyEnum.Bar;
     enc ~= MyEnum.Baz;
     enc ~= MyEnum.Foo;
-    checkEqual(enc.bytes,  [0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0]);
+    enc.bytes.shouldEqual([0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0]);
 
     auto dec = Decerealizer(enc.bytes);
-    checkEqual(dec.value!MyEnum, MyEnum.Bar);
-    checkEqual(dec.value!MyEnum, MyEnum.Baz);
-    checkEqual(dec.value!MyEnum, MyEnum.Foo);
-    checkThrown!RangeError(dec.value!ubyte);
+    dec.value!MyEnum.shouldEqual(MyEnum.Bar);
+    dec.value!MyEnum.shouldEqual(MyEnum.Baz);
+    dec.value!MyEnum.shouldEqual(MyEnum.Foo);
+    dec.value!ubyte.shouldThrow!RangeError;
 }
 
 void testDecodeEnum() {
@@ -30,5 +30,5 @@ void testDecodeEnum() {
     auto cereal = Decerealiser([ 0, 1 ]);
     checkEqual(cereal.value!Foo, Foo.Bar);
     checkEqual(cereal.value!Foo, Foo.Baz);
-    checkThrown!RangeError(cereal.value!ubyte);
+    cereal.value!ubyte.shouldThrow!RangeError;
 }

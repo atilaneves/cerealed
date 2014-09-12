@@ -1,6 +1,6 @@
 module tests.encode_decode;
 
-import unit_threaded.check;
+import unit_threaded;
 import unit_threaded.io;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
@@ -17,7 +17,7 @@ private void implEncDec(T)(T[] values) {
     auto dec = Decerealiser(enc.bytes);
     writelnUt("Decoding ", values);
     foreach(b; values) checkEqual(dec.value!T, b);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
 void testEncDecBool() {
@@ -77,10 +77,10 @@ void testEncDecChars() {
     auto enc = Cerealiser();
     enc ~= c; enc ~= w; enc ~= d;
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!char, c);
-    checkEqual(dec.value!wchar, w);
-    checkEqual(dec.value!dchar, d);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    dec.value!char.shouldEqual(c);
+    dec.value!wchar.shouldEqual(w);
+    dec.value!dchar.shouldEqual(d);
+    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
 void testEncDecArray() {
@@ -88,8 +88,8 @@ void testEncDecArray() {
     const ints = [ 2, 6, 9];
     enc ~= ints;
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!(int[]), ints);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    dec.value!(int[]).shouldEqual(ints);
+    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
 void testEncDecAssocArray() {
@@ -97,6 +97,6 @@ void testEncDecAssocArray() {
     const intToInts = [ 1:2, 3:6, 9:18];
     enc ~= intToInts;
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!(int[int]), intToInts);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    dec.value!(int[int]).shouldEqual(intToInts);
+    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }

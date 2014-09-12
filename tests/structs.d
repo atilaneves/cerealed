@@ -23,9 +23,9 @@ void testDummyStruct() {
     enc ~= dummy;
 
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!DummyStruct, dummy);
+    dec.value!DummyStruct.shouldEqual(dummy);
 
-    checkThrown!RangeError(dec.value!ubyte);
+    dec.value!ubyte.shouldThrow!RangeError;
 }
 
 private struct StringStruct {
@@ -36,15 +36,15 @@ void testDecodeStringStruct() {
     auto dec = Decerealiser([0, 3, 'f', 'o', 'o']);
     auto str = StringStruct();
     dec.grain(str);
-    checkEqual(str.s, "foo");
-    checkThrown!RangeError(dec.value!ubyte);
+    str.s.shouldEqual("foo");
+    dec.value!ubyte.shouldThrow!RangeError;
 }
 
 void testEncodeStringStruct() {
     auto enc = Cerealiser();
     const str = StringStruct("foo");
     enc ~= str;
-    checkEqual(enc.bytes, [ 0, 3, 'f', 'o', 'o']);
+    enc.bytes.shouldEqual([ 0, 3, 'f', 'o', 'o']);
 }
 
 
@@ -60,10 +60,10 @@ void testEncDecProtoHeaderStruct() {
     const hdr = ProtoHeaderStruct(6, 1, 3, 254);
     auto enc = Cerealiser();
     enc ~= hdr; //1101 0011, 254
-    checkEqual(enc.bytes, [0xd3, 254]);
+    enc.bytes.shouldEqual([0xd3, 254]);
 
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!ProtoHeaderStruct, hdr);
+    dec.value!ProtoHeaderStruct.shouldEqual(hdr);
 }
 
 private struct StructWithNoCereal {
@@ -79,12 +79,12 @@ void testNoCereal() {
     cerealizer ~= StructWithNoCereal(3, 14, 42, 5, 12);
     //only nibble1, nibble2 and value should show up in bytes
     immutable bytes = [0x3e, 0x00, 0x05];
-    checkEqual(cerealizer.bytes, bytes);
+    cerealizer.bytes.shouldEqual(bytes);
 
     auto decerealizer = Decerealizer(bytes);
     //won't be the same as the serialised struct, since the members
     //marked with NoCereal will be set to T.init
-    checkEqual(decerealizer.value!StructWithNoCereal, StructWithNoCereal(3, 14, 0, 5, 0));
+    decerealizer.value!StructWithNoCereal.shouldEqual(StructWithNoCereal(3, 14, 0, 5, 0));
 }
 
 private struct CustomStruct {
@@ -101,11 +101,11 @@ private struct CustomStruct {
 void testCustomCereal() {
     auto cerealiser = Cerealiser();
     cerealiser ~= CustomStruct(1, 2);
-    checkEqual(cerealiser.bytes, [ 1, 0, 2, 4]);
+    cerealiser.bytes.shouldEqual([ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
     auto decerealiser = Decerealiser([1, 0, 2, 4]);
-    checkEqual(decerealiser.value!CustomStruct, CustomStruct(1, 2));
+    decerealiser.value!CustomStruct.shouldEqual(CustomStruct(1, 2));
 }
 
 
@@ -120,7 +120,7 @@ void testAttrMember() {
     cereal.grainMemberWithAttr!"nocereal2"(str);
 
     //only nibble1, nibble2 and value should show up in bytes
-    checkEqual(cereal.bytes, [0x3e, 0x00, 0x05]);
+    cereal.bytes.shouldEqual([0x3e, 0x00, 0x05]);
 }
 
 struct EnumStruct {
@@ -139,10 +139,10 @@ void testEnum() {
     const e = EnumStruct(1, EnumStruct.Enum.Baz);
     cerealiser ~= e;
     const bytes = [1, 2];
-    checkEqual(cerealiser.bytes, bytes);
+    cerealiser.bytes.shouldEqual(bytes);
 
     auto decerealiser = Decerealiser(bytes);
-    checkEqual(decerealiser.value!EnumStruct, e);
+    decerealiser.value!EnumStruct.shouldEqual(e);
 }
 
 struct PostBlitStruct {
@@ -159,10 +159,10 @@ void testPostBlit() {
     auto enc = Cerealiser();
     enc ~= PostBlitStruct(3, 5, 8);
     const bytes = [ 3, 8, 0, 4];
-    checkEqual(enc.bytes, bytes);
+    enc.bytes.shouldEqual(bytes);
 
     auto dec = Decerealiser(bytes);
-    checkEqual(dec.value!PostBlitStruct, PostBlitStruct(3, 0, 8));
+    dec.value!PostBlitStruct.shouldEqual(PostBlitStruct(3, 0, 8));
 }
 
 private struct StringsStruct {
@@ -177,10 +177,10 @@ void testRawArray() {
     //no length encoding for the array, but strings still get a length each
     const bytes = [ 5, 0, 3, 'f', 'o', 'o', 0, 6, 'f', 'o', 'o', 'b', 'a', 'r',
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
-    checkEqual(enc.bytes, bytes);
+    enc.bytes.shouldEqual(bytes);
 
     auto dec = Decerealiser(bytes);
-    checkEqual(dec.value!StringsStruct, strs);
+    dec.value!StringsStruct.shouldEqual(strs);
 }
 
 void testReadmeCode() {
@@ -277,11 +277,10 @@ void testAcceptPostBlitAttrs() {
 void testCerealiseMqttHeader() {
     auto cereal = Cerealiser();
     cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
-    checkEqual(cereal.bytes, [0x3c, 0x5]);
+    cereal.bytes.shouldEqual([0x3c, 0x5]);
 }
 
 void testDecerealiseMqttHeader() {
     auto cereal = Decerealiser([0x3c, 0x5]);
-    checkEqual(cereal.value!MqttFixedHeader,
-               MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
+    cereal.value!MqttFixedHeader.shouldEqual(MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }

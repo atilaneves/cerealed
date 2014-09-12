@@ -9,7 +9,7 @@ import core.exception;
 void testInputRange() {
     auto enc = Cerealiser();
     enc ~= iota(cast(ubyte)5);
-    checkEqual(enc.bytes, [0, 5, 0, 1, 2, 3, 4]);
+    enc.bytes.shouldEqual([0, 5, 0, 1, 2, 3, 4]);
 }
 
 private ubyte[] gOutputBytes;
@@ -31,7 +31,7 @@ void testOutputRangeValue() {
     auto dec = Decerealiser([0, 5, 2, 3, 9, 6, 1]);
     auto output = dec.value!MyOutputRange;
 
-    checkEqual(gOutputBytes, [2, 3, 9, 6, 1]);
+    gOutputBytes.shouldEqual([2, 3, 9, 6, 1]);
 }
 
 @SingleThreaded
@@ -42,7 +42,7 @@ void testOutputRangeRead() {
     auto output = MyOutputRange();
     dec.read(output);
 
-    checkEqual(gOutputBytes, [2, 3, 9, 6, 1]);
+    gOutputBytes.shouldEqual([2, 3, 9, 6, 1]);
 }
 
 
@@ -68,7 +68,7 @@ void testEmbeddedInputRange() {
     auto str = StructWithInputRange(2, MyInputRange([9, 7, 6]));
     enc ~= str;
     const bytes = [2, 0, 3, 9, 7, 6];
-    checkEqual(enc.bytes, bytes);
+    enc.bytes.shouldEqual(bytes);
 
     //no deserialisation for InputRange
     auto dec = Decerealiser(bytes);
@@ -91,12 +91,12 @@ void testEmbeddedOutputRange() {
     auto dec = Decerealiser([255, //1st byte
                              0, 3, 9, 7, 6, //length, values
                              12]); //2nd byte
-    checkEqual(dec.bytes, [255, 0, 3, 9, 7, 6, 12]);
+    dec.bytes.shouldEqual([255, 0, 3, 9, 7, 6, 12]);
     const str = dec.value!StructWithOutputRange;
     writelnUt("dec bytes is ", dec.bytes);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 
-    checkEqual(str.b1, 255);
-    checkEqual(str.b2, 12);
-    checkEqual(gOutputBytes, [9, 7, 6]);
+    str.b1.shouldEqual(255);
+    str.b2.shouldEqual(12);
+    gOutputBytes.shouldEqual([9, 7, 6]);
 }

@@ -20,7 +20,7 @@ void testEmptyNested() {
     auto dec = Decerealiser(enc.bytes);
     restored = dec.value!(SomeStruct);
 
-    checkEqual(original, restored);
+    original.shouldEqual(restored);
 }
 
 
@@ -30,10 +30,9 @@ void testNested() {
                            [Nested([7: Nested()])]);
     auto enc = Cerealiser();
     enc ~= some;
-    checkEqual(enc.bytes,
-               [0, 2, 0, 3, 'f', 'o', 'o', 0, 5, 's', 'u', 'n', 'n', 'y',
-                0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 4, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 5,
-                0, 1, 0, 1, 0, 0, 0, 7, 0, 0]);
+    enc.bytes.shouldEqual([0, 2, 0, 3, 'f', 'o', 'o', 0, 5, 's', 'u', 'n', 'n', 'y',
+                           0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 4, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 5,
+                           0, 1, 0, 1, 0, 0, 0, 7, 0, 0]);
     auto dec = Decerealiser(enc.bytes);
-    checkEqual(dec.value!SomeStruct, some);
+    dec.value!SomeStruct.shouldEqual(some);
 }

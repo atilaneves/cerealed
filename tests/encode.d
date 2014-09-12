@@ -1,6 +1,6 @@
 module tests.encode;
 
-import unit_threaded.check;
+import unit_threaded;
 import cerealed.cerealiser;
 
 
@@ -9,68 +9,68 @@ void testEncodeBool() {
     cereal.write(false);
     cereal.write(true);
     cereal.write(false);
-    checkEqual(cereal.bytes, [ 0x0, 0x1, 0x0 ]);
+    cereal.bytes.shouldEqual([ 0x0, 0x1, 0x0 ]);
 
     cereal ~= true;
-    checkEqual(cereal.bytes, [ 0x0, 0x1, 0x0, 0x1 ]);
+    cereal.bytes.shouldEqual([ 0x0, 0x1, 0x0, 0x1 ]);
 }
 
 void testEncodeByte() {
     auto cereal = Cerealiser();
     byte[] ins = [ 1, 3, -2, 5, -4];
     foreach(i; ins) cereal.write(i);
-    checkEqual(cereal.bytes, [ 0x1, 0x3, 0xfe, 0x5, 0xfc ]);
+    cereal.bytes.shouldEqual([ 0x1, 0x3, 0xfe, 0x5, 0xfc ]);
 }
 
 void testEncodeUByte() {
     auto cereal = Cerealiser();
     ubyte[] ins = [ 2, 3, 12, 10];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x2, 0x3, 0xc, 0xa ]);
+    cereal.bytes.shouldEqual([ 0x2, 0x3, 0xc, 0xa ]);
 }
 
 void testEncodeShort() {
     auto cereal = Cerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
+    cereal.bytes.shouldEqual([ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
 }
 
 void testEncodeUShort() {
     auto cereal = Cerealiser();
     ushort[] ins = [ 2, 3, cast(short)65535, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);
+    cereal.bytes.shouldEqual([ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);
 }
 
 void testEncodeInt() {
     auto cereal = Cerealiser();
     int[] ins = [ 3, -1_000_000];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x0, 0x0, 0x0, 0x3, 0xff, 0xf0, 0xbd, 0xc0 ]);
+    cereal.bytes.shouldEqual([ 0x0, 0x0, 0x0, 0x3, 0xff, 0xf0, 0xbd, 0xc0 ]);
 }
 
 void testEncodeUInt() {
     auto cereal = Cerealiser();
     uint[] ins = [ 1_000_000, 0];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
+    cereal.bytes.shouldEqual([ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
 }
 
 void testEncodeLong() {
     auto cereal = Cerealiser();
     long[] ins = [1, 2];
     foreach(i; ins) cereal ~= i;
-    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
+    cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
 }
 
 void testEncodeULong() {
     auto cereal = Cerealiser();
     cereal ~= 45L;
-    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 45 ]);
+    cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 45 ]);
     cereal = Cerealiser();
     cereal ~= 42L;
-    checkEqual(cereal.bytes, [ 0, 0, 0, 0, 0, 0, 0, 42 ]);
+    cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 42 ]);
 }
 
 void testEncodeFloat() {
@@ -88,7 +88,7 @@ void testEncodeChars() {
     char  c; cereal ~= c;
     wchar w; cereal ~= w;
     dchar d; cereal ~= d;
-    checkEqual(cereal.bytes, [ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff]);
+    cereal.bytes.shouldEqual([ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff]);
 }
 
 void testEncodeArray() {
@@ -96,7 +96,7 @@ void testEncodeArray() {
     const ints = [ 2, 6, 9];
     cereal ~= ints;
     //encoding should be a short with the length, plus payload
-    checkEqual(cereal.bytes, [ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9]);
+    cereal.bytes.shouldEqual([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9]);
 }
 
 void testEncodeAssocArray() {
@@ -106,7 +106,7 @@ void testEncodeAssocArray() {
     import std.range;
     cereal ~= intToInt;
     //short with length, then payload
-    checkEqual(cereal.bytes, [ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
+    cereal.bytes.shouldEqual([ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
 }
 
 void testEncodeString() {
@@ -114,14 +114,14 @@ void testEncodeString() {
     const str = "foobarbaz";
     cereal ~= str;
     //short with length, then payload
-    checkEqual(cereal.bytes, [ 0, 9, 'f', 'o', 'o', 'b', 'a', 'r', 'b', 'a', 'z' ]);
+    cereal.bytes.shouldEqual([ 0, 9, 'f', 'o', 'o', 'b', 'a', 'r', 'b', 'a', 'z' ]);
 }
 
 void testEncodeNibble() {
     auto cereal = Cerealiser();
     cereal.writeBits(0x4, 4);
     cereal.writeBits(0xf, 4);
-    checkEqual(cereal.bytes, [ 0x4f ]);
+    cereal.bytes.shouldEqual([ 0x4f ]);
 }
 
 void testEncodeSubByte() {
@@ -131,7 +131,7 @@ void testEncodeSubByte() {
     cereal.writeBits(0, 1);
     cereal.writeBits(5, 3);
     cereal.writeBits(1, 1);
-    checkEqual(cereal.bytes, [ 0xeb]);
+    cereal.bytes.shouldEqual([ 0xeb]);
 }
 
 void testEncodeSubWord() {
@@ -141,7 +141,7 @@ void testEncodeSubWord() {
     cereal.writeBits(23, 5);
     cereal.writeBits(1, 2);
     cereal.writeBits(2, 3);
-    checkEqual(cereal.bytes, [ 0x9e, 0xea]);
+    cereal.bytes.shouldEqual([ 0x9e, 0xea]);
 }
 
 void testEncodeMoreThan8Bits() {
@@ -149,13 +149,13 @@ void testEncodeMoreThan8Bits() {
         auto cereal = Cerealiser();
         cereal.writeBits(1, 9);
         cereal.writeBits(15, 7);
-        checkEqual(cereal.bytes, [ 0x00, 0x8f]);
+        cereal.bytes.shouldEqual([ 0x00, 0x8f]);
     }
     {
         auto cereal = Cerealiser();
         cereal.writeBits((0x9e << 1) | 1, 9);
         cereal.writeBits(0xea & 0x7f, 7);
-        checkEqual(cereal.bytes, [ 0x9e, 0xea]);
+        cereal.bytes.shouldEqual([ 0x9e, 0xea]);
     }
 }
 
@@ -175,5 +175,5 @@ void testEncodeTwoBytesBits() {
     cereal.writeBits(2, 2);
     cereal.writeBits(0, 1);
     cereal.writeBits(5, 8);
-    checkEqual(cereal.bytes, [0x3c, 0x05]);
+    cereal.bytes.shouldEqual([0x3c, 0x05]);
 }

@@ -12,10 +12,10 @@ struct WhateverStruct {
 void testOldCerealiser() {
     auto enc = DynamicArrayCerealiser();
     enc ~= WhateverStruct(5, "blargh");
-    checkEqual(enc.bytes, [ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
+    enc.bytes.shouldEqual([ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
     enc.reset();
-    checkEqual(enc.bytes, []);
-    checkNotThrown!RangeError(enc ~= 4);
+    enc.bytes.shouldEqual([]);
+    (enc ~= 4).shouldNotThrow!RangeError;
 }
 
 void testScopeBufferCerealiser() {
@@ -30,11 +30,10 @@ void testScopeBufferCerealiser() {
     auto enc = CerealiserImpl!ScopeBufferRange(sbufRange);
 
     enc ~= WhateverStruct(5, "blargh");
-    checkEqual(enc.bytes, [ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
+    enc.bytes.shouldEqual([ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
 }
 
 
 void testCerealise() {
-    WhateverStruct(5, "blargh").cerealise!(bytes => checkEqual(bytes,
-                                                               [0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h']));
+   WhateverStruct(5, "blargh").cerealise!(bytes => bytes.shouldEqual([0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h']));
 }

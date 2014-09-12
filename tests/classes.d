@@ -1,6 +1,6 @@
 module tests.classes;
 
-import unit_threaded.check;
+import unit_threaded;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
 
@@ -42,10 +42,10 @@ void testClassWithStruct() {
     auto klass = new ClassWithStruct(DummyStruct(2, 3), 4);
     enc ~= klass;
     const bytes = [2, 0, 3, 4];
-    checkEqual(enc.bytes, bytes);
+    enc.bytes.shouldEqual(bytes);
 
     auto dec = Decerealiser(bytes);
-    checkEqual(dec.value!ClassWithStruct, klass);
+    dec.value!ClassWithStruct.shouldEqual(klass);
 }
 
 class BaseClass {
@@ -79,10 +79,10 @@ void testDerivedClass() {
     auto klass = new DerivedClass(2, 4, 8, 9);
     enc ~= klass;
     const bytes = [2, 4, 8, 9];
-    checkEqual(enc.bytes, bytes);
+    enc.bytes.shouldEqual(bytes);
 
     auto dec = Decerealiser(bytes);
-    checkEqual(dec.value!DerivedClass, klass);
+    dec.value!DerivedClass.shouldEqual(klass);
 }
 
 
@@ -93,13 +93,13 @@ void testSerialisationViaBaseClass() {
 
     auto enc = Cerealiser();
     enc ~= klass;
-    checkEqual(enc.bytes, baseBytes);
+    enc.bytes.shouldEqual(baseBytes);
 
     Cerealiser.registerChildClass!DerivedClass;
     enc.reset();
     enc ~= klass;
-    checkEqual(enc.bytes, childBytes);
+    enc.bytes.shouldEqual(childBytes);
 
     auto dec = Decerealiser(childBytes);
-    checkEqual(dec.value!DerivedClass, cast(DerivedClass)klass);
+    dec.value!DerivedClass.shouldEqual(cast(DerivedClass)klass);
 }
