@@ -70,6 +70,7 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
+                                                                       !isStaticArray!T &&
                                                                        !isAssociativeArray!T) {
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
@@ -79,7 +80,12 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     foreach(ref e; val) cereal.grain(e);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
+    foreach(ref e; val) cereal.grain(e);
+}
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                                       !isStaticArray!T &&
                                                                        isOutputRange!(T, ubyte)) {
     U length = void;
     cereal.grain(length);
@@ -110,7 +116,7 @@ private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                                        !isOutputRange!(T, ubyte) &&
-                                                                       isArray!T && !is(T == string)) {
+                                                                       isDynamicArray!T && !is(T == string)) {
     U length = void;
     cereal.grain(length);
     decerealiseArrayImpl(cereal, val, length);
