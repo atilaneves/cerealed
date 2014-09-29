@@ -83,8 +83,8 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
         grain(this, lval);
     }
 
-    void write(T)(const(T)[] val) @safe {
-        T[] lval = val.dup;
+    void write(T)(const(T)[] val) @trusted {
+        auto lval = cast(T[])val.dup;
         grain(this, lval);
     }
 
