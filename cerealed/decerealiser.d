@@ -34,7 +34,7 @@ struct Decerealiser {
 
     ulong bytesLeft() const @safe { return bytes.length; }
 
-    @property @safe T value(T)() if(!isArray!T && !isAssociativeArray!T &&
+    @property @safe T value(T)() if(!isDynamicArray!T && !isAssociativeArray!T &&
                                     !is(T == class)) {
         T val;
         grain(this, val);
@@ -47,7 +47,7 @@ struct Decerealiser {
         return val;
     }
 
-    @property @safe T value(T, U = short)() if(isArray!T || isAssociativeArray!T) {
+    @property @safe T value(T, U = short)() if(isDynamicArray!T || isAssociativeArray!T) {
         T val;
         grain!(typeof(this), T, U)(this, val);
         return val;

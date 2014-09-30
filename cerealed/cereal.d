@@ -70,16 +70,23 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
+                                                                       !isStaticArray!T &&
                                                                        !isAssociativeArray!T) {
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
     U length = cast(U)val.length;
+    assert(length == val.length, "overflow");
     cereal.grain(length);
     foreach(ref e; val) cereal.grain(e);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
+    foreach(ref e; val) cereal.grain(e);
+}
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                                       !isStaticArray!T &&
                                                                        isOutputRange!(T, ubyte)) {
     U length = void;
     cereal.grain(length);
@@ -104,13 +111,14 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
-    if(val.length < length) val.length = cast(uint)length;
+    if(val.length != length) val.length = cast(uint)length;
+    assert(length == val.length, "overflow");
     foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                                        !isOutputRange!(T, ubyte) &&
-                                                                       isArray!T && !is(T == string)) {
+                                                                       isDynamicArray!T && !is(T == string)) {
     U length = void;
     cereal.grain(length);
     decerealiseArrayImpl(cereal, val, length);
@@ -118,6 +126,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
     U length = cast(U)val.length;
+    assert(length == val.length, "overflow");
     cereal.grain(length);
 
     static if(is(isCerealiser!C)) {
@@ -139,6 +148,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
     U length = cast(U)val.length;
+    assert(length == val.length, "overflow");
     cereal.grain(length);
     const keys = val.keys;
 

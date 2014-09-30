@@ -76,15 +76,15 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
         grain(this, lval);
     }
 
-    void write(T)(const ref T val) @safe if(!isArray!T &&
+    void write(T)(const ref T val) @safe if(!isDynamicArray!T &&
                                             !isAssociativeArray!T &&
                                             !isAggregateType!T) {
         T lval = val;
         grain(this, lval);
     }
 
-    void write(T)(const(T)[] val) @safe {
-        T[] lval = val.dup;
+    void write(T)(const(T)[] val) @trusted {
+        auto lval = cast(T[])val.dup;
         grain(this, lval);
     }
 
