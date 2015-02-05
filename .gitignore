@@ -1,3 +1,5 @@
 unit_threaded
 *.a
 *.o
+.dub
+dub.selections.json
