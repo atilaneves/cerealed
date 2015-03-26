@@ -20,3 +20,38 @@ void testStaticArray() {
 
     assert(original == restored);
 }
+
+
+void testArrayOfArrays() {
+    static struct Unit {
+        ubyte thingie;
+        ushort length;
+        @NoCereal ubyte[] data;
+
+        void postBlit(C)(auto ref C cereal) if(isCereal!C) {
+            static if(isDecerealiser!C) {
+                writelnUt("Decerealiser bytesLeft ", cereal.bytesLeft);
+                writelnUt("length: ", length);
+            }
+            cereal.grainLengthedArray(data, length);
+        }
+    }
+
+    static struct Packet {
+        ubyte vrsion;
+        @RawArray Unit[] units;
+    }
+
+    ubyte[] bytes = [7, //vrsion
+                     1, 0, 3, 0xa, 0xb, 0xc, //1st unit
+                     2, 0, 5, 1, 2, 3, 4, 5 //2nd unit
+        ];
+
+    auto dec = Decerealiser(bytes);
+    auto pkt = dec.value!Packet;
+    pkt.shouldEqual(Packet(7, [Unit(1, 3, [0xa, 0xb, 0xc]), Unit(2, 5, [1, 2, 3, 4, 5])]));
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
+}

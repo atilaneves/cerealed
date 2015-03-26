@@ -264,6 +264,16 @@ void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C)
 }
 
 
+/**
+ * To be used when the length of the array is known at run-time based on the value
+ * of a part of byte stream.
+ */
+void grainLengthedArray(C, T)(auto ref C cereal, ref T[] val, long length) {
+    val.length = length;
+    foreach(ref t; val) cereal.grain(t);
+}
+
+
 package void grainClassImpl(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == class)) {
     //do base classes first or else the order is wrong
     cereal.grainBaseClasses(val);
