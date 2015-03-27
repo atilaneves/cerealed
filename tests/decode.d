@@ -81,6 +81,14 @@ void testDecodeRefLong() {
     val.shouldEqual(1);
 }
 
+
+void testDecodeBigULong() {
+    auto dec = Decerealiser([0xd8, 0xbf, 0xc7, 0xcd, 0x2d, 0x9b, 0xa1, 0xb1]);
+    dec.value!ulong.shouldEqual(0xd8bfc7cd2d9ba1b1);
+    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+}
+
+
 void testDecodeDouble() {
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
     checkNotThrown(cereal.value!double);

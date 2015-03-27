@@ -68,9 +68,17 @@ void testEncodeULong() {
     auto cereal = Cerealiser();
     cereal ~= 45L;
     cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 45 ]);
+
     cereal = Cerealiser();
     cereal ~= 42L;
     cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 42 ]);
+}
+
+void testEncodeBigULong() {
+    ulong val = 0xd8bfc7cd2d9ba1b1;
+    auto enc = Cerealiser();
+    enc ~= val;
+    enc.bytes.shouldEqual([0xd8, 0xbf, 0xc7, 0xcd, 0x2d, 0x9b, 0xa1, 0xb1]);
 }
 
 void testEncodeFloat() {

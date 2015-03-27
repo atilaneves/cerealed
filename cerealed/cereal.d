@@ -56,15 +56,14 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ui
 }
 
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ulong)) {
-    immutable oldVal = val;
-    val = 0;
-
-    for(int i = T.sizeof - 1; i >= 0; --i) {
-        immutable shift = (T.sizeof - i) * 8;
-        ubyte byteVal = (oldVal >> shift) & 0xff;
+    T newVal;
+    for(int i = 0; i < T.sizeof; ++i) {
+        immutable shiftBy = 64 - (i + 1) * T.sizeof;
+        ubyte byteVal = (val >> shiftBy) & 0xff;
         cereal.grainUByte(byteVal);
-        val |= cast(T)byteVal << shift;
+        newVal |= (cast(T)byteVal << shiftBy);
     }
+    val = newVal;
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&

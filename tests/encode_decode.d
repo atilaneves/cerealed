@@ -15,7 +15,8 @@ private void implEncDec(T)(T[] values) {
         enc ~= b;
     }
     auto dec = Decerealiser(enc.bytes);
-    writelnUt("Decoding ", values);
+    writelnUt("Decoding to match ", values);
+    writelnUt("Bytes: ", enc.bytes);
     foreach(b; values) checkEqual(dec.value!T, b);
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
@@ -59,7 +60,7 @@ void testEncDecLong() {
 }
 
 void testEncDecULong() {
-    implEncDecValues!(ulong, [ 5_000_000, 2, 5_000_000_000, 1 ]);
+    implEncDecValues!(ulong, [ 5_000_000, 2, 7_000_000_000, 1 ]);
 }
 
 void testEncDecFloat() {
