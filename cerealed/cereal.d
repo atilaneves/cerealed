@@ -173,7 +173,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isPointer!
 private template canCall(C, T, string func) {
     enum canCall = is(typeof(() { auto cer = C(); auto val = T.init; mixin("val." ~ func ~ "(cer);"); }));
     static if(!canCall && __traits(hasMember, T, func)) {
-        pragma(msg, "Warning: '" ~ func ~ "' function defined for ", T, ", but does not compile.");
+        pragma(msg, "Warning: '" ~ func ~
+               "' function defined for ", T, ", but does not compile for Cereal ", C);
     }
 }
 
