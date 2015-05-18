@@ -269,7 +269,7 @@ void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C)
  * of a part of byte stream.
  */
 void grainLengthedArray(C, T)(auto ref C cereal, ref T[] val, long length) {
-    val.length = length;
+    val.length = cast(typeof(val.length))length;
     foreach(ref t; val) cereal.grain(t);
 }
 
