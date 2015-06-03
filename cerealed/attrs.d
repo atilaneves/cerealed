@@ -21,3 +21,5 @@ struct Bits(int N) if(N > 0 && N <= 32) {
 
 enum NoCereal;
 enum RawArray;
+
+alias RestOfPacket = RawArray;
