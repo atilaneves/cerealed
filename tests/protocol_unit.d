@@ -40,11 +40,16 @@ void testUnits() {
 
 
 struct PacketWithTotalLength {
-    enum headerSize = ub.sizeof + us.sizeof + length.sizeof;
+    static struct Header {
+        ubyte ub;
+        ushort us;
+        ushort length;
+    }
 
-    ubyte ub;
-    ushort us;
-    ushort length;
+    enum headerSize = unalignedSizeof!Header;
+    alias header this;
+
+    Header header;
     @Length("length - headerSize") Unit[] units;
 }
 

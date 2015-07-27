@@ -7,3 +7,4 @@ public import cerealed.cerealizer;
 public import cerealed.decerealizer;
 public import cerealed.traits;
 public import cerealed.range;
+public import cerealed.utils;
