@@ -237,18 +237,21 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
         static assert(lengths.length == 0 || lengths.length == 1, "Too many Length attributes");
 
         static if(bitsAttrs.length == 1) {
-            grainWithBitsAttr!(member)(cereal, val);
+
+            grainWithBitsAttr!member(cereal, val);
+
         } else static if(rawArrayIndex != -1) {
+
             cereal.grainRawArray(__traits(getMember, val, member));
+
         } else static if(lengths.length > 0) {
-            static if(isCerealiser!C) {
-                cereal.grainRawArray(__traits(getMember, val, member));
-            } else {
-                __traits(getMember, val, member).length = __traits(getMember, val, lengths[0].member);
-                foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
-            }
+
+            grainWithLengthAttr!member(cereal, val);
+
         } else {
+
             cereal.grain(__traits(getMember, val, member));
+
         }
     }
 }
@@ -263,6 +266,18 @@ private void grainWithBitsAttr(string member, C, T)(auto ref C cereal, ref T val
                   text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
                        " bits long, which is not enough to store @Bits!", numBits));
     cereal.grainBitsT(__traits(getMember, val, member), numBits);
+}
+
+private void grainWithLengthAttr(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
+    alias lengths = Filter!(isALengthStruct, __traits(getAttributes,
+                                                      __traits(getMember, val, member)));
+
+    static if(isCerealiser!C) {
+        cereal.grainRawArray(__traits(getMember, val, member));
+    } else {
+        __traits(getMember, val, member).length = __traits(getMember, val, lengths[0].member);
+        foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
+    }
 }
 
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
