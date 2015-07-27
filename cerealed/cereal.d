@@ -246,7 +246,7 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
 
         } else static if(lengths.length > 0) {
 
-            grainWithLengthAttr!member(cereal, val);
+            grainWithLengthAttr!(member, lengths[0].member)(cereal, val);
 
         } else {
 
@@ -268,14 +268,13 @@ private void grainWithBitsAttr(string member, C, T)(auto ref C cereal, ref T val
     cereal.grainBitsT(__traits(getMember, val, member), numBits);
 }
 
-private void grainWithLengthAttr(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
-    alias lengths = Filter!(isALengthStruct, __traits(getAttributes,
-                                                      __traits(getMember, val, member)));
+private void grainWithLengthAttr(string member, string lengthMember, C, T)
+    (auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        __traits(getMember, val, member).length = __traits(getMember, val, lengths[0].member);
+        __traits(getMember, val, member).length = __traits(getMember, val, lengthMember);
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }
