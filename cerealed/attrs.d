@@ -13,7 +13,7 @@ template getNumBits(T) {
 }
 
 
-enum isABitsStruct(T) = is(T:Bits!N, int N);
+enum isABitsStruct(alias T) = is(T) && is(T:Bits!N, int N);
 
 
 struct Bits(int N) if(N > 0 && N <= 32) {
@@ -23,3 +23,15 @@ enum NoCereal;
 enum RawArray;
 
 alias RestOfPacket = RawArray;
+
+struct Length {
+    string member;
+}
+
+
+enum isALengthStruct(alias T) = is(typeof(T)) && is(typeof(T) == Length);
+
+unittest {
+    auto l = Length();
+    static assert(isALengthStruct!l);
+}

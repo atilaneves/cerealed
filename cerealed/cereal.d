@@ -6,6 +6,7 @@ import std.traits;
 import std.conv;
 import std.algorithm;
 import std.range;
+import std.typetuple;
 
 enum CerealType { WriteBytes, ReadBytes };
 
@@ -220,33 +221,63 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 
 void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     /**(De)serialises one member taking into account its attributes*/
-    import std.typetuple;
     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
     enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
     //only serialise if the member doesn't have @NoCereal
     static if(noCerealIndex == -1) {
-        alias attrs = Filter!(isABitsStruct, __traits(getAttributes,
+        alias bitsAttrs = Filter!(isABitsStruct, __traits(getAttributes,
                                                       __traits(getMember, val, member)));
-        static assert(attrs.length == 0 || attrs.length == 1,
+        static assert(bitsAttrs.length == 0 || bitsAttrs.length == 1,
                       "Too many Bits!N attributes!");
-        static if(attrs.length == 0) {
-            //normal case, no Bits attributes
-            static if(rawArrayIndex == -1) {
-                cereal.grain(__traits(getMember, val, member));
-            } else {
-                cereal.grainRawArray(__traits(getMember, val, member));
-            }
+
+        alias lengths = Filter!(isALengthStruct, __traits(getAttributes,
+                                                          __traits(getMember, val, member)));
+        static assert(lengths.length == 0 || lengths.length == 1, "Too many Length attributes");
+
+        static if(bitsAttrs.length == 1) {
+
+            grainWithBitsAttr!(member, bitsAttrs[0])(cereal, val);
+
+        } else static if(rawArrayIndex != -1) {
+
+            cereal.grainRawArray(__traits(getMember, val, member));
+
+        } else static if(lengths.length > 0) {
+
+            grainWithLengthAttr!(member, lengths[0].member)(cereal, val);
+
         } else {
-            //Bits attributes, store it in less bits than fits
-            enum numBits = getNumBits!(attrs[0]);
-            enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
-            static assert(numBits <= sizeInBits,
-                          text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
-                               " bits long, which is not enough to store @Bits!", numBits));
-            cereal.grainBitsT(__traits(getMember, val, member), numBits);
+
+            cereal.grain(__traits(getMember, val, member));
+
         }
+    }
+}
+
+private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
+    auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    enum numBits = getNumBits!(bitsAttr);
+    enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
+    static assert(numBits <= sizeInBits,
+                  text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
+                       " bits long, which is not enough to store @Bits!", numBits));
+    cereal.grainBitsT(__traits(getMember, val, member), numBits);
+}
+
+private void grainWithLengthAttr(string member, string lengthMember, C, T)
+    (auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    alias M = typeof(__traits(getMember, val, member));
+    static assert(is(M == E[], E), text("@Length not valid for ", member, ": it can only be used on slices"));
+
+    static if(isCerealiser!C) {
+        cereal.grainRawArray(__traits(getMember, val, member));
+    } else {
+        __traits(getMember, val, member).length = __traits(getMember, val, lengthMember);
+        foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }
 
