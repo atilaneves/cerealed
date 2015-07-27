@@ -276,7 +276,7 @@ private void grainWithLengthAttr(string member, string lengthMember, C, T)
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        __traits(getMember, val, member).length = __traits(getMember, val, lengthMember);
+        mixin("with(val) __traits(getMember, val, member).length = " ~ lengthMember ~ ";");
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }
