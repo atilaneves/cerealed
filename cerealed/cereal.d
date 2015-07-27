@@ -270,6 +270,9 @@ private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
 private void grainWithLengthAttr(string member, string lengthMember, C, T)
     (auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
+    alias M = typeof(__traits(getMember, val, member));
+    static assert(is(M == E[], E), text("@Length not valid for ", member, ": it can only be used on slices"));
+
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
