@@ -6,6 +6,11 @@ public import cerealed.traits;
 import std.traits;
 
 
+auto decerealise(T)(in ubyte[] bytes) {
+    return Decerealiser(bytes).value!T;
+}
+
+
 struct Decerealiser {
     //interface:
     enum type = CerealType.ReadBytes;

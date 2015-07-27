@@ -17,15 +17,12 @@ struct Packet {
     ushort length;
     ubyte ub2;
     @Length("length") Unit[] units;
-
 }
 
 
 void testUnits() {
     ubyte[] bytes = [3, 0, 4, 9, 0, 7, 1, 2, 0, 6, 2, 3, 0, 5, 4, 5, 0, 4, 9, 8];
-    auto dec = Decerealiser(bytes);
-    auto pkt = dec.value!Packet;
-    dec.value!ubyte.shouldThrow!RangeError; //no more bytes
+    auto pkt = decerealise!Packet(bytes);
 
     pkt.ub1.shouldEqual(3);
     pkt.length.shouldEqual(4);
