@@ -23,7 +23,7 @@ struct Packet {
 void testUnits() {
     ubyte[] bytes = [3, 0, 4, 9, 0, 7, 1, 2, 0, 6, 2, 3, 0, 5, 4, 5, 0, 4, 9, 8];
     auto dec = Decerealiser(bytes);
-    const pkt = dec.value!Packet;
+    auto pkt = dec.value!Packet;
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 
     pkt.ub1.shouldEqual(3);
@@ -34,4 +34,8 @@ void testUnits() {
     pkt.units[1].us.shouldEqual(6);
     pkt.units[1].ub1.shouldEqual(2);
     pkt.units[1].ub2.shouldEqual(3);
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
 }
