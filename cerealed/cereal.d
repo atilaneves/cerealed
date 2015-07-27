@@ -238,7 +238,7 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
 
         static if(bitsAttrs.length == 1) {
 
-            grainWithBitsAttr!member(cereal, val);
+            grainWithBitsAttr!(member, bitsAttrs[0])(cereal, val);
 
         } else static if(rawArrayIndex != -1) {
 
@@ -256,11 +256,10 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
     }
 }
 
-private void grainWithBitsAttr(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
-    //Bits attributes, store it in less bits than fits
-    alias bitsAttrs = Filter!(isABitsStruct, __traits(getAttributes,
-                                                      __traits(getMember, val, member)));
-    enum numBits = getNumBits!(bitsAttrs[0]);
+private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
+    auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    enum numBits = getNumBits!(bitsAttr);
     enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
     static assert(numBits <= sizeInBits,
                   text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
