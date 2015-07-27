@@ -6,6 +6,7 @@ import std.traits;
 import std.conv;
 import std.algorithm;
 import std.range;
+import std.typetuple;
 
 enum CerealType { WriteBytes, ReadBytes };
 
@@ -220,7 +221,6 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 
 void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
     /**(De)serialises one member taking into account its attributes*/
-    import std.typetuple;
     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
     enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
@@ -250,15 +250,21 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
                 cereal.grain(__traits(getMember, val, member));
             }
         } else {
-            //Bits attributes, store it in less bits than fits
-            enum numBits = getNumBits!(bitsAttrs[0]);
-            enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
-            static assert(numBits <= sizeInBits,
-                          text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
-                               " bits long, which is not enough to store @Bits!", numBits));
-            cereal.grainBitsT(__traits(getMember, val, member), numBits);
+            grainWithBitsAttr!(member)(cereal, val);
         }
     }
+}
+
+private void grainWithBitsAttr(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
+    //Bits attributes, store it in less bits than fits
+    alias bitsAttrs = Filter!(isABitsStruct, __traits(getAttributes,
+                                                      __traits(getMember, val, member)));
+    enum numBits = getNumBits!(bitsAttrs[0]);
+    enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
+    static assert(numBits <= sizeInBits,
+                  text(fullyQualifiedName!T, ".", member, " is ", sizeInBits,
+                       " bits long, which is not enough to store @Bits!", numBits));
+    cereal.grainBitsT(__traits(getMember, val, member), numBits);
 }
 
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
