@@ -84,11 +84,20 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     U length = cast(U)val.length;
     assert(length == val.length, "overflow");
     cereal.grain(length);
-    foreach(ref e; val) cereal.grain(e);
+
+    static if(hasSlicing!(Unqual!T) && is(Unqual!(ElementType!T) : ubyte)) {
+        cereal.grainRaw(cast(ubyte[])val);
+    }
+    else
+        foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
-    foreach(ref e; val) cereal.grain(e);
+    static if(is(Unqual!(ElementType!T) : ubyte)) {
+        cereal.grainRaw(cast(ubyte[])val);
+    }
+    else
+        foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
@@ -117,9 +126,15 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
-    if(val.length != length) val.length = cast(uint)length;
-    assert(length == val.length, "overflow");
-    foreach(ref e; val) cereal.grain(e);
+    static if(is(Unqual!(E) : ubyte)) {
+        val = cast(E[])cereal.grainRaw(length).dup;
+    }
+    else {
+        if(val.length != length) val.length = cast(uint)length;
+        assert(length == val.length, "overflow");
+
+        foreach(ref e; val) cereal.grain(e);
+    }
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
@@ -135,19 +150,10 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
     assert(length == val.length, "overflow");
     cereal.grain(length);
 
-    static if(is(isCerealiser!C)) {
-        //easier to read from a string
-        foreach(e; val) cereal.grain(e);
+    static if(isCerealiser!C) {
+        cereal.grainRaw(cast(ubyte[])val);
     } else {
-        auto values = new char[length];
-        if(val.length != 0) { //copy string
-            values[] = val[];
-        }
-
-        foreach(ref e; values) {
-            cereal.grain(e);
-        }
-        val = cast(string)values;
+        val = cast(string)cereal.grainRaw(length);
     }
 }
 
@@ -187,7 +193,6 @@ private template canCall(C, T, string func) {
 
 void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggregateType!T &&
                                                            !isInputRange!T && !isOutputRange!(T, ubyte)) {
-
     enum canAccept   = canCall!(C, T, "accept");
     enum canPreBlit = canCall!(C, T, "preBlit");
     enum canPostBlit = canCall!(C, T, "postBlit");

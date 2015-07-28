@@ -61,6 +61,10 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
         }
     }
 
+    void grainRaw(ubyte[] val) @trusted {
+        _output.put(val);
+    }
+
     //specific:
     const(ubyte[]) bytes() const nothrow @property @safe {
         return _output.data;

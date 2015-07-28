@@ -13,6 +13,10 @@ struct DynamicArrayRange {
         _bytes ~= val;
     }
 
+    void put(in ubyte[] val) nothrow @safe {
+        _bytes ~= val;
+    }
+
     const(ubyte)[] data() pure const nothrow @property @safe {
         return _bytes;
     }
