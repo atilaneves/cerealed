@@ -7,4 +7,15 @@
     "sourcePaths": ["cerealed"],
     "importPaths": ["."],
     "targetType": "library",
+    "configurations": [
+        {"name": "library"},
+        {"name": "unittest",
+         "targetType": "executable",
+         "sourcePaths": ["tests"],
+         "mainSourceFile": "tests/ut.d",
+         "dependencies": {
+             "unit-threaded": "~>0.4.10"
+         }
+        }
+    ]
 }

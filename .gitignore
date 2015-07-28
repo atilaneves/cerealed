@@ -1,4 +1,4 @@
-unit_threaded
+bin
 *.a
 *.o
 .dub
