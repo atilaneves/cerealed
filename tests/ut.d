@@ -20,6 +20,7 @@ int main(string[] args) {
                           "tests.structs",
                           "tests.classes",
                           "tests.range",
-                          "tests.compile_time"
+                          "tests.compile_time",
+                          "tests.utils",
                           );
 }
