@@ -22,5 +22,6 @@ int main(string[] args) {
                           "tests.range",
                           "tests.compile_time",
                           "tests.utils",
+                          "tests.protocol_unit",
                           );
 }

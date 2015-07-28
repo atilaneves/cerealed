@@ -8,6 +8,12 @@ import std.algorithm;
 import std.range;
 import std.typetuple;
 
+class CerealException: Exception {
+    this(string msg) @safe pure {
+        super(msg);
+    }
+}
+
 enum CerealType { WriteBytes, ReadBytes };
 
 void grain(C, T)(auto ref C cereal, ref T val) if(isCereal!C && is(T == ubyte)) {
@@ -276,7 +282,14 @@ private void grainWithLengthAttr(string member, string lengthMember, C, T)
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        mixin("with(val) __traits(getMember, val, member).length = " ~ lengthMember ~ ";");
+        int _tmpLen;
+        mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+
+        if(_tmpLen < 0)
+            throw new CerealException(text("@Length resulted in negative length ", _tmpLen));
+
+
+        mixin(q{__traits(getMember, val, member).length = _tmpLen;});
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }

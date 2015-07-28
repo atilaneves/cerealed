@@ -65,3 +65,15 @@ void testTotalLength() {
     pkt.units[2].ub1.shouldEqual(4);
     pkt.units[2].ub2.shouldEqual(5);
 }
+
+
+struct NegativeStruct {
+    enum len = -1;
+    ushort us;
+    @Length("len") Unit[] units;
+}
+
+void testNegativeLength() {
+    immutable ubyte[] bytes = [1, 2, 3, 4, 5];
+    decerealise!NegativeStruct(bytes).shouldThrow!CerealException;
+}
