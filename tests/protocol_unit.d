@@ -54,7 +54,10 @@ struct PacketWithTotalLength {
 }
 
 void testTotalLength() {
-    ubyte[] bytes = [3, 0, 7, 0, 8, 0, 7, 1, 2, 0, 6, 2, 3, 0, 5, 4, 5];
+    ubyte[] bytes = [3, 0, 7, 0, 8, //header
+                     0, 7, 1, 2,
+                     0, 6, 2, 3,
+                     0, 5, 4, 5];
     auto pkt = decerealise!PacketWithTotalLength(bytes);
 
     pkt.ub.shouldEqual(3);
@@ -76,4 +79,11 @@ struct NegativeStruct {
 void testNegativeLength() {
     immutable ubyte[] bytes = [1, 2, 3, 4, 5];
     decerealise!NegativeStruct(bytes).shouldThrow!CerealException;
+}
+
+
+void testNotEnoughBytes() {
+    immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
+                               0, 7]; //truncated
+    decerealise!PacketWithTotalLength(bytes).shouldThrow!CerealException;
 }

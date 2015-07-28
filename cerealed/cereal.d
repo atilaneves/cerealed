@@ -288,6 +288,14 @@ private void grainWithLengthAttr(string member, string lengthMember, C, T)
         if(_tmpLen < 0)
             throw new CerealException(text("@Length resulted in negative length ", _tmpLen));
 
+        if(_tmpLen > cereal.bytesLeft) {
+            alias E = ElementType!(typeof(__traits(getMember, val, member)));
+            throw new CerealException(text("@Length of ", _tmpLen, " units of type ",
+                                           E.stringof,
+                                           " (", _tmpLen * E.sizeof, " bytes) ",
+                                           "larger than remaining byte array (",
+                                           cereal.bytesLeft, " bytes)"));
+        }
 
         mixin(q{__traits(getMember, val, member).length = _tmpLen;});
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
