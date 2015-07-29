@@ -91,3 +91,33 @@ void testNotEnoughBytes() {
                                0, 7]; //truncated
     decerealise!PacketWithArrayLengthExpr(bytes).shouldThrow!CerealException;
 }
+
+
+struct PacketWithLengthInBytes {
+    static struct Header {
+        ubyte ub;
+        ushort lengthNoHeader;
+    }
+
+    enum headerSize = unalignedSizeof!Header;
+    alias header this;
+
+    Header header;
+    @LengthInBytes("lengthNoHeader - headerSize") Unit[] units;
+}
+
+void testLengthInBytes() {
+    immutable ubyte[] bytes = [ 7, 0, 11, //header (11 bytes = hdr + 2 units of 4 bytes each)
+                                0, 3, 1, 2,
+                                0, 9, 3, 4,
+        ];
+    auto pkt = decerealise!PacketWithLengthInBytes(bytes);
+
+    pkt.ub.shouldEqual(7);
+    pkt.lengthNoHeader.shouldEqual(11);
+    pkt.units.length.shouldEqual(2);
+
+    pkt.units[0].us.shouldEqual(3);
+    pkt.units[1].ub1.shouldEqual(1);
+    pkt.units[1].ub1.shouldEqual(2);
+}

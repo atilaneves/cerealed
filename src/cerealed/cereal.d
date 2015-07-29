@@ -241,7 +241,14 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
         alias arrayLengths = Filter!(isArrayLengthStruct,
                                      __traits(getAttributes,
                                               __traits(getMember, val, member)));
-        static assert(arrayLengths.length == 0 || arrayLengths.length == 1, "Too many Length attributes");
+        static assert(arrayLengths.length == 0 || arrayLengths.length == 1,
+                      "Too many ArrayLength attributes");
+
+        alias lengthInBytes = Filter!(isLengthInBytesStruct,
+                                      __traits(getAttributes,
+                                               __traits(getMember, val, member)));
+        static assert(lengthInBytes.length == 0 || lengthInBytes.length == 1,
+                      "Too many LengthInBytes attributes");
 
         static if(bitsAttrs.length == 1) {
 
@@ -253,7 +260,11 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
 
         } else static if(arrayLengths.length > 0) {
 
-            grainWithLengthAttr!(member, arrayLengths[0].member)(cereal, val);
+            grainWithArrayLengthAttr!(member, arrayLengths[0].member)(cereal, val);
+
+        } else static if(lengthInBytes.length > 0) {
+
+            grainWithLengthInBytesAttr!(member, lengthInBytes[0].member)(cereal, val);
 
         } else {
 
@@ -274,11 +285,11 @@ private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
     cereal.grainBitsT(__traits(getMember, val, member), numBits);
 }
 
-private void grainWithLengthAttr(string member, string lengthMember, C, T)
+private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
     (auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
     alias M = typeof(__traits(getMember, val, member));
-    static assert(is(M == E[], E), text("@Length not valid for ", member, ": it can only be used on slices"));
+    static assert(is(M == E[], E), text("@ArrayLength not valid for ", member, ": it can only be used on slices"));
 
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
@@ -287,11 +298,11 @@ private void grainWithLengthAttr(string member, string lengthMember, C, T)
         mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
 
         if(_tmpLen < 0)
-            throw new CerealException(text("@Length resulted in negative length ", _tmpLen));
+            throw new CerealException(text("@ArrayLength resulted in negative length ", _tmpLen));
 
         if(_tmpLen > cereal.bytesLeft) {
             alias E = ElementType!(typeof(__traits(getMember, val, member)));
-            throw new CerealException(text("@Length of ", _tmpLen, " units of type ",
+            throw new CerealException(text("@ArrayLength of ", _tmpLen, " units of type ",
                                            E.stringof,
                                            " (", _tmpLen * E.sizeof, " bytes) ",
                                            "larger than remaining byte array (",
@@ -302,6 +313,41 @@ private void grainWithLengthAttr(string member, string lengthMember, C, T)
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }
+
+private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T)
+    (auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    alias M = typeof(__traits(getMember, val, member));
+    static assert(is(M == E[], E),
+                  text("@LengthInBytes not valid for ", member, ": it can only be used on slices"));
+
+    static if(isCerealiser!C) {
+        cereal.grainRawArray(__traits(getMember, val, member));
+    } else {
+        int _tmpLen;
+        mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+
+        if(_tmpLen < 0)
+            throw new CerealException(text("@LengthInBytes resulted in negative length ", _tmpLen));
+
+        if(_tmpLen > cereal.bytesLeft) {
+            alias E = ElementType!(typeof(__traits(getMember, val, member)));
+            throw new CerealException(text("@LengthInBytes of ", _tmpLen, " units of type ",
+                                           E.stringof,
+                                           " (", _tmpLen * E.sizeof, " bytes) ",
+                                           "larger than remaining byte array (",
+                                           cereal.bytesLeft, " bytes)"));
+        }
+
+        __traits(getMember, val, member).length = 0;
+
+        while(cereal.bytesLeft) {
+            __traits(getMember, val, member).length++;
+            cereal.grain(__traits(getMember, val, member)[$ - 1]);
+        }
+    }
+}
+
 
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
     //can't use virtual functions due to template parameter

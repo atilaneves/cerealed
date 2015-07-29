@@ -35,3 +35,16 @@ unittest {
     auto l = ArrayLength();
     static assert(isArrayLengthStruct!l);
 }
+
+
+struct LengthInBytes {
+    string member;
+}
+
+
+enum isLengthInBytesStruct(alias T) = is(typeof(T)) && is(typeof(T) == LengthInBytes);
+
+unittest {
+    auto l = LengthInBytes();
+    static assert(isLengthInBytesStruct!l);
+}
