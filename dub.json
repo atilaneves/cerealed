@@ -4,9 +4,8 @@
     "homepage": "https://github.com/atilaneves/cerealed",
     "authors": ["Atila Neves"],
     "license": "BSD 3-clause",
-    "sourcePaths": ["cerealed"],
-    "importPaths": ["."],
     "targetType": "library",
+    "targetPath": "bin",
     "configurations": [
         {"name": "library"},
         {"name": "unittest",
