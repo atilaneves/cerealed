@@ -16,7 +16,7 @@ struct Packet {
     ubyte ub1;
     ushort length;
     ubyte ub2;
-    @Length("length") Unit[] units;
+    @ArrayLength("length") Unit[] units;
 }
 
 
@@ -50,7 +50,7 @@ struct PacketWithArrayLengthExpr {
     alias header this;
 
     Header header;
-    @Length("length - headerSize") Unit[] units;
+    @ArrayLength("length - headerSize") Unit[] units;
 }
 
 void testArrayLengthExpr() {
@@ -77,7 +77,7 @@ void testArrayLengthExpr() {
 struct NegativeStruct {
     enum len = -1;
     ushort us;
-    @Length("len") Unit[] units;
+    @ArrayLength("len") Unit[] units;
 }
 
 void testNegativeLength() {

@@ -238,9 +238,10 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
         static assert(bitsAttrs.length == 0 || bitsAttrs.length == 1,
                       "Too many Bits!N attributes!");
 
-        alias lengths = Filter!(isALengthStruct, __traits(getAttributes,
-                                                          __traits(getMember, val, member)));
-        static assert(lengths.length == 0 || lengths.length == 1, "Too many Length attributes");
+        alias arrayLengths = Filter!(isArrayLengthStruct,
+                                     __traits(getAttributes,
+                                              __traits(getMember, val, member)));
+        static assert(arrayLengths.length == 0 || arrayLengths.length == 1, "Too many Length attributes");
 
         static if(bitsAttrs.length == 1) {
 
@@ -250,9 +251,9 @@ void grainMemberWithAttr(string member, C, T)(auto ref C cereal, ref T val) @tru
 
             cereal.grainRawArray(__traits(getMember, val, member));
 
-        } else static if(lengths.length > 0) {
+        } else static if(arrayLengths.length > 0) {
 
-            grainWithLengthAttr!(member, lengths[0].member)(cereal, val);
+            grainWithLengthAttr!(member, arrayLengths[0].member)(cereal, val);
 
         } else {
 

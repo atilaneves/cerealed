@@ -24,14 +24,14 @@ enum RawArray;
 
 alias RestOfPacket = RawArray;
 
-struct Length {
+struct ArrayLength {
     string member;
 }
 
 
-enum isALengthStruct(alias T) = is(typeof(T)) && is(typeof(T) == Length);
+enum isArrayLengthStruct(alias T) = is(typeof(T)) && is(typeof(T) == ArrayLength);
 
 unittest {
-    auto l = Length();
-    static assert(isALengthStruct!l);
+    auto l = ArrayLength();
+    static assert(isArrayLengthStruct!l);
 }
