@@ -54,10 +54,10 @@ struct PacketWithTotalLength {
 }
 
 void testTotalLength() {
-    ubyte[] bytes = [3, 0, 7, 0, 8, //header
-                     0, 7, 1, 2,
-                     0, 6, 2, 3,
-                     0, 5, 4, 5];
+    immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
+                               0, 7, 1, 2,
+                               0, 6, 2, 3,
+                               0, 5, 4, 5];
     auto pkt = decerealise!PacketWithTotalLength(bytes);
 
     pkt.ub.shouldEqual(3);
@@ -67,6 +67,10 @@ void testTotalLength() {
     pkt.units[2].us.shouldEqual(5);
     pkt.units[2].ub1.shouldEqual(4);
     pkt.units[2].ub2.shouldEqual(5);
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
 }
 
 
