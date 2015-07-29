@@ -329,7 +329,7 @@ private void checkArrayAttrType(string member, C, T)(auto ref C cereal, ref T va
 private int lengthOfArray(string member, string lengthMember, C, T)(auto ref C cereal, ref T val)
     @safe if(isCereal!C) {
     int _tmpLen;
-    mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+    mixin(q{with(val) _tmpLen = cast(int)} ~ lengthMember ~ ";");
 
     if(_tmpLen < 0)
         throw new CerealException(text("@LengthInBytes resulted in negative length ", _tmpLen));
