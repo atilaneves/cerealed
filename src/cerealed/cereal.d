@@ -86,7 +86,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     cereal.grain(length);
 
     static if(hasSlicing!(Unqual!T) && is(Unqual!(ElementType!T) : ubyte)) {
-        cereal.grainRaw(cast(ubyte[])val);
+        cereal.grainRaw(cast(ubyte[])val.array);
     }
     else
         foreach(ref e; val) cereal.grain(e);
