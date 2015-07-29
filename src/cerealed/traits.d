@@ -6,13 +6,14 @@ import cerealed.decerealiser;
 
 
 enum isCereal(T) = is(typeof(() {
-        ubyte b;
-        auto cereal = T.init;
-        cereal.grainUByte(b);
-        uint val;
-        cereal.grainBits(val, 3);
-        CerealType type = cereal.type;
-    }));
+    ubyte b;
+    auto cereal = T.init;
+    cereal.grainUByte(b);
+    uint val;
+    cereal.grainBits(val, 3);
+    CerealType type = cereal.type;
+    //grainClass is missing because static asserts fail
+}));
 
 
 enum isCerealiser(T) = isCereal!T && T.type == CerealType.WriteBytes;
