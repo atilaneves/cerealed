@@ -129,3 +129,31 @@ void testLengthInBytes() {
     enc ~= pkt;
     enc.bytes.shouldEqual(bytes);
 }
+
+
+struct BigUnit {
+    int i1;
+    int i2;
+}
+
+struct BigUnitPacket {
+    enum headerSize = totalLength.sizeof;
+    ushort totalLength;
+    @LengthInBytes("totalLength - headerSize") BigUnit[] units;
+}
+
+void testLengthInBytesOneUnit() {
+    immutable ubyte[] bytes = [ 9, //totalLength = 1 unit of size 8 + header size of 1
+                                0, 0, 0, 1, 0, 0, 0, 2
+        ];
+    auto pkt = decerealise!BigUnitPacket(bytes);
+
+    pkt.totalLength.shouldEqual(9);
+    pkt.units.length.shouldEqual(1);
+    pkt.units[0].i1.shouldEqual(1);
+    pkt.units[0].i2.shouldEqual(2);
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
+}
