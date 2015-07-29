@@ -16,7 +16,7 @@ struct Packet {
     ubyte ub1;
     ushort length;
     ubyte ub2;
-    @Length("length") Unit[] units;
+    @ArrayLength("length") Unit[] units;
 }
 
 
@@ -50,7 +50,7 @@ struct PacketWithArrayLengthExpr {
     alias header this;
 
     Header header;
-    @Length("length - headerSize") Unit[] units;
+    @ArrayLength("length - headerSize") Unit[] units;
 }
 
 void testArrayLengthExpr() {
@@ -77,7 +77,7 @@ void testArrayLengthExpr() {
 struct NegativeStruct {
     enum len = -1;
     ushort us;
-    @Length("len") Unit[] units;
+    @ArrayLength("len") Unit[] units;
 }
 
 void testNegativeLength() {
@@ -90,4 +90,42 @@ void testNotEnoughBytes() {
     immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
                                0, 7]; //truncated
     decerealise!PacketWithArrayLengthExpr(bytes).shouldThrow!CerealException;
+}
+
+
+struct PacketWithLengthInBytes {
+    static struct Header {
+        ubyte ub;
+        ushort lengthNoHeader;
+    }
+
+    enum headerSize = unalignedSizeof!Header;
+    alias header this;
+
+    Header header;
+    @LengthInBytes("lengthNoHeader - headerSize") Unit[] units;
+}
+
+void testLengthInBytes() {
+    immutable ubyte[] bytes = [ 7, 0, 11, //header (11 bytes = hdr + 2 units of 4 bytes each)
+                                0, 3, 1, 2,
+                                0, 9, 3, 4,
+        ];
+    auto pkt = decerealise!PacketWithLengthInBytes(bytes);
+
+    pkt.ub.shouldEqual(7);
+    pkt.lengthNoHeader.shouldEqual(11);
+    pkt.units.length.shouldEqual(2);
+
+    pkt.units[0].us.shouldEqual(3);
+    pkt.units[0].ub1.shouldEqual(1);
+    pkt.units[0].ub2.shouldEqual(2);
+
+    pkt.units[1].us.shouldEqual(9);
+    pkt.units[1].ub1.shouldEqual(3);
+    pkt.units[1].ub2.shouldEqual(4);
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
 }
