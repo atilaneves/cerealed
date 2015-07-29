@@ -294,8 +294,7 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        int _tmpLen;
-        mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+        int _tmpLen = lengthOfArray!lengthMember(val);
 
         if(_tmpLen < 0)
             throw new CerealException(text("@ArrayLength resulted in negative length ", _tmpLen));
@@ -324,8 +323,7 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        int _tmpLen;
-        mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+        int _tmpLen = lengthOfArray!lengthMember(val);
 
         if(_tmpLen < 0)
             throw new CerealException(text("@LengthInBytes resulted in negative length ", _tmpLen));
@@ -348,6 +346,12 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
     }
 }
 
+
+private int lengthOfArray(string lengthMember, T)(ref T val) @safe {
+    int _tmpLen;
+    mixin(q{with(val) _tmpLen = } ~ lengthMember ~ ";");
+    return _tmpLen;
+}
 
 void grainRawArray(C, T)(auto ref C cereal, ref T[] val) @trusted if(isCereal!C) {
     //can't use virtual functions due to template parameter
