@@ -288,8 +288,7 @@ private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
 private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
     (auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
-    alias M = typeof(__traits(getMember, val, member));
-    static assert(is(M == E[], E), text("@ArrayLength not valid for ", member, ": it can only be used on slices"));
+    checkArrayAttrType!member(cereal, val);
 
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
@@ -304,9 +303,7 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
 private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T)
     (auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
-    alias M = typeof(__traits(getMember, val, member));
-    static assert(is(M == E[], E),
-                  text("@LengthInBytes not valid for ", member, ": it can only be used on slices"));
+    checkArrayAttrType!member(cereal, val);
 
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
@@ -320,6 +317,14 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
         }
     }
 }
+
+private void checkArrayAttrType(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
+    alias M = typeof(__traits(getMember, val, member));
+    static assert(is(M == E[], E),
+                  text("@ArrayLength and @LengthInBytes not valid for ", member,
+                       ": they can only be used on slices"));
+}
+
 
 private int lengthOfArray(string member, string lengthMember, C, T)(auto ref C cereal, ref T val)
     @safe if(isCereal!C) {
