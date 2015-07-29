@@ -2,6 +2,7 @@ module tests.structs;
 
 import unit_threaded;
 import cerealed;
+import std.conv;
 import core.exception;
 
 
@@ -283,4 +284,46 @@ void testCerealiseMqttHeader() {
 void testDecerealiseMqttHeader() {
     auto cereal = Decerealiser([0x3c, 0x5]);
     cereal.value!MqttFixedHeader.shouldEqual(MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
+}
+
+
+class CustomException: Exception {
+    this(string msg) {
+        super(msg);
+    }
+}
+
+struct StructWithPreBlit {
+    static struct Header {
+        uint i;
+    }
+
+    alias header this;
+    enum headerSize = unalignedSizeof!Header;
+
+    Header header;
+    ubyte ub1;
+    ubyte ub2;
+
+    void preBlit(C)(auto ref C cereal) {
+        static if(isDecerealiser!C) {
+            if(cereal.bytesLeft < headerSize)
+                throw new CustomException(
+                    text("Cannot decerealise into header of size ", headerSize,
+                         " when there are only ", cereal.bytesLeft, " bytes left"));
+        }
+    }
+
+    mixin assertHasPreBlit!StructWithPreBlit;
+}
+
+void testPreBlit() {
+    immutable ubyte[] bytesOk = [0, 0, 0, 3, 1, 2];
+    bytesOk.decerealise!StructWithPreBlit;
+
+    immutable ubyte[] bytesOops = [0, 0, 0];
+    bytesOops.decerealise!StructWithPreBlit.shouldThrow!CustomException;
+
+    immutable ubyte[] bytesMegaOops = [0, 0, 0, 3];
+    bytesMegaOops.decerealise!StructWithPreBlit.shouldThrow!RangeError;
 }

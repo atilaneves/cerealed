@@ -22,22 +22,30 @@ enum isDecerealiser(T) = isCereal!T && T.type == CerealType.ReadBytes &&
 
 
 enum hasAccept(T) = is(typeof(() {
-            auto obj = T.init;
-            auto enc = Cerealiser();
-            obj.accept(enc);
-            auto dec = Decerealiser();
-            obj.accept(dec);
+    auto obj = T.init;
+    auto enc = Cerealiser();
+    obj.accept(enc);
+    auto dec = Decerealiser();
+    obj.accept(dec);
 }));
 
 
 enum hasPostBlit(T) = is(typeof(() {
-            auto obj = T.init;
-            auto enc = Cerealiser();
-            obj.postBlit(enc);
-            auto dec = Decerealiser();
-            obj.postBlit(dec);
+    auto obj = T.init;
+    auto enc = Cerealiser();
+    obj.postBlit(enc);
+    auto dec = Decerealiser();
+    obj.postBlit(dec);
 }));
 
+
+enum hasPreBlit(T) = is(typeof(() {
+    auto obj = T.init;
+    auto enc = Cerealiser();
+    obj.preBlit(enc);
+    auto dec = Decerealiser();
+    obj.preBlit(dec);
+}));
 
 
 mixin template assertHasPostBlit(T) {
@@ -48,6 +56,18 @@ mixin template assertHasPostBlit(T) {
             obj.postBlit(enc);
             auto dec = Decerealiser();
             obj.postBlit(dec);
+        }
+    }
+}
+
+mixin template assertHasPreBlit(T) {
+    static if(!hasPreBlit!T) {
+        void func() {
+            auto obj = T.init;
+            auto enc = Cerealiser();
+            obj.preBlit(enc);
+            auto dec = Decerealiser();
+            obj.preBlit(dec);
         }
     }
 }

@@ -189,12 +189,17 @@ void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAggre
                                                            !isInputRange!T && !isOutputRange!(T, ubyte)) {
 
     enum canAccept   = canCall!(C, T, "accept");
+    enum canPreBlit = canCall!(C, T, "preBlit");
     enum canPostBlit = canCall!(C, T, "postBlit");
 
     static if(canAccept) { //custom serialisation
-        static assert(!canPostBlit, "Cannot define both accept and postBlit");
+        static assert(!canPostBlit && !canPreBlit, "Cannot define both accept and pre/postBlit");
         val.accept(cereal);
     } else { //normal serialisation, go through each member and possibly serialise
+        static if(canPreBlit) {
+            val.preBlit(cereal);
+        }
+
         cereal.grainAllMembers(val);
         static if(canPostBlit) { //semi-custom serialisation, do post blit
             val.postBlit(cereal);
