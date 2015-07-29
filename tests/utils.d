@@ -33,3 +33,13 @@ union Union {
 void testSizeOfUnion() {
     unalignedSizeof!Union.shouldEqual(2);
 }
+
+
+class Class {
+    ubyte ub;
+    ushort us;
+}
+
+void testSizeOfClass() {
+    unalignedSizeof!Class.shouldEqual(3);
+}
