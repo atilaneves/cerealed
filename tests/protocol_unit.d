@@ -39,7 +39,7 @@ void testUnits() {
 }
 
 
-struct PacketWithTotalLength {
+struct PacketWithArrayLengthExpr {
     static struct Header {
         ubyte ub;
         ushort us;
@@ -53,12 +53,12 @@ struct PacketWithTotalLength {
     @Length("length - headerSize") Unit[] units;
 }
 
-void testTotalLength() {
+void testArrayLengthExpr() {
     immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
                                0, 7, 1, 2,
                                0, 6, 2, 3,
                                0, 5, 4, 5];
-    auto pkt = decerealise!PacketWithTotalLength(bytes);
+    auto pkt = decerealise!PacketWithArrayLengthExpr(bytes);
 
     pkt.ub.shouldEqual(3);
     pkt.us.shouldEqual(7);
@@ -89,5 +89,5 @@ void testNegativeLength() {
 void testNotEnoughBytes() {
     immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
                                0, 7]; //truncated
-    decerealise!PacketWithTotalLength(bytes).shouldThrow!CerealException;
+    decerealise!PacketWithArrayLengthExpr(bytes).shouldThrow!CerealException;
 }
