@@ -294,6 +294,16 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
         immutable length = lengthOfArray!(member, lengthMember)(cereal, val);
+        alias E = ElementType!(typeof(__traits(getMember, val, member)));
+
+        if(length * E.sizeof  > cereal.bytesLeft) {
+            throw new CerealException(text("@ArrayLength of ", length, " units of type ",
+                                           E.stringof,
+                                           " (", length * E.sizeof, " bytes) ",
+                                           "larger than remaining byte array (",
+                                           cereal.bytesLeft, " bytes)"));
+        }
+
         mixin(q{__traits(getMember, val, member).length = length;});
 
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
@@ -308,7 +318,15 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        lengthOfArray!(member, lengthMember)(cereal, val); //error handling
+        immutable length = lengthOfArray!(member, lengthMember)(cereal, val); //error handling
+
+        if(length > cereal.bytesLeft) {
+            alias E = ElementType!(typeof(__traits(getMember, val, member)));
+            throw new CerealException(text("@LengthInBytes of ", length, " bytes ",
+                                           "larger than remaining byte array (",
+                                           cereal.bytesLeft, " bytes)"));
+        }
+
         __traits(getMember, val, member).length = 0;
 
         while(cereal.bytesLeft) {
@@ -334,14 +352,14 @@ private int lengthOfArray(string member, string lengthMember, C, T)(auto ref C c
     if(_tmpLen < 0)
         throw new CerealException(text("@LengthInBytes resulted in negative length ", _tmpLen));
 
-    if(_tmpLen > cereal.bytesLeft) {
-        alias E = ElementType!(typeof(__traits(getMember, val, member)));
-        throw new CerealException(text("@LengthInBytes of ", _tmpLen, " units of type ",
-                                       E.stringof,
-                                       " (", _tmpLen * E.sizeof, " bytes) ",
-                                       "larger than remaining byte array (",
-                                       cereal.bytesLeft, " bytes)"));
-    }
+    // if(_tmpLen > cereal.bytesLeft) {
+    //     alias E = ElementType!(typeof(__traits(getMember, val, member)));
+    //     throw new CerealException(text("@LengthInBytes of ", _tmpLen, " units of type ",
+    //                                    E.stringof,
+    //                                    " (", _tmpLen * E.sizeof, " bytes) ",
+    //                                    "larger than remaining byte array (",
+    //                                    cereal.bytesLeft, " bytes)"));
+    // }
 
     return _tmpLen;
 }

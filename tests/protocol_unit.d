@@ -143,7 +143,7 @@ struct BigUnitPacket {
 }
 
 void testLengthInBytesOneUnit() {
-    immutable ubyte[] bytes = [ 9, //totalLength = 1 unit of size 8 + header size of 1
+    immutable ubyte[] bytes = [ 0, 9, //totalLength = 1 unit of size 8 + header size of 1
                                 0, 0, 0, 1, 0, 0, 0, 2
         ];
     auto pkt = decerealise!BigUnitPacket(bytes);
