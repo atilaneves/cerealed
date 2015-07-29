@@ -118,6 +118,14 @@ void testLengthInBytes() {
     pkt.units.length.shouldEqual(2);
 
     pkt.units[0].us.shouldEqual(3);
-    pkt.units[1].ub1.shouldEqual(1);
-    pkt.units[1].ub1.shouldEqual(2);
+    pkt.units[0].ub1.shouldEqual(1);
+    pkt.units[0].ub2.shouldEqual(2);
+
+    pkt.units[1].us.shouldEqual(9);
+    pkt.units[1].ub1.shouldEqual(3);
+    pkt.units[1].ub2.shouldEqual(4);
+
+    auto enc = Cerealiser();
+    enc ~= pkt;
+    enc.bytes.shouldEqual(bytes);
 }
