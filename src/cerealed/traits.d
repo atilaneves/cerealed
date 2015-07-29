@@ -21,66 +21,33 @@ enum isDecerealiser(T) = isCereal!T && T.type == CerealType.ReadBytes &&
     is(typeof(() { auto dec = T(); ulong bl = dec.bytesLeft; }));
 
 
-enum hasAccept(T) = is(typeof(() {
-    auto obj = T.init;
-    auto enc = Cerealiser();
-    obj.accept(enc);
-    auto dec = Decerealiser();
-    obj.accept(dec);
-}));
-
-
-enum hasPostBlit(T) = is(typeof(() {
-    auto obj = T.init;
-    auto enc = Cerealiser();
-    obj.postBlit(enc);
-    auto dec = Decerealiser();
-    obj.postBlit(dec);
-}));
-
-
-enum hasPreBlit(T) = is(typeof(() {
-    auto obj = T.init;
-    auto enc = Cerealiser();
-    obj.preBlit(enc);
-    auto dec = Decerealiser();
-    obj.preBlit(dec);
-}));
-
-
-mixin template assertHasPostBlit(T) {
-    static if(!hasPostBlit!T) {
-        void func() {
-            auto obj = T.init;
-            auto enc = Cerealiser();
-            obj.postBlit(enc);
-            auto dec = Decerealiser();
-            obj.postBlit(dec);
-        }
+bool hasFunc(T, string funcName)() {
+    if(!__ctfe) {
+        auto obj = T.init;
+        auto enc = Cerealiser();
+        mixin("obj." ~ funcName ~ "(enc);");
+        auto dec = Decerealiser();
+        mixin("obj." ~ funcName ~ "(dec);");
     }
+    return true;
 }
 
-mixin template assertHasPreBlit(T) {
-    static if(!hasPreBlit!T) {
-        void func() {
-            auto obj = T.init;
-            auto enc = Cerealiser();
-            obj.preBlit(enc);
-            auto dec = Decerealiser();
-            obj.preBlit(dec);
-        }
+enum hasAccept(T)   = hasFunc!(T, "accept");
+enum hasPostBlit(T) = hasFunc!(T, "postBlit");
+enum hasPreBlit(T)  = hasFunc!(T, "preBlit");
+
+unittest {
+    struct Accept {
+        void accept(C)(auto ref C cereal) if(isCereal!C) { }
     }
+
+    static assert(hasAccept!Accept);
 }
 
-
-mixin template assertHasAccept(T) {
-    static if(!hasAccept!T) {
-        void func() {
-            auto obj = T.init;
-            auto enc = Cerealiser();
-            obj.accept(enc);
-            auto dec = Decerealiser();
-            obj.accept(dec);
-        }
-    }
+mixin template assertHas(T, string funcName) {
+    static assert(hasFunc!(T, funcName));
 }
+
+mixin template assertHasPostBlit(T) { mixin assertHas!(T, "postBlit"); }
+mixin template assertHasPreBlit(T)  { mixin assertHas!(T, "preBlit"); }
+mixin template assertHasAccept(T)   { mixin assertHas!(T, "accept"); }
