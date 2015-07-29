@@ -294,9 +294,9 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        int _tmpLen = lengthOfArray!(member, lengthMember)(cereal, val);
+        immutable length = lengthOfArray!(member, lengthMember)(cereal, val);
+        mixin(q{__traits(getMember, val, member).length = length;});
 
-        mixin(q{__traits(getMember, val, member).length = _tmpLen;});
         foreach(ref e; __traits(getMember, val, member)) cereal.grain(e);
     }
 }
@@ -311,7 +311,7 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
     static if(isCerealiser!C) {
         cereal.grainRawArray(__traits(getMember, val, member));
     } else {
-        int _tmpLen = lengthOfArray!(member, lengthMember)(cereal, val);
+        lengthOfArray!(member, lengthMember)(cereal, val); //error handling
         __traits(getMember, val, member).length = 0;
 
         while(cereal.bytesLeft) {
