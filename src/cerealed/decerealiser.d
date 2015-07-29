@@ -28,6 +28,12 @@ struct Decerealiser {
         grainClassImpl(this, val);
     }
 
+    auto grainRaw(size_t length) @safe {
+        auto res = _bytes[0..length];
+        _bytes = _bytes[length..$];
+        return res;
+    }
+
     //specific:
     this(T)(in T[] bytes) @safe if(isNumeric!T) {
         setBytes(bytes);

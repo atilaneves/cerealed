@@ -73,6 +73,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     val = newVal;
 }
 
+enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte);
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
@@ -84,11 +86,18 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     U length = cast(U)val.length;
     assert(length == val.length, "overflow");
     cereal.grain(length);
-    foreach(ref e; val) cereal.grain(e);
+
+    static if(hasSlicing!(Unqual!T) && hasByteElement!T)
+        cereal.grainRaw(cast(ubyte[])val.array);
+     else
+        foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
-    foreach(ref e; val) cereal.grain(e);
+    static if(hasByteElement!T)
+        cereal.grainRaw(cast(ubyte[])val);
+    else
+        foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
@@ -117,9 +126,13 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
-    if(val.length != length) val.length = cast(uint)length;
-    assert(length == val.length, "overflow");
-    foreach(ref e; val) cereal.grain(e);
+    static if(hasByteElement!T)
+        val = cast(E[])cereal.grainRaw(length.dup);
+    else {
+        if(val.length != length) val.length = cast(uint)length;
+        assert(length == val.length, "overflow");
+        foreach(ref e; val) cereal.grain(e);
+    }
 }
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
@@ -135,20 +148,10 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
     assert(length == val.length, "overflow");
     cereal.grain(length);
 
-    static if(is(isCerealiser!C)) {
-        //easier to read from a string
-        foreach(e; val) cereal.grain(e);
-    } else {
-        auto values = new char[length];
-        if(val.length != 0) { //copy string
-            values[] = val[];
-        }
-
-        foreach(ref e; values) {
-            cereal.grain(e);
-        }
-        val = cast(string)values;
-    }
+    static if(isCerealiser!C)
+        cereal.grainRaw(cast(ubyte[])val);
+    else
+        val = cast(string)cereal.grainRaw(length);
 }
 
 
