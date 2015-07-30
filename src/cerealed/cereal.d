@@ -73,6 +73,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     val = newVal;
 }
 
+enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte);
+
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&
                                                                        !is(T == string) &&
@@ -85,17 +87,15 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     assert(length == val.length, "overflow");
     cereal.grain(length);
 
-    static if(hasSlicing!(Unqual!T) && is(Unqual!(ElementType!T) : ubyte)) {
+    static if(hasSlicing!(Unqual!T) && hasByteElement!T)
         cereal.grainRaw(cast(ubyte[])val.array);
-    }
     else
         foreach(ref e; val) cereal.grain(e);
 }
 
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
-    static if(is(Unqual!(ElementType!T) : ubyte)) {
+    static if(hasByteElement!T)
         cereal.grainRaw(cast(ubyte[])val);
-    }
     else
         foreach(ref e; val) cereal.grain(e);
 }
@@ -126,9 +126,8 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
-    static if(is(Unqual!(E) : ubyte)) {
-        val = cast(E[])cereal.grainRaw(length).dup;
-    }
+    static if(hasByteElement!T)
+        val = cast(E[])cereal.grainRaw(length.dup);
     else {
         if(val.length != length) val.length = cast(uint)length;
         assert(length == val.length, "overflow");
@@ -150,11 +149,10 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
     assert(length == val.length, "overflow");
     cereal.grain(length);
 
-    static if(isCerealiser!C) {
+    static if(isCerealiser!C)
         cereal.grainRaw(cast(ubyte[])val);
-    } else {
+    else
         val = cast(string)cereal.grainRaw(length);
-    }
 }
 
 
