@@ -105,7 +105,7 @@ define both `accept` and `postBlit`. Example below.
     }
 
 For more examples of how to serialise structs, check the [tests](tests) directory
-or real-world usage in my [MQTT](https://github.com/atilaneves/mqtt) broker
+or real-world usage in my [MQTT broker](https://github.com/atilaneves/mqtt)
 also written in D.
 
 Arrays are by default serialised with a ushort denoting array length followed
@@ -144,6 +144,44 @@ child class must be registered first:
 There is now support for InputRange and OutputRange objects. Examples can
 be found in the [tests directory](tests/range.d)
 
+Advanced Usage
+---------------
+Frequency in networking programming, the packets themselves encode the length
+of elements to follow. This happens often enough that Cerealed has two UDAs
+to automate this kind of serialisation: `@ArrayLength` and `@LengthInBytes`.
+The former specifies how to get the length of an array (usually a variable)
+The latter specifies how many bytes the array takes. Examples:
+
+    struct Packet {
+        ushort length;
+        @ArrayLength("length") ushort[] array;
+    }
+    auto pkt = decerealise!Packet([
+        0, 3, //length
+        0, 1, 0, 2, 0, 3]); //array of 3 ushorts
+    assert(pkt.length == 3);
+    assert(pkt.array == [1, 2, 3]);
+
+    struct Packet {
+        static struct Header {
+            ubyte ub;
+            ubyte totalLength;
+        }
+        enum headerSize = unalignedSizeof!Header; //2 bytes
+
+        Header header;
+        @LengthInBytes("totalLength - headerSize") ushort[] array;
+    }
+    auto pkt = decerealise!Packet([
+        7, //ub1
+        6, //totalLength in bytes
+        0, 1, 0, 2]); //array of 2 ushorts
+    assert(pkt.ub1 == 7);
+    assert(pkt.totalLength == 6);
+    assert(pkt.array == [1, 2]);
+
+
 Related Projects
 ----------------
 - [orange](https://github.com/jacob-carlborg/orange).
+- [msgpack-d](https://github.com/msgpack/msgpack-d).
