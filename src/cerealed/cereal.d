@@ -360,15 +360,6 @@ private int lengthOfArray(string member, string lengthMember, C, T)(auto ref C c
     if(_tmpLen < 0)
         throw new CerealException(text("@LengthInBytes resulted in negative length ", _tmpLen));
 
-    // if(_tmpLen > cereal.bytesLeft) {
-    //     alias E = ElementType!(typeof(__traits(getMember, val, member)));
-    //     throw new CerealException(text("@LengthInBytes of ", _tmpLen, " units of type ",
-    //                                    E.stringof,
-    //                                    " (", _tmpLen * E.sizeof, " bytes) ",
-    //                                    "larger than remaining byte array (",
-    //                                    cereal.bytesLeft, " bytes)"));
-    // }
-
     return _tmpLen;
 }
 
