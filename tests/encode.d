@@ -108,13 +108,18 @@ void testEncodeArray() {
 }
 
 void testEncodeAssocArray() {
+    import std.algorithm;
+
     auto cereal = Cerealiser();
     const intToInt = [ 1:2, 3:6];
     import std.traits;
     import std.range;
     cereal ~= intToInt;
     //short with length, then payload
-    cereal.bytes.shouldEqual([ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6]);
+    cereal.bytes[0..2].shouldEqual([0, 2]);
+    cereal.bytes.length.shouldEqual(18); //ushort length, 4 bytes each for each int
+    cereal.bytes.canFind([0, 0, 0, 1, /*:*/ 0, 0, 0, 2,]).shouldBeTrue;
+    cereal.bytes.canFind([0, 0, 0, 3, /*:*/ 0, 0, 0, 6,]).shouldBeTrue;
 }
 
 void testEncodeString() {
