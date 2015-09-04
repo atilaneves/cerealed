@@ -127,10 +127,7 @@ private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val
     if(is(T == E[], E)) {
 
     static if(hasByteElement!T) {
-        static if(isCerealiser!C)
-            cereal.grainRaw(val);
-        else
-            val = cereal.grainRaw(length).dup;
+        val = cereal.grainRaw(length).dup;
     } else {
         if(val.length != length) val.length = cast(uint)length;
         assert(length == val.length, "overflow");
