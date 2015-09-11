@@ -126,9 +126,9 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
 private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
-    static if(hasByteElement!T)
-        val = cast(E[])cereal.grainRaw(length.dup);
-    else {
+    static if(hasByteElement!T) {
+        val = cereal.grainRaw(length).dup;
+    } else {
         if(val.length != length) val.length = cast(uint)length;
         assert(length == val.length, "overflow");
 

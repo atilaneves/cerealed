@@ -24,3 +24,15 @@ void testAssocArrayWithPair() {
     map.keys.shouldEqual(map2.keys);
     map.values.shouldEqual(map2.values);
 }
+
+void testByteArray() {
+    ubyte[] arr = [1,2,3,4];
+    
+    auto enc = Cerealiser();
+    enc ~= arr;
+    
+    auto dec = Decerealiser(enc.bytes);
+    auto arr2 = dec.value!(ubyte[]);
+    
+    arr.shouldEqual(arr2);
+}
