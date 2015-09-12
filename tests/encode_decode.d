@@ -17,7 +17,7 @@ private void implEncDec(T)(T[] values) {
     auto dec = Decerealiser(enc.bytes);
     writelnUt("Decoding to match ", values);
     writelnUt("Bytes: ", enc.bytes);
-    foreach(b; values) checkEqual(dec.value!T, b);
+    foreach(b; values) shouldEqual(dec.value!T, b);
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 

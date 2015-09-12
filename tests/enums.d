@@ -28,7 +28,7 @@ void testDecodeEnum() {
     }
 
     auto cereal = Decerealiser([ 0, 1 ]);
-    checkEqual(cereal.value!Foo, Foo.Bar);
-    checkEqual(cereal.value!Foo, Foo.Baz);
+    shouldEqual(cereal.value!Foo, Foo.Bar);
+    shouldEqual(cereal.value!Foo, Foo.Baz);
     cereal.value!ubyte.shouldThrow!RangeError;
 }

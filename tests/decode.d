@@ -7,12 +7,12 @@ import core.exception;
 void testDecodeBool() {
     auto cereal = Decerealiser([1, 0, 1, 0, 0, 1]);
     bool val;
-    cereal.grain(val); checkEqual(val, true);
-    cereal.grain(val); checkEqual(val, false);
-    cereal.grain(val); checkEqual(val, true);
-    cereal.grain(val); checkEqual(val, false);
-    cereal.grain(val); checkEqual(val, false);
-    cereal.grain(val); checkEqual(val, true);
+    cereal.grain(val); shouldEqual(val, true);
+    cereal.grain(val); shouldEqual(val, false);
+    cereal.grain(val); shouldEqual(val, true);
+    cereal.grain(val); shouldEqual(val, false);
+    cereal.grain(val); shouldEqual(val, false);
+    cereal.grain(val); shouldEqual(val, true);
     cereal.value!bool.shouldThrow!RangeError; //no more bytes
 }
 
@@ -44,7 +44,7 @@ void testDecodeShort() {
     auto cereal = Decerealiser([0xff, 0xfe, 0x0, 0x3]);
     cereal.value!short.shouldEqual(-2);
     cereal.value!short.shouldEqual(3);
-    checkThrown!RangeError(cereal.value!short); //no more bytes
+    shouldThrow!RangeError(cereal.value!short); //no more bytes
 }
 
 void testDecodeRefShort() {
@@ -57,7 +57,7 @@ void testDecodeRefShort() {
 void testDecodeInt() {
     auto cereal = Decerealiser([ 0xff, 0xf0, 0xbd, 0xc0]);
     cereal.value!int.shouldEqual(-1_000_000);
-    checkThrown!RangeError(cereal.value!int); //no more bytes
+    shouldThrow!RangeError(cereal.value!int); //no more bytes
 }
 
 void testDecodeRefInt() {
@@ -85,14 +85,14 @@ void testDecodeRefLong() {
 void testDecodeBigULong() {
     auto dec = Decerealiser([0xd8, 0xbf, 0xc7, 0xcd, 0x2d, 0x9b, 0xa1, 0xb1]);
     dec.value!ulong.shouldEqual(0xd8bfc7cd2d9ba1b1);
-    checkThrown!RangeError(dec.value!ubyte); //no more bytes
+    shouldThrow!RangeError(dec.value!ubyte); //no more bytes
 }
 
 
 void testDecodeDouble() {
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
-    checkNotThrown(cereal.value!double);
-    checkNotThrown(cereal.value!double);
+    shouldNotThrow(cereal.value!double);
+    shouldNotThrow(cereal.value!double);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 

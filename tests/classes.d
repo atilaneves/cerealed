@@ -31,7 +31,7 @@ private class ClassWithStruct {
         dummy = d;
         anotherByte = a;
     }
-    override string toString() const {  //so it can be used in checkEqual
+    override string toString() const {  //so it can be used in shouldEqual
         import std.conv;
         return text("ClassWithStruct(", dummy, ", ", anotherByte, ")");
     }
@@ -68,7 +68,7 @@ class DerivedClass: BaseClass {
         this.byte3 = byte3;
         this.byte4 = byte4;
     }
-    override string toString() const { //so it can be used in checkEqual
+    override string toString() const { //so it can be used in shouldEqual
         import std.conv;
         return text("DerivedClass(", byte1, ", ", byte2, ", ", byte2, ", ", byte4, ")");
     }

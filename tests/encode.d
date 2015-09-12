@@ -174,10 +174,10 @@ void testEncodeMoreThan8Bits() {
 
 void testEncodeFailsIfTooBigForBits() {
     auto cereal = Cerealiser();
-    checkNotThrown(cereal.writeBits(1, 1));
-    checkThrown(cereal.writeBits(2, 1));
-    checkNotThrown(cereal.writeBits(3, 2));
-    checkThrown(cereal.writeBits(5, 2));
+    shouldNotThrow(cereal.writeBits(1, 1));
+    shouldThrow(cereal.writeBits(2, 1));
+    shouldNotThrow(cereal.writeBits(3, 2));
+    shouldThrow(cereal.writeBits(5, 2));
 }
 
 void testEncodeTwoBytesBits() {

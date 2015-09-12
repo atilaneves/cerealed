@@ -31,7 +31,7 @@ void testStructWithPointerToStruct() {
     //can't compare the two structs directly since the pointers
     //won't match but the values will.
     decOuter.s.shouldEqual(outer.s);
-    checkEqual(*decOuter.inner, *outer.inner);
+    shouldEqual(*decOuter.inner, *outer.inner);
     decOuter.inner.shouldNotEqual(outer.inner); //ptrs shouldn't match
     decOuter.b.shouldEqual(outer.b);
 
@@ -44,9 +44,9 @@ private class InnerClass {
     ubyte b;
     this() {} //needed for decerealisation
     this(ushort s, ubyte b) { this.s = s; this.b = b; }
-    override string toString() const { //so it can be used in checkEqual
+    override string toString() const { //so it can be used in shouldEqual
         import std.conv;
-        return text("InnerClass(", s, ", ", b);
+        return text("InnerClass(", s, ", ", b, ")");
     }
 
 }
@@ -72,7 +72,7 @@ void testStructWithClassReference() {
     //won't match but the values will.
     decOuter.s.shouldEqual(outer.s);
     decOuter.inner.shouldEqual(outer.inner);
-    decOuter.inner.shouldNotEqual(outer.inner); //ptrs shouldn't match
+    shouldNotEqual(&decOuter.inner, &outer.inner); //ptrs shouldn't match
     decOuter.b.shouldEqual(outer.b);
 }
 
@@ -84,5 +84,5 @@ void testPointerToInt() {
     enc.bytes.shouldEqual(bytes);
 
     auto dec = Decerealiser(bytes);
-    checkEqual(*dec.value!(int*), *i);
+    shouldEqual(*dec.value!(int*), *i);
 }
