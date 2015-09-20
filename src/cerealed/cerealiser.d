@@ -37,6 +37,18 @@ auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
     }
 }
 
+/**
+ * Slower version of $(D cerealise) that returns a ubyte slice.
+ * It's preferable to use the version with the lambda template alias
+ */
+ubyte[] cerealise(T)(auto ref T val) {
+    auto enc = Cerealiser();
+    enc ~= val;
+    return enc.bytes.dup;
+}
+
+alias cerealize = cerealise;
+
 struct CerealiserImpl(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;

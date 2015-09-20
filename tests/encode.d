@@ -190,3 +190,9 @@ void testEncodeTwoBytesBits() {
     cereal.writeBits(5, 8);
     cereal.bytes.shouldEqual([0x3c, 0x05]);
 }
+
+
+void testCerealise() {
+    cerealise(4).shouldEqual([0, 0, 0, 4]);
+    cerealize("foo").shouldEqual([0, 3, 'f', 'o', 'o']);
+}
