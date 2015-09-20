@@ -53,10 +53,6 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     //interface
     enum type = CerealType.WriteBytes;
 
-    this(R r) {
-        _output = r;
-    }
-
     void grainUByte(ref ubyte val) @trusted {
         _output.put(val);
     }
@@ -78,6 +74,10 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     }
 
     //specific:
+    this(R r) {
+        _output = r;
+    }
+
     const(ubyte[]) bytes() const nothrow @property @safe {
         return _output.data;
     }
