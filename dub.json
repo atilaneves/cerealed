@@ -13,7 +13,7 @@
          "sourcePaths": ["tests"],
          "mainSourceFile": "tests/ut.d",
          "dependencies": {
-             "unit-threaded": "~>0.5.2"
+             "unit-threaded": "~>0.5.3"
          }
         }
     ]
