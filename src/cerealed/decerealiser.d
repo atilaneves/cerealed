@@ -88,6 +88,10 @@ struct Decerealiser {
         return readBitsHelper(bits);
     }
 
+    const(ubyte)[] originalBytes() @safe pure nothrow const {
+        return _originalBytes;
+    }
+
 private:
 
     const (ubyte)[] _originalBytes;
