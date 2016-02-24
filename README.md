@@ -2,11 +2,7 @@ cerealed
 =============
 [![Build Status](https://travis-ci.org/atilaneves/cerealed.png?branch=master)](https://travis-ci.org/atilaneves/cerealed)
 
-**Warning**: Backward compatibility is broken with the old (V0.4.x) version of Cerealed.
-This new code uses structs instead of classes, which means changing any existing
-`accept` and `postBlit` functions (see below) to be template functions, and not
-using the `new` operator to create instances. `new` might still work in some
-cases but will use GC-allocated memory when it's not actually needed.
+[My DConf 2014 talk mentioning Cerealed](https://www.youtube.com/watch?v=xpImt14KTdc).
 
 Binary serialisation library for D. Minimal to no boilerplate necessary.
 The tests in the [tests directory](tests) depend on
@@ -74,10 +70,10 @@ the scenes.
     assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
 
 
-The other option when custom serialisation is needed, to avoid boilerplate, is to
+The other option when custom serialisation is needed that avoids boilerplate is to
 define a `void postBlit(C)(ref C cereal)` function instead of `accept`. The
 marshalling or unmarshalling is done as it would in the absence of customisation,
-and postBlit is called to fix things up. It is a compile-time error to
+and `postBlit` is called to fix things up. It is a compile-time error to
 define both `accept` and `postBlit`. Example below.
 
     struct CustomStruct {
@@ -111,12 +107,13 @@ also written in D.
 Arrays are by default serialised with a ushort denoting array length followed
 by the array contents. It happens often enough that networking protocols
 have explicit length parameters for the whole packet and that array lengths
-are implicitly determined from this. For this use case, the `@RawArray`
-attribute tells `cerealed` to not add the length parameter.
+are implicitly determined from this. For this use case, the `@RestOfPacket`
+attribute tells `cerealed` to not add the length parameter. As the name implies,
+it will "eat" all bytes until there aren't any left.
 
     private struct StringsStruct {
         ubyte mybyte;
-        @RawArray string[] strings;
+        @RestOfPacket string[] strings;
     }
 
     auto enc = Cerealiser();
@@ -146,7 +143,7 @@ be found in the [tests directory](tests/range.d)
 
 Advanced Usage
 ---------------
-Frequency in networking programming, the packets themselves encode the length
+Frequently in networking programming, the packets themselves encode the length
 of elements to follow. This happens often enough that Cerealed has two UDAs
 to automate this kind of serialisation: `@ArrayLength` and `@LengthInBytes`.
 The former specifies how to get the length of an array (usually a variable)
