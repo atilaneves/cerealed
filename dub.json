@@ -11,7 +11,8 @@
         {"name": "unittest",
          "targetType": "executable",
          "sourcePaths": ["tests"],
-         "mainSourceFile": "tests/ut.d",
+         "preBuildCommands": ["dub fetch dtest && dub run dtest -- -Isrc -f bin/ut.d"],
+         "mainSourceFile": "bin/ut.d",
          "dependencies": {
              "unit-threaded": "~>0.5.3"
          }
