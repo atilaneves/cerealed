@@ -11,10 +11,10 @@
         {"name": "unittest",
          "targetType": "executable",
          "sourcePaths": ["tests"],
-         "preBuildCommands": ["dub fetch dtest && dub run dtest -- -Isrc -f bin/ut.d"],
+         "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
          "mainSourceFile": "bin/ut.d",
          "dependencies": {
-             "unit-threaded": "~>0.5.3"
+             "unit-threaded": "~>0.6.0"
          }
         }
     ]
