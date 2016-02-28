@@ -1,6 +1,3 @@
 import reggae;
-
-alias ut = dubConfigurationTarget!(ExeName("ut"),
-                                   Configuration("unittest"),
-                                   Flags("-g -debug -cov"));
+alias ut = dubTestTarget!(Flags("-g -debug -cov"));
 mixin build!ut;
