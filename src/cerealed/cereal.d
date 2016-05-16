@@ -73,7 +73,7 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
     val = newVal;
 }
 
-enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte);
+enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte) && T.sizeof == 1;
 
 void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                                        isInputRange!T && !isInfinite!T &&

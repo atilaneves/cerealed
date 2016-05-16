@@ -27,12 +27,24 @@ void testAssocArrayWithPair() {
 
 void testByteArray() {
     ubyte[] arr = [1,2,3,4];
-    
+
     auto enc = Cerealiser();
     enc ~= arr;
-    
+
     auto dec = Decerealiser(enc.bytes);
     auto arr2 = dec.value!(ubyte[]);
-    
+
     arr.shouldEqual(arr2);
+}
+
+
+@("bool array")
+unittest {
+    auto arr = [true, false, true];
+    auto enc = Cerealiser();
+    enc ~= arr;
+    enc.bytes.shouldEqual([0, 3, 1, 0, 1]);
+
+    auto dec = Decerealiser(enc.bytes);
+    dec.value!(bool[]).shouldEqual(arr);
 }
