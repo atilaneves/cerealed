@@ -21,7 +21,7 @@ void testMultidimensionalArray() {
     ];
     auto enc = Cerealiser();
     enc ~= some;
-    std.stdio.writeln(enc.bytes);
+    writelnUt(enc.bytes);
     enc.bytes.shouldEqual([
         0, 2,
             0, 3,
