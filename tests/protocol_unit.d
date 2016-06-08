@@ -143,12 +143,12 @@ struct BigUnitPacket {
 }
 
 void testLengthInBytesOneUnit() {
-    immutable ubyte[] bytes = [ 0, 9, //totalLength = 1 unit of size 8 + header size of 1
+    immutable ubyte[] bytes = [ 0, 10, //totalLength = 1 unit of size 8 + header size of 1
                                 0, 0, 0, 1, 0, 0, 0, 2
         ];
     auto pkt = decerealise!BigUnitPacket(bytes);
 
-    pkt.totalLength.shouldEqual(9);
+    pkt.totalLength.shouldEqual(bytes.length);
     pkt.units.length.shouldEqual(1);
     pkt.units[0].i1.shouldEqual(1);
     pkt.units[0].i2.shouldEqual(2);
@@ -156,4 +156,42 @@ void testLengthInBytesOneUnit() {
     auto enc = Cerealiser();
     enc ~= pkt;
     enc.bytes.shouldEqual(bytes);
+}
+
+
+@("RestOfPacket with LengthInBytes")
+unittest {
+    struct Small {
+        ushort v;
+    }
+    struct Unit {
+        ushort length;
+        @LengthInBytes("length - 2") Small[] smalls;
+    }
+    struct Struct {
+        @RestOfPacket Unit[] units;
+    }
+    immutable ubyte[] bytes =
+        [
+            0, 6, //length
+            0, 1, 0, 2, // smalls
+            0, 4, //length
+            0, 3, //smalls
+        ];
+
+    auto dec = Decerealiser(bytes);
+    auto pkt = dec.value!Struct;
+
+    pkt.shouldEqual(
+        Struct([Unit(6,
+                     [
+                         Small(1),
+                         Small(2),
+                     ]
+                       ),
+                Unit(4,
+                    [
+                        Small(3),
+                    ]
+                    )]));
 }

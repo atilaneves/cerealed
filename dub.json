@@ -14,7 +14,7 @@
          "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
          "mainSourceFile": "bin/ut.d",
          "dependencies": {
-             "unit-threaded": "~>0.6.0"
+             "unit-threaded": "~>0.6.17"
          }
         }
     ]

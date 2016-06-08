@@ -338,9 +338,12 @@ private void grainWithLengthInBytesAttr(string member, string lengthMember, C, T
 
         __traits(getMember, val, member).length = 0;
 
-        while(cereal.bytesLeft) {
+        long bytesLeft = length;
+        while(bytesLeft) {
+            auto origCerealBytesLeft = cereal.bytesLeft;
             __traits(getMember, val, member).length++;
             cereal.grain(__traits(getMember, val, member)[$ - 1]);
+            bytesLeft -= (origCerealBytesLeft - cereal.bytesLeft);
         }
     }
 }
