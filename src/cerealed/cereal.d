@@ -9,8 +9,8 @@ import std.range;
 import std.typetuple;
 
 class CerealException: Exception {
-    this(string msg) @safe pure {
-        super(msg);
+    this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @safe pure {
+        super(msg, file, line, next);
     }
 }
 
@@ -309,7 +309,8 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
                                            E.stringof,
                                            " (", length * E.sizeof, " bytes) ",
                                            "larger than remaining byte array (",
-                                           cereal.bytesLeft, " bytes)"));
+                                           cereal.bytesLeft, " bytes)\n",
+                                          cereal.bytes));
         }
 
         mixin(q{__traits(getMember, val, member).length = length;});
