@@ -75,11 +75,19 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
 
 enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte) && T.sizeof == 1;
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
-                                                                       isInputRange!T && !isInfinite!T &&
-                                                                       !is(T == string) &&
-                                                                       !isStaticArray!T &&
-                                                                       !isAssociativeArray!T) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
+                                                           isInputRange!T && !isInfinite!T &&
+                                                           !is(T == string) &&
+                                                           !isStaticArray!T &&
+                                                           !isAssociativeArray!T) {
+    grain!ushort(cereal, val);
+}
+
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
+                                                              isInputRange!T && !isInfinite!T &&
+                                                              !is(T == string) &&
+                                                              !isStaticArray!T &&
+                                                              !isAssociativeArray!T) {
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -92,6 +100,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
     else
         foreach(ref e; val) cereal.grain(e);
 }
+
 
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
     static if(hasByteElement!T)
