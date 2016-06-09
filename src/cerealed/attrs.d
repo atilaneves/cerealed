@@ -19,11 +19,25 @@ enum isABitsStruct(alias T) = is(T) && is(T:Bits!N, int N);
 struct Bits(int N) if(N > 0 && N <= 32) {
 }
 
+/**
+ Exclude this member from serialization
+ */
 enum NoCereal;
+
+
+/**
+ Do not encode array length before the array.
+ This consumes the remaining bytes when deserializing
+ */
 enum RawArray;
-
 alias RestOfPacket = RawArray;
+alias Rest = RawArray;
 
+
+/**
+ Inform the library about which member variable contains
+ the length for an array measured in number of elements, not bytes
+ */
 struct ArrayLength {
     string member;
 }
@@ -36,7 +50,9 @@ unittest {
     static assert(isArrayLengthStruct!l);
 }
 
-
+/**
+ Specifies the length of an array by the number of bytes, not elements
+ */
 struct LengthInBytes {
     string member;
 }
