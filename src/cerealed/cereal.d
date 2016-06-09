@@ -132,7 +132,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
     }
 }
 
-private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
+private void decerealiseArrayImpl(U, C, T)(auto ref C cereal, ref T val, U length) @safe
     if(is(T == E[], E)) {
 
     static if(hasByteElement!T) {
