@@ -99,9 +99,9 @@ void testEncDecArray() {
     enc.grain!ubyte(arr);
     enc.bytes.shouldEqual([2, 8, 9]);
     auto dec = Decerealiser(enc.bytes);
-    int[] arr2;
-    // dec.grain!ubyte(arr2);
-    // arr2.shouldEqual(arr);
+    ubyte[] arr2;
+    dec.grain!ubyte(arr2);
+    arr2.shouldEqual(arr);
 }
 
 void testEncDecAssocArray() {
