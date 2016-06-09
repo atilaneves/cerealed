@@ -64,3 +64,13 @@ unittest {
     auto l = LengthInBytes();
     static assert(isLengthInBytesStruct!l);
 }
+
+
+struct LengthType(T) {
+    alias Type = T;
+}
+enum isLengthType(alias T) = is(T) && is(T:LengthType!U, U);
+
+unittest {
+    static assert(isLengthType!(LengthType!ushort));
+}

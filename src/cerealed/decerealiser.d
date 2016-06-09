@@ -58,11 +58,16 @@ struct Decerealiser {
         return val;
     }
 
-    @property @safe T value(T, U = short)() if(isDynamicArray!T || isAssociativeArray!T) {
+    @property @safe T value(T)() if(isDynamicArray!T || isAssociativeArray!T) {
+        return value!(T, ushort)();
+    }
+
+    @property @safe T value(T, U)() if(isDynamicArray!T || isAssociativeArray!T) {
         T val;
-        grain!(typeof(this), T, U)(this, val);
+        grain!U(this, val);
         return val;
     }
+
 
     void reset() @safe {
         /**resets the decerealiser to read from the beginning again*/

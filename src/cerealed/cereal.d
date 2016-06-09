@@ -75,11 +75,19 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == ul
 
 enum hasByteElement(T) = is(Unqual!(ElementType!T): ubyte) && T.sizeof == 1;
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
-                                                                       isInputRange!T && !isInfinite!T &&
-                                                                       !is(T == string) &&
-                                                                       !isStaticArray!T &&
-                                                                       !isAssociativeArray!T) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
+                                                           isInputRange!T && !isInfinite!T &&
+                                                           !is(T == string) &&
+                                                           !isStaticArray!T &&
+                                                           !isAssociativeArray!T) {
+    grain!ushort(cereal, val);
+}
+
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
+                                                              isInputRange!T && !isInfinite!T &&
+                                                              !is(T == string) &&
+                                                              !isStaticArray!T &&
+                                                              !isAssociativeArray!T) {
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -93,6 +101,7 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereali
         foreach(ref e; val) cereal.grain(e);
 }
 
+
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticArray!T) {
     static if(hasByteElement!T)
         cereal.grainRaw(cast(ubyte[])val);
@@ -100,9 +109,15 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && isStaticAr
         foreach(ref e; val) cereal.grain(e);
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
-                                                                       !isStaticArray!T &&
-                                                                       isOutputRange!(T, ubyte)) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                           !isStaticArray!T &&
+                                                           isOutputRange!(T, ubyte)) {
+    grain!ushort(cereal, val);
+}
+
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                              !isStaticArray!T &&
+                                                              isOutputRange!(T, ubyte)) {
     U length = void;
     cereal.grain(length);
 
@@ -123,8 +138,9 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerea
     }
 }
 
-private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val, U length) @safe
-    if(is(T == E[], E)) {
+private void decerealiseArrayImpl(C, T, U)(auto ref C cereal, ref T val, U length) @safe
+    if(is(T == E[], E))
+{
 
     static if(hasByteElement!T) {
         val = cereal.grainRaw(length).dup;
@@ -136,15 +152,26 @@ private void decerealiseArrayImpl(C, T, U = ushort)(auto ref C cereal, ref T val
     }
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
-                                                                       !isOutputRange!(T, ubyte) &&
-                                                                       isDynamicArray!T && !is(T == string)) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                           !isOutputRange!(T, ubyte) &&
+                                                           isDynamicArray!T && !is(T == string)) {
+    grain!ushort(cereal, val);
+}
+
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
+                                                              !isOutputRange!(T, ubyte) &&
+                                                              isDynamicArray!T && !is(T == string)) {
+
     U length = void;
     cereal.grain(length);
     decerealiseArrayImpl(cereal, val, length);
 }
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
+    grain!ushort(cereal, val);
+}
+
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == string)) {
     U length = cast(U)val.length;
     assert(length == val.length, "overflow");
     cereal.grain(length);
@@ -155,8 +182,11 @@ void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!
         val = cast(string)cereal.grainRaw(length);
 }
 
+void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
+    grain!ushort(cereal, val);
+}
 
-void grain(C, T, U = ushort)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
+void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {
     U length = cast(U)val.length;
     assert(length == val.length, "overflow");
     cereal.grain(length);
@@ -265,9 +295,17 @@ void grainMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(
     enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
 
+    alias lengthTypes = Filter!(isLengthType, __traits(getAttributes, __traits(getMember, val, member)));
+    static assert(lengthTypes.length == 0 || lengthTypes.length == 1,
+                  "Too many LengthType attributes");
+
     static if(bitsAttrs.length == 1) {
 
         grainWithBitsAttr!(member, bitsAttrs[0])(cereal, val);
+
+    } else static if(lengthTypes.length == 1) {
+
+        grain!(lengthTypes[0].Type)(cereal, __traits(getMember, val, member));
 
     } else static if(rawArrayIndex != -1) {
 

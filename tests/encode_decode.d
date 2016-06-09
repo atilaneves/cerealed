@@ -93,6 +93,30 @@ void testEncDecArray() {
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
+@("array with non-default length type") unittest {
+    auto enc = Cerealiser();
+    ubyte[] arr = [8, 9];
+    enc.grain!ubyte(arr);
+    enc.bytes.shouldEqual([2, 8, 9]);
+    auto dec = Decerealiser(enc.bytes);
+    ubyte[] arr2;
+    dec.grain!ubyte(arr2);
+    arr2.shouldEqual(arr);
+}
+
+@("struct with @LengthType") unittest {
+    struct Foo {
+        @LengthType!ubyte ushort[] arr;
+    }
+
+    auto enc = Cerealiser();
+    auto foo = Foo([7, 8, 9]);
+    enc ~= foo;
+    enc.bytes.shouldEqual([3, 0, 7, 0, 8, 0, 9]);
+    auto dec = Decerealiser(enc.bytes);
+    dec.value!Foo.shouldEqual(foo);
+}
+
 void testEncDecAssocArray() {
     auto enc = Cerealiser();
     const intToInts = [ 1:2, 3:6, 9:18];
