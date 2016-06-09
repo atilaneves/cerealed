@@ -295,9 +295,17 @@ void grainMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(
     enum rawArrayIndex = staticIndexOf!(RawArray, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
 
+    alias lengthTypes = Filter!(isLengthType, __traits(getAttributes, __traits(getMember, val, member)));
+    static assert(lengthTypes.length == 0 || lengthTypes.length == 1,
+                  "Too many LengthType attributes");
+
     static if(bitsAttrs.length == 1) {
 
         grainWithBitsAttr!(member, bitsAttrs[0])(cereal, val);
+
+    } else static if(lengthTypes.length == 1) {
+
+        grain!(lengthTypes[0].Type)(cereal, __traits(getMember, val, member));
 
     } else static if(rawArrayIndex != -1) {
 
