@@ -15,7 +15,7 @@ Example usage:
     cerealiser ~= cast(ubyte)42;
     assert(cerealiser.bytes == [ 0, 0, 0, 5, 42]);
 
-    auto deceralizer = Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
+    auto decerealizer = Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
     assert(decerealizer.value!int == 5);
     assert(decerealizer.value!ubyte == 42);
 
