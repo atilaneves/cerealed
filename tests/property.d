@@ -7,7 +7,7 @@ import unit_threaded;
 @Types!(bool, byte, ubyte, short, ushort, int, uint, long, ulong,
         float, double,
         char, wchar, dchar,
-        ubyte[], ushort[], int[])
+        ubyte[], ushort[], int[], long[], float[], double[])
 void testEncodeDecodeProperty(T)() {
     check!((T val) {
         auto enc = Cerealiser();
@@ -26,6 +26,7 @@ unittest {
         }
         auto enc = Cerealiser();
         enc.grain!ubyte(arr);
+        enc.bytes.length.shouldEqual(arr.length + ubyte.sizeof);
         auto dec = Decerealiser(enc.bytes);
         ubyte[] arr2;
         dec.grain!ubyte(arr2);
