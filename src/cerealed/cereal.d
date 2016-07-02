@@ -88,11 +88,14 @@ void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                               !is(T == string) &&
                                                               !isStaticArray!T &&
                                                               !isAssociativeArray!T) {
+    import std.conv: to;
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
     U length = cast(U)val.length;
-    assert(length == val.length, "overflow");
+    assert(length == val.length,
+           text(C.stringof, " overflow. Length: ", length, ". Val length: ", val.length, "\n",
+               val.array));
     cereal.grain(length);
 
     static if(hasSlicing!(Unqual!T) && hasByteElement!T)
