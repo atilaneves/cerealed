@@ -31,6 +31,8 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == enum)) {
     alias Unqual!(OriginalType!(T)) BaseType;
     cereal.grain( cast(BaseType)val );
+    if(val < T.min || val > T.max)
+        throw new Exception(text("Illegal value (", val, ") for type ", T.stringof));
 }
 
 

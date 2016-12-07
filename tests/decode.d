@@ -196,3 +196,17 @@ void testDecodeStringArray() {
                               0, 2, 'l', 'i']);
     dec.value!(string[]).shouldEqual(["foo", "w00t", "li"]);
 }
+
+@("Decode enum with bad value")
+unittest {
+    struct Foo {
+        enum Type {
+            foo,
+            bar,
+        }
+        Type type;
+    }
+
+    Decerealiser([0, 0, 0, 42]).value!(Foo.Type).shouldThrow;
+    Decerealiser([0, 0, 0, 42]).value!Foo.shouldThrow;
+}
