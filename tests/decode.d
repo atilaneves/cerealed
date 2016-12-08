@@ -210,3 +210,15 @@ unittest {
     Decerealiser([0, 0, 0, 42]).value!(Foo.Type).shouldThrow;
     Decerealiser([0, 0, 0, 42]).value!Foo.shouldThrow;
 }
+
+
+@("Throws if length of array is larger than packet")
+unittest {
+    Decerealiser([0, 8, 1, 2]).value!(ubyte[]).shouldThrowWithMessage(
+        "Not enough bytes left to decerealise ubyte[] of 8 elements\n" ~
+        "Bytes left: 2, Needed: 8, bytes: [1, 2]");
+
+    Decerealiser([0, 8, 1, 2]).value!(int[]).shouldThrowWithMessage(
+        "Not enough bytes left to decerealise int[] of 8 elements\n" ~
+        "Bytes left: 2, Needed: 32, bytes: [1, 2]");
+}
