@@ -144,8 +144,16 @@ void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &
 }
 
 private void decerealiseArrayImpl(C, T, U)(auto ref C cereal, ref T val, U length) @safe
-    if(is(T == E[], E))
+    if(is(T == E[], E) && isDecerealiser!C)
 {
+
+    import std.exception: enforce;
+    import std.conv: text;
+    import std.range: ElementType;
+
+    enforce(length * ElementType!T.sizeof <= cereal.bytesLeft,
+            text("Not enough bytes left to decerealise ", T.stringof, " of ", length, " elements\n",
+                 "Bytes left: ", cereal.bytesLeft, ", Needed: ", length * ElementType!T.sizeof, ", bytes: ", cereal.bytes));
 
     static if(hasByteElement!T) {
         val = cereal.grainRaw(length).dup;
