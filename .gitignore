@@ -2,4 +2,3 @@ bin
 *.a
 *.o
 .dub
-dub.selections.json
