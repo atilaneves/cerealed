@@ -499,12 +499,12 @@ private void grainAllMembersImpl(ActualType, C, ValType)
 
 private template CerealPtrType(T) {
     static if(is(T == bool) || is(T == char)) {
-        alias ubyte* CerealPtrType;
+        alias CerealPtrType = ubyte*;
     } else static if(is(T == float)) {
-        alias uint* CerealPtrType;
+        alias CerealPtrType = uint*;
     } else static if(is(T == double)) {
-        alias ulong* CerealPtrType;
+        alias CerealPtrType = ulong*;
     } else {
-       alias Unsigned!T* CerealPtrType;
+        alias CerealPtrType = Unsigned!T*;
     }
 }
