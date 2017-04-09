@@ -115,3 +115,16 @@ void testEncDecAssocArray() {
     dec.value!(int[int]).shouldEqual(intToInts);
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
+
+@("Types with @disable this can be encoded/decoded")
+@safe unittest {
+
+    static struct Foo {
+        int i;
+        @disable this();
+        this(int i) { this.i = i; }
+    }
+
+    const foo = Foo(5);
+    decerealise!Foo(cerealise(foo)).shouldEqual(foo);
+}

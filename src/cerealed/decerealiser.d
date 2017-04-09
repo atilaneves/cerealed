@@ -45,9 +45,16 @@ struct Decerealiser {
 
     ulong bytesLeft() const @safe { return bytes.length; }
 
-    @property @safe T value(T)() if(!isDynamicArray!T && !isAssociativeArray!T &&
-                                    !is(T == class)) {
+    @property T value(T)() if(!isDynamicArray!T && !isAssociativeArray!T &&
+                              !is(T == class) && __traits(compiles, T())) {
         T val;
+        grain(this, val);
+        return val;
+    }
+
+    @property T value(T)() if(!isDynamicArray!T && !isAssociativeArray!T &&
+                              !is(T == class) && !__traits(compiles, T())) {
+        T val = void;
         grain(this, val);
         return val;
     }
