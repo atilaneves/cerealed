@@ -43,6 +43,10 @@ struct ScopeBufferRange {
         sbuf = ScopeBuffer!ubyte(buf);
     }
 
+    ~this() {
+        free;
+    }
+
     const(ubyte)[] data() pure const nothrow @property @trusted {
         return sbuf[];
     }

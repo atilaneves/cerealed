@@ -27,7 +27,6 @@ auto cerealise(alias F, ushort N = 32, T)(auto ref T val) @system  {
     static assert(N % 2 == 0, "cerealise must be passed an even number of bytes");
     ubyte[N] buf = void;
     auto sbufRange = ScopeBufferRange(buf);
-    scope(exit) sbufRange.free();
     auto enc = ScopeBufferCerealiser(sbufRange);
     enc ~= val;
     static if(is(ReturnType!F == void)) {
