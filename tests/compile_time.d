@@ -17,7 +17,6 @@ private struct RightStruct {
     @Bits!32 uint ui;
 }
 
-
 void testBitsTooBig() {
     static assert(!is(typeof(() { auto c = Cerealiser(); c ~= WrongStruct1(3); })));
     static assert(!is(typeof(() { auto c = Cerealiser(); c ~= WrongStruct2(3); })));

@@ -1,11 +1,8 @@
 module cerealed.cereal;
 
-public import cerealed.attrs;
-import cerealed.traits;
-import std.traits;
-import std.conv;
-import std.algorithm;
-import std.range;
+import cerealed.traits: isCereal, isCerealiser, isDecerealiser;
+import std.traits; // too many to bother listing
+import std.range: isInputRange, isOutputRange, isInfinite;
 
 class CerealException: Exception {
     this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @safe pure {
@@ -28,7 +25,9 @@ void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && !is(T == e
 
 // If the type is an enum, get the unqualified base type and cast it to that.
 void grain(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && is(T == enum)) {
-    alias Unqual!(OriginalType!(T)) BaseType;
+    import std.conv: text;
+
+    alias BaseType = Unqual!(OriginalType!(T));
     cereal.grain( cast(BaseType)val );
     if(val < T.min || val > T.max)
         throw new Exception(text("Illegal value (", val, ") for type ", T.stringof));
@@ -89,7 +88,10 @@ void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCerealiser!C &&
                                                               !is(T == string) &&
                                                               !isStaticArray!T &&
                                                               !isAssociativeArray!T) {
-    import std.conv: to;
+    import std.conv: text;
+    import std.array: array;
+    import std.range: hasSlicing;
+
     enum hasLength = is(typeof(() { auto l = val.length; }));
     static assert(hasLength, text("Only InputRanges with .length accepted, not the case for ",
                                   fullyQualifiedName!T));
@@ -270,6 +272,9 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C && 
 
 
 void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T == class)) {
+
+    import std.conv: text;
+
     static if(isCerealiser!C) {
         assert(val !is null, "null value cannot be serialised");
     }
@@ -289,7 +294,10 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 
 alias grainMemberWithAttr = grainAggregateMember;
 void grainAggregateMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+
+    import cerealed.attrs: NoCereal;
     import std.meta: staticIndexOf;
+
     /**(De)serialises one member taking into account its attributes*/
     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
@@ -300,6 +308,9 @@ void grainAggregateMember(string member, C, T)(auto ref C cereal, ref T val) @tr
 }
 
 void grainMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+
+    import cerealed.attrs:
+        isABitsStruct, isArrayLengthStruct, isLengthInBytesStruct, RawArray, isLengthType;
     import std.meta: staticIndexOf, Filter;
 
     alias bitsAttrs = Filter!(isABitsStruct, __traits(getAttributes,
@@ -356,6 +367,9 @@ void grainMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(
 private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
     auto ref C cereal, ref T val) @safe if(isCereal!C) {
 
+    import cerealed.attrs: getNumBits;
+    import std.conv: text;
+
     enum numBits = getNumBits!(bitsAttr);
     enum sizeInBits = __traits(getMember, val, member).sizeof * 8;
     static assert(numBits <= sizeInBits,
@@ -366,6 +380,9 @@ private void grainWithBitsAttr(string member, alias bitsAttr, C, T)(
 
 private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
     (auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    import std.conv: text;
+    import std.range: ElementType;
 
     checkArrayAttrType!member(cereal, val);
 
@@ -392,6 +409,9 @@ private void grainWithArrayLengthAttr(string member, string lengthMember, C, T)
 
 void grainWithLengthInBytesAttr(string member, string lengthMember, C, T)
                                 (auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    import std.conv: text;
+    import std.range: ElementType;
 
     checkArrayAttrType!member(cereal, val);
 
@@ -420,6 +440,9 @@ void grainWithLengthInBytesAttr(string member, string lengthMember, C, T)
 }
 
 private void checkArrayAttrType(string member, C, T)(auto ref C cereal, ref T val) @safe if(isCereal!C) {
+
+    import std.conv: text;
+
     alias M = typeof(__traits(getMember, val, member));
     static assert(is(M == E[], E),
                   text("@ArrayLength and @LengthInBytes not valid for ", member,
@@ -429,6 +452,9 @@ private void checkArrayAttrType(string member, C, T)(auto ref C cereal, ref T va
 
 private int lengthOfArray(string member, string lengthMember, C, T)(auto ref C cereal, ref T val)
     @safe if(isCereal!C) {
+
+    import std.conv: text;
+
     int _tmpLen;
     mixin(q{with(val) _tmpLen = cast(int)(} ~ lengthMember ~ q{);});
 

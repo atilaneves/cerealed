@@ -8,3 +8,4 @@ public import cerealed.decerealizer;
 public import cerealed.traits;
 public import cerealed.range;
 public import cerealed.utils;
+public import cerealed.attrs;
