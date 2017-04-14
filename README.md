@@ -4,29 +4,29 @@ cerealed
 
 [My DConf 2014 talk mentioning Cerealed](https://www.youtube.com/watch?v=xpImt14KTdc).
 
-Binary serialisation library for D. Minimal to no boilerplate necessary.
-The tests in the [tests directory](tests) depend on
-[unit-threaded](https://github.com/atilaneves/unit-threaded) to run.
+Binary serialisation library for D. Minimal to no boilerplate necessary. Example usage:
 
-Example usage:
+```d
+    import cerealed;
 
-    auto cerealiser = Cerealiser(); //UK spelling
-    cerealiser ~= 5; //int
-    cerealiser ~= cast(ubyte)42;
-    assert(cerealiser.bytes == [ 0, 0, 0, 5, 42]);
+    assert(cerealise(5) == [0, 0, 0, 5]); // returns ubyte[]
+    cerealise!(a => assert(a == [0, 0, 0, 5]))(5); // faster than using the bytes directly
 
-    auto decerealizer = Decerealizer([ 0, 0, 0, 5, 42]); //US spelling works too
-    assert(decerealizer.value!int == 5);
-    assert(decerealizer.value!ubyte == 42);
+    assert(decerealise!int([0, 0, 0, 5]) == 5);
 
-It can also handle strings, associative arrays, arrays, chars, etc.
-What about structs? No boilerplate necessary, compile-time reflection does it for you.
+    struct Foo { int i; }
+    const foo = Foo(5);
+    // alternate spelling
+    assert(foo.cerealize.decerealize!Foo == foo);
+```
+
 The example below shows off a few features. First and foremost, members are serialised
 automatically, but can be opted out via the `@NoCereal` attribute. Also importantly,
 members to be serialised in a certain number of bits (important for binary protocols)
 are signalled with the `@Bits` attribute with a compile-time integer specifying the
 number of bits to use.
 
+```d
     struct MyStruct {
         ubyte mybyte1;
         @NoCereal uint nocereal1; //won't be serialised
@@ -36,9 +36,8 @@ number of bits to use.
         ubyte mybyte2;
     }
 
-    auto cereal = Cerealiser();
-    cereal ~= MyStruct(3, 123, 14, 1, 42);
-    assert(cereal.bytes == [ 3, 0xea /*1110 1 010*/, 42]);
+    assert(MyStruct(3, 123, 14, 1, 42).cerealise == [ 3, 0xea /*1110 1 010*/, 42]);
+```
 
 What if custom serialisation is needed and the default, even with opt-outs, won't work?
 If an aggregate type defines a member function `void accept(C)(ref C cereal)` it will be used
@@ -48,8 +47,9 @@ example below. This function takes a ref argument so rvalues need not apply.
 
 The function to use on `Cereal` to marshall or unmarshall a particular value is `grain`.
 This is essentially what `Cerealiser.~=` and `Decerealiser.value` are calling behind
-the scenes.
+the scenes (and therefore `cerealise` and `decerealise`).
 
+```d
     struct CustomStruct {
         ubyte mybyte;
         ushort myshort;
@@ -61,14 +61,11 @@ the scenes.
         }
     }
 
-    auto cerealiser = Cerealiser();
-    cerealiser ~= CustomStruct(1, 2);
-    assert(cerealiser.bytes == [ 1, 0, 2, 4]);
+    assert(CustomStruct(1, 2).cerealise == [ 1, 0, 2, 4]);
 
     //because of the custom serialisation, passing in just [1, 0, 2] would throw
-    auto decerealiser = Decerealiser([1, 0, 2, 4]);
-    assert(decerealiser.value!CustomStruct == CustomStruct(1, 2));
-
+    assert([1, 0, 2, 4].decerealise!CustomStruct == CustomStruct(1, 2));
+```
 
 The other option when custom serialisation is needed that avoids boilerplate is to
 define a `void postBlit(C)(ref C cereal)` function instead of `accept`. The
@@ -76,6 +73,7 @@ marshalling or unmarshalling is done as it would in the absence of customisation
 and `postBlit` is called to fix things up. It is a compile-time error to
 define both `accept` and `postBlit`. Example below.
 
+```d
     struct CustomStruct {
         ubyte mybyte;
         ushort myshort;
@@ -88,17 +86,9 @@ define both `accept` and `postBlit`. Example below.
         }
     }
 
-    {
-        auto cereal = Cerealiser();
-        cereal ~= CustomStruct(1, 2);
-        assert(cereal.bytes == [ 1, 0, 2, 4]);
-    }
-
-    {
-        auto cereal = Cerealiser();
-        cereal ~= CustomStruct(3, 2);
-        assert(cereal.bytes == [ 1, 0, 2]);
-    }
+    assert(CustomStruct(1, 2).cerealise == [ 1, 0, 2, 4]);
+    assert(CustomStruct(3, 2).cerealise == [ 1, 0, 2]);
+```
 
 For more examples of how to serialise structs, check the [tests](tests) directory
 or real-world usage in my [MQTT broker](https://github.com/atilaneves/mqtt)
@@ -111,32 +101,30 @@ are implicitly determined from this. For this use case, the `@RestOfPacket`
 attribute tells `cerealed` to not add the length parameter. As the name implies,
 it will "eat" all bytes until there aren't any left.
 
+```d
     private struct StringsStruct {
         ubyte mybyte;
         @RestOfPacket string[] strings;
     }
 
-    auto enc = Cerealiser();
-    auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
-    enc ~= strs;
     //no length encoding for the array, but strings still get a length each
     const bytes = [ 5, 0, 3, 'f', 'o', 'o', 0, 6, 'f', 'o', 'o', 'b', 'a', 'r',
                     0, 6, 'o', 'h', 'w', 'e', 'l', 'l'];
-    assert(enc.bytes == bytes);
-
-    auto dec = Decerealiser(bytes);
-    assert(dec.value!StringsStruct ==  strs);
+    const strs = StringStruct(5, ["foo", "foobar", "ohwell"]);
+    assert(strs.cerealise == bytes);
+    assert(bytes.decerealise!StringsStruct ==  strs);
+```
 
 Derived classes can be serialised via a reference to the base class, but the
 child class must be registered first:
 
+```d
     class BaseClass  { int a; this(int a) { this.a = a; }}
     class ChildClass { int b; this(int b) { this.b = b; }}
     Cereal.registerChildClass!ChildClass;
-    auto enc = Cerealiser();
     BaseClass obj = ChildClass(3, 7);
-    enc ~= obj;
-    assert(enc.bytes == [0, 0, 0, 3, 0, 0, 0, 7]);
+    assert(obj.cerealise == [0, 0, 0, 3, 0, 0, 0, 7]);
+```
 
 There is now support for InputRange and OutputRange objects. Examples can
 be found in the [tests directory](tests/range.d)
@@ -149,6 +137,7 @@ to automate this kind of serialisation: `@ArrayLength` and `@LengthInBytes`.
 The former specifies how to get the length of an array (usually a variable)
 The latter specifies how many bytes the array takes. Examples:
 
+```d
     struct Packet {
         ushort length;
         @ArrayLength("length") ushort[] array;
@@ -176,7 +165,7 @@ The latter specifies how many bytes the array takes. Examples:
     assert(pkt.ub1 == 7);
     assert(pkt.totalLength == 6);
     assert(pkt.array == [1, 2]);
-
+```
 
 Related Projects
 ----------------
