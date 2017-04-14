@@ -8,18 +8,13 @@ import unit_threaded;
         float, double,
         char, wchar, dchar,
         ubyte[], ushort[], int[], long[], float[], double[])
-void testEncodeDecodeProperty(T)() {
-    check!((T val) {
-        auto enc = Cerealiser();
-        enc ~= val;
-        auto dec = Decerealiser(enc.bytes);
-        return dec.value!T == val;
-    });
+void testEncodeDecodeProperty(T)() @safe {
+    check!((T val) => val.cerealise.decerealise!T == val);
 }
 
 
 @("array with non-default length type")
-unittest {
+@safe unittest {
     check!((ubyte[] arr) {
         if(arr.length > ubyte.max) {
             return true;
