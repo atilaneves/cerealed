@@ -196,3 +196,14 @@ void testCerealise() {
     cerealise(4).shouldEqual([0, 0, 0, 4]);
     cerealize("foo").shouldEqual([0, 3, 'f', 'o', 'o']);
 }
+
+@("struct with no default ctor")
+@safe pure unittest {
+    static struct NoDefault {
+        ubyte i;
+        @disable this();
+        this(ubyte i) { this.i = i; }
+    }
+
+    cerealise(NoDefault(5)).shouldEqual([5]);
+}

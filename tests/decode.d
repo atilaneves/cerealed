@@ -231,3 +231,14 @@ unittest {
         "Not enough bytes left to decerealise int[] of 8 elements\n" ~
         "Bytes left: 2, Needed: 32, bytes: [1, 2]");
 }
+
+@("Types with @disable this can be encoded/decoded")
+@safe unittest {
+    static struct NoDefault {
+        ubyte i;
+        @disable this();
+        this(ubyte i) { this.i = i; }
+    }
+
+    [5].decerealise!NoDefault.shouldEqual(NoDefault(5));
+}

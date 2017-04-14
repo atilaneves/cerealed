@@ -3,7 +3,7 @@ module cerealed.decerealiser;
 import cerealed.cereal: grain;
 
 
-auto decerealise(T)(in ubyte[] bytes) {
+auto decerealise(T)(in ubyte[] bytes) @trusted {
     return Decerealiser(bytes).value!T;
 }
 
