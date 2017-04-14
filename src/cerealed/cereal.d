@@ -6,7 +6,6 @@ import std.traits;
 import std.conv;
 import std.algorithm;
 import std.range;
-import std.typetuple;
 
 class CerealException: Exception {
     this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @safe pure {
@@ -290,6 +289,7 @@ void grainAllMembers(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C 
 
 alias grainMemberWithAttr = grainAggregateMember;
 void grainAggregateMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+    import std.meta: staticIndexOf;
     /**(De)serialises one member taking into account its attributes*/
     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
                                                            __traits(getMember, val, member)));
@@ -300,6 +300,8 @@ void grainAggregateMember(string member, C, T)(auto ref C cereal, ref T val) @tr
 }
 
 void grainMember(string member, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C) {
+    import std.meta: staticIndexOf, Filter;
+
     alias bitsAttrs = Filter!(isABitsStruct, __traits(getAttributes,
                                                       __traits(getMember, val, member)));
     static assert(bitsAttrs.length == 0 || bitsAttrs.length == 1,

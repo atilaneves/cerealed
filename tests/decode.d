@@ -5,6 +5,7 @@ import cerealed.decerealiser;
 import core.exception;
 
 void testDecodeBool() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([1, 0, 1, 0, 0, 1]);
     bool val;
     cereal.grain(val); shouldEqual(val, true);
@@ -26,6 +27,7 @@ void testDecodeByte() {
 }
 
 void testDecodeRefByte() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xfc]);
     byte val;
     cereal.grain(val);
@@ -48,6 +50,7 @@ void testDecodeShort() {
 }
 
 void testDecodeRefShort() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff, 0xfe]);
     short val;
     cereal.grain(val);
@@ -61,6 +64,7 @@ void testDecodeInt() {
 }
 
 void testDecodeRefInt() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff, 0xf0, 0xbd, 0xc0]);
     int val;
     cereal.grain(val);
@@ -75,6 +79,7 @@ void testDecodeLong() {
 }
 
 void testDecodeRefLong() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1]);
     long val;
     cereal.grain(val);
@@ -105,6 +110,7 @@ void testDecodeChars() {
 }
 
 void testDecodeRefChar() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff]);
     char val;
     cereal.grain(val);
@@ -119,6 +125,7 @@ void testDecodeArray() {
 }
 
 void testDecodeRefArray() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 1, 0, 0, 0, 2]);
     int[] val;
     cereal.grain(val);
@@ -139,6 +146,7 @@ void testDecodeAssocArray() {
 
 
 void testDecodeRefAssocArray() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 1, 0, 0, 0, 2, 0, 0, 0, 3]);
     int[int] val;
     cereal.grain(val);
@@ -158,6 +166,7 @@ void testDecodeString() {
 }
 
 void testDecodeRefString() {
+    import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
     string val;
     cereal.grain(val);

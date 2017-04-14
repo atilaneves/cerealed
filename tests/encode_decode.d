@@ -95,6 +95,7 @@ void testEncDecArray() {
 
 
 @("struct with @LengthType") unittest {
+    import cerealed.attrs: LengthType;
     struct Foo {
         @LengthType!ubyte ushort[] arr;
     }

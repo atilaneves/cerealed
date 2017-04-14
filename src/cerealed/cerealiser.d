@@ -1,13 +1,9 @@
 module cerealed.cerealiser;
 
 
-public import cerealed.cereal;
-public import cerealed.attrs;
-public import cerealed.traits;
-import cerealed.range;
-import std.traits;
-import std.exception;
-import std.array;
+import cerealed.cereal: grain;
+import cerealed.range: DynamicArrayRange, ScopeBufferRange, isCerealiserRange;
+import std.array: Appender;
 
 
 alias AppenderCerealiser = CerealiserImpl!(Appender!(ubyte[]));
@@ -49,6 +45,11 @@ ubyte[] cerealise(T)(auto ref T val) {
 alias cerealize = cerealise;
 
 struct CerealiserImpl(R) if(isCerealiserRange!R) {
+
+    import cerealed.cereal: CerealType;
+    import cerealed.traits: isCereal, isCerealiser;
+    import std.traits: isArray, isAssociativeArray, isDynamicArray, isAggregateType, Unqual;
+
     //interface
     enum type = CerealType.WriteBytes;
 
@@ -61,6 +62,8 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     }
 
     void grainClass(T)(T val) @trusted if(is(T == class)) {
+        import cerealed.cereal: grainClassImpl;
+
         if(val.classinfo.name in _childCerealisers) {
             _childCerealisers[val.classinfo.name](this, val);
         } else {
@@ -109,7 +112,9 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     }
 
     void writeBits(in int value, in int bits) @safe {
-        import std.conv;
+        import std.conv: text;
+        import std.exception: enforce;
+
         enforce(value < (1 << bits), text("value ", value, " too big for ", bits, " bits"));
         enum bitsInByte = 8;
         if(_bitIndex + bits >= bitsInByte) { //carries over to next byte
@@ -134,6 +139,7 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     }
 
     static void registerChildClass(T)() @safe {
+        import cerealed.cereal: grainClassImpl;
         _childCerealisers[T.classinfo.name] = (ref Cerealiser cereal, Object val) {
             T child = cast(T)val;
             cereal.grainClassImpl(child);

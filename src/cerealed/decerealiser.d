@@ -1,9 +1,6 @@
 module cerealed.decerealiser;
 
-public import cerealed.cereal;
-public import cerealed.attrs;
-public import cerealed.traits;
-import std.traits;
+import cerealed.cereal: grain;
 
 
 auto decerealise(T)(in ubyte[] bytes) {
@@ -12,6 +9,11 @@ auto decerealise(T)(in ubyte[] bytes) {
 
 
 struct Decerealiser {
+
+    import cerealed.cereal: CerealType;
+    import cerealed.traits: isCereal, isDecerealiser;
+    import std.traits: isNumeric, isDynamicArray, isAssociativeArray;
+
     //interface:
     enum type = CerealType.ReadBytes;
 
@@ -25,6 +27,7 @@ struct Decerealiser {
     }
 
     void grainClass(T)(T val) @trusted if(is(T == class)) {
+        import cerealed.cereal: grainClassImpl;
         grainClassImpl(this, val);
     }
 
