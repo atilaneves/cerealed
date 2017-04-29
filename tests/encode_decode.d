@@ -1,7 +1,6 @@
 module tests.encode_decode;
 
 import unit_threaded;
-import unit_threaded.io;
 import cerealed.cerealiser;
 import cerealed.decerealiser;
 import core.exception;
