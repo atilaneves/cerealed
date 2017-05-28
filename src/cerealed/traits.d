@@ -5,20 +5,36 @@ import cerealed.cerealiser;
 import cerealed.decerealiser;
 
 
-enum isCereal(T) = is(typeof(() {
+void checkCereal(T)() {
     ubyte b;
     auto cereal = T.init;
     cereal.grainUByte(b);
     uint val;
     cereal.grainBits(val, 3);
     CerealType type = cereal.type;
-    //grainClass is missing because static asserts fail
-}));
+    // can't check grainClass because it calls grainClassImpl,
+    // which uses the template constraint isCereal
+    // Class class_;
+    // cereal.grainClass(class_);
+}
 
+enum isCereal(T) = is(typeof(checkCereal!T));
 
-enum isCerealiser(T) = isCereal!T && T.type == CerealType.WriteBytes;
-enum isDecerealiser(T) = isCereal!T && T.type == CerealType.ReadBytes &&
-    is(typeof(() { auto dec = T(); ulong bl = dec.bytesLeft; }));
+void checkCerealiser(T)() {
+    checkCereal!T;
+    static assert(T.type == CerealType.WriteBytes);
+}
+
+enum isCerealiser(T) = is(typeof(checkCerealiser!T));
+
+void checkDecerealiser(T)() {
+    checkCereal!T;
+    static assert(T.type == CerealType.ReadBytes);
+    auto dec = T();
+    ulong bl = dec.bytesLeft;
+}
+
+enum isDecerealiser(T) = is(typeof(checkDecerealiser!T));
 
 
 bool hasFunc(T, string funcName)() {
@@ -51,3 +67,5 @@ mixin template assertHas(T, string funcName) {
 mixin template assertHasPostBlit(T) { mixin assertHas!(T, "postBlit"); }
 mixin template assertHasPreBlit(T)  { mixin assertHas!(T, "preBlit"); }
 mixin template assertHasAccept(T)   { mixin assertHas!(T, "accept"); }
+
+private class Class { ubyte ub; }

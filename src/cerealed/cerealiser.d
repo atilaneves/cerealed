@@ -3,6 +3,8 @@ module cerealed.cerealiser;
 
 import cerealed.cereal: grain;
 import cerealed.range: DynamicArrayRange, ScopeBufferRange, isCerealiserRange;
+import cerealed.traits: isCereal, isCerealiser;
+import concepts: models;
 import std.array: Appender;
 
 
@@ -44,10 +46,11 @@ ubyte[] cerealise(T)(auto ref T val) {
 
 alias cerealize = cerealise;
 
+@models!(Cerealiser, isCereal)
+@models!(Cerealiser, isCerealiser)
 struct CerealiserImpl(R) if(isCerealiserRange!R) {
 
     import cerealed.cereal: CerealType;
-    import cerealed.traits: isCereal, isCerealiser;
     import std.traits: isArray, isAssociativeArray, isDynamicArray, isAggregateType, Unqual;
 
     //interface
@@ -154,6 +157,6 @@ private:
     alias ChildCerealiser = void function(ref CerealiserImpl cereal, Object val);
     static ChildCerealiser[string] _childCerealisers;
 
-    static assert(isCereal!CerealiserImpl);
-    static assert(isCerealiser!CerealiserImpl);
+    // static assert(isCereal!CerealiserImpl);
+    // static assert(isCerealiser!CerealiserImpl);
 }

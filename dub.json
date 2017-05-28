@@ -6,6 +6,9 @@
     "license": "BSD 3-clause",
     "targetType": "library",
     "targetPath": "bin",
+    "dependencies": {
+        "concepts": "~>0.0.6"
+    },
     "configurations": [
         {"name": "library"},
         {

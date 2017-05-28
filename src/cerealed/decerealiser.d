@@ -1,17 +1,18 @@
 module cerealed.decerealiser;
 
 import cerealed.cereal: grain;
-
+import cerealed.traits: isCereal, isDecerealiser;
+import concepts: models;
 
 auto decerealise(T)(in ubyte[] bytes) @trusted {
     return Decerealiser(bytes).value!T;
 }
 
-
+@models!(Decerealiser, isCereal)
+@models!(Decerealiser, isDecerealiser)
 struct Decerealiser {
 
     import cerealed.cereal: CerealType;
-    import cerealed.traits: isCereal, isDecerealiser;
     import std.traits: isNumeric, isDynamicArray, isAssociativeArray;
 
     //interface:
@@ -142,6 +143,6 @@ private:
         _originalBytes = _bytes;
     }
 
-    static assert(isCereal!Decerealiser);
-    static assert(isDecerealiser!Decerealiser);
+    // static assert(isCereal!Decerealiser);
+    // static assert(isDecerealiser!Decerealiser);
 }
