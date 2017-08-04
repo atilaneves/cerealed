@@ -124,7 +124,11 @@ void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
 void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                               !isStaticArray!T &&
                                                               isOutputRange!(T, ubyte)) {
-    U length = void;
+    version(DigitalMars)
+        U length;
+    else
+        U length = void;
+
     cereal.grain(length);
 
     static if(isArray!T) {
@@ -187,8 +191,11 @@ void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
 void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isDecerealiser!C &&
                                                               !isOutputRange!(T, ubyte) &&
                                                               isDynamicArray!T && !is(T == string)) {
+    version(DigitalMars)
+        U length;
+    else
+        U length = void;
 
-    U length = void;
     cereal.grain(length);
     decerealiseArrayImpl(cereal, val, length);
 }
