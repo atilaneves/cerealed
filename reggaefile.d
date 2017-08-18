@@ -1,7 +1,6 @@
 import reggae;
 
-alias ut = dubTestTarget!();
-alias utl = dubConfigurationTarget!(ExeName("utl"),
-                                    Configuration("ut"),
-                                    Flags("-unittest -version=unitThreadedLight"));
+alias ut = dubTestTarget!(CompilerFlags("-g -debug"));
+alias utl = dubConfigurationTarget!(Configuration("ut"),
+                                    CompilerFlags("-g -debug -unittest -version=unitThreadedLight"));
 mixin build!(ut, utl);
