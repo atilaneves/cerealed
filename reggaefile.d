@@ -1,6 +1,9 @@
 import reggae;
+import std.typecons;
 
-alias ut = dubTestTarget!(CompilerFlags("-g -debug"));
+alias ut = dubTestTarget!(CompilerFlags("-w -g -debug"),
+                          LinkerFlags(),
+                          Yes.allTogether);
 alias utl = dubConfigurationTarget!(Configuration("ut"),
-                                    CompilerFlags("-g -debug -unittest -version=unitThreadedLight"));
+                                    CompilerFlags("-w -g -debug -unittest -version=unitThreadedLight"));
 mixin build!(ut, utl);
