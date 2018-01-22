@@ -1,6 +1,7 @@
 cerealed
 =============
 [![Build Status](https://travis-ci.org/atilaneves/cerealed.png?branch=master)](https://travis-ci.org/atilaneves/cerealed)
+[![Coverage](https://codecov.io/gh/atilaneves/cerealed/branch/master/graph/badge.svg)](https://codecov.io/gh/atilaneves/cerealed)
 
 [My DConf 2014 talk mentioning Cerealed](https://www.youtube.com/watch?v=xpImt14KTdc).
 
