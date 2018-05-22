@@ -324,6 +324,9 @@ void testPreBlit() {
     immutable ubyte[] bytesOops = [0, 0, 0];
     bytesOops.decerealise!StructWithPreBlit.shouldThrow!CustomException;
 
-    immutable ubyte[] bytesMegaOops = [0, 0, 0, 3];
-    bytesMegaOops.decerealise!StructWithPreBlit.shouldThrow!RangeError;
+    // otherwise fails to throw RangeError with --build=release
+    debug {
+        immutable ubyte[] bytesMegaOops = [0, 0, 0, 3];
+        bytesMegaOops.decerealise!StructWithPreBlit.shouldThrow!RangeError;
+    }
 }
