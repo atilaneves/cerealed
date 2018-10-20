@@ -212,7 +212,7 @@ void grain(U, C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && is(T
     static if(isCerealiser!C)
         cereal.grainRaw(cast(ubyte[])val);
     else
-        val = cast(string)cereal.grainRaw(length);
+        val = cast(string) cereal.grainRaw(length).idup;
 }
 
 void grain(C, T)(auto ref C cereal, ref T val) @trusted if(isCereal!C && isAssociativeArray!T) {

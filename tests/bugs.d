@@ -48,3 +48,19 @@ unittest {
     auto dec = Decerealiser(enc.bytes);
     dec.value!(bool[]).shouldEqual(arr);
 }
+
+@("19")
+unittest {
+    static struct Foo { string value; }
+
+    auto data = Foo("bar").cerealise;
+    auto f1 = data.decerealise!Foo;
+    f1.value.should == "bar";
+
+    auto data2 = Foo("baz").cerealise;
+    data[] = data2[];
+    auto f2 = data.decerealise!Foo;
+
+    f1.value.should == "bar";
+    f2.value.should == "baz";
+}
