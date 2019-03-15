@@ -36,3 +36,17 @@ void testNested() {
     auto dec = Decerealiser(enc.bytes);
     dec.value!SomeStruct.shouldEqual(some);
 }
+
+void testNestedDynamic() {
+    SomeStruct[] some;
+    some ~= SomeStruct(["foo", "sunny"],
+                       [[2, 4], [1, 3, 5]],
+                       [Nested([7: Nested()])]);
+    auto enc = Cerealiser();
+    enc ~= some;
+    enc.bytes.shouldEqual([0, 1, 0, 2, 0, 3, 'f', 'o', 'o', 0, 5, 's', 'u', 'n', 'n', 'y',
+                           0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 4, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 5,
+                           0, 1, 0, 1, 0, 0, 0, 7, 0, 0]);
+    auto dec = Decerealiser(enc.bytes);
+    dec.value!(SomeStruct[]).shouldEqual(some);
+}

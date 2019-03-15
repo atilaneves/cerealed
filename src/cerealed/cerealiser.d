@@ -105,7 +105,7 @@ struct CerealiserImpl(R) if(isCerealiserRange!R) {
     }
 
     void write(T)(const(T)[] val) @trusted {
-        auto lval = cast(T[])val.dup;
+        auto lval = (cast(T[])val).dup;
         grain(this, lval);
     }
 
