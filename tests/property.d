@@ -2,13 +2,14 @@ module tests.property;
 
 import cerealed;
 import unit_threaded;
+import std.meta: AliasSeq;
 
 
-@Types!(bool, byte, ubyte, short, ushort, int, uint, long, ulong,
-        float, double,
-        char, wchar, dchar,
-        ubyte[], ushort[], int[], long[], float[], double[])
-void testEncodeDecodeProperty(T)() @safe {
+static foreach(T; AliasSeq!(bool, byte, ubyte, short, ushort, int, uint, long, ulong,
+                            float, double,
+                            char, wchar, dchar,
+                            ubyte[], ushort[], int[], long[], float[], double[]))
+unittest {
     check!((T val) => val.cerealise.decerealise!T == val);
 }
 
