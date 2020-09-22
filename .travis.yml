@@ -14,7 +14,7 @@ install:
 
 script:
   - dub test --build=unittest-cov --compiler=${DC}
-  - dub test --build=release
+  # - dub test --build=release
 
 after_success:
  - bash <(curl -s https://codecov.io/bash)
