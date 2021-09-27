@@ -37,7 +37,7 @@ number of bits to use.
         ubyte mybyte2;
     }
 
-    assert(MyStruct(3, 123, 14, 1, 42).cerealise == [ 3, 0xea /*1110 1 010*/, 42]);
+    assert(MyStruct(3, 123, 14, 1, 2, 42).cerealise == [ 3, 0xea /*1110 1 010*/, 42]);
 ```
 
 What if custom serialisation is needed and the default, even with opt-outs, won't work?
