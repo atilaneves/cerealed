@@ -14,26 +14,12 @@
         {"name": "library"},
         {
             "name": "unittest",
-            "targetType": "executable",
             "targetName": "ut",
             "sourcePaths": ["tests"],
-            "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
-            "mainSourceFile": "bin/ut.d",
             "dependencies": {
-                "unit-threaded": "*"
+                "unit-threaded": "*",
+                "unit-threaded:autorunner": "*"
             }
         },
-        {
-            "name": "ut",
-            "targetType": "executable",
-            "targetName": "utl",
-            "sourcePaths": ["tests"],
-            "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
-            "mainSourceFile": "bin/ut.d",
-            "dependencies": {
-                "unit-threaded": "*"
-            },
-            "versions": ["unitThreadedLight"]
-        }
     ]
 }
