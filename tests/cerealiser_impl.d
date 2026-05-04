@@ -14,7 +14,7 @@ void testOldCerealiser() {
     enc ~= WhateverStruct(5, "blargh");
     enc.bytes.shouldEqual([ 0, 5, 0, 6, 'b', 'l', 'a', 'r', 'g', 'h' ]);
     enc.reset();
-    enc.bytes.shouldBeEmpty;
+    enc.bytes.length.shouldEqual(0);
     (enc ~= 4).shouldNotThrow!RangeError;
 }
 
