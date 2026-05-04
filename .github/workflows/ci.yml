@@ -8,17 +8,17 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-          - windows-2025
-          - macos-15-intel
+          - windows-2022
+          - macos-14
         dc:
-          - dmd-2.112.0
+          - dmd-2.111.0
           - dmd-2.100.0
-          - ldc-1.42.0
+          - ldc-1.41.0
           - ldc-1.28.0
 
         exclude:
           - dc: dmd-2.100.0
-            os: macos-15-intel
+            os: macos-14
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -35,4 +35,4 @@ jobs:
       - name: Build binary
         run: dub build -q
 
-      - uses: codecov/codecov-action@v6.0.0
+      - uses: codecov/codecov-action@v5.1.2
