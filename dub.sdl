@@ -15,6 +15,7 @@ configuration "library" {
 
 configuration "unittest" {
     targetName "ut"
+    importPaths "tests"
     sourcePaths "tests"
 
     dependency "unit-threaded" version="*"
