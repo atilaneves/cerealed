@@ -14,7 +14,7 @@ void testResetCerealiser() {
 
     enc.reset();
 
-    enc.bytes.shouldBeEmpty;
+    enc.bytes.length.shouldEqual(0);
     bytesSlice.shouldEqual([0, 0, 0, 5, 'a']);
 
     enc ~= 2;
@@ -31,7 +31,7 @@ void testResetDecerealiser() {
     dec.bytes.shouldEqual([8, 13]);
 
     dec.value!short; //get rid of the remaining 2 bytes
-    dec.bytes.shouldBeEmpty;
+    dec.bytes.length.shouldEqual(0);
 
     dec.reset();
     dec.bytes.shouldEqual(bytes1);

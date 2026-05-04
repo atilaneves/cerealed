@@ -8,7 +8,7 @@
     "targetPath": "bin",
 
     "dependencies": {
-        "concepts": "~>0.0.6"
+        "concepts": "~>0.1.0"
     },
     "configurations": [
         {"name": "library"},
@@ -20,6 +20,6 @@
                 "unit-threaded": "*",
                 "unit-threaded:autorunner": "*"
             }
-        },
+        }
     ]
 }
