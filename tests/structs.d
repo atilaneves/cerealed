@@ -18,7 +18,8 @@ private struct DummyStruct {
 }
 
 
-void testDummyStruct() {
+@("dummy.struct")
+unittest {
     auto enc = Cerealiser();
     auto dummy = DummyStruct(5, 6.0, [2, 3], true, [2: 4.0], "dummy!");
     enc ~= dummy;
@@ -33,7 +34,8 @@ private struct StringStruct {
     string s;
 }
 
-void testDecodeStringStruct() {
+@("decode.string.struct")
+unittest {
     auto dec = Decerealiser([0, 3, 'f', 'o', 'o']);
     auto str = StringStruct();
     dec.grain(str);
@@ -41,7 +43,8 @@ void testDecodeStringStruct() {
     dec.value!ubyte.shouldThrow!RangeError;
 }
 
-void testEncodeStringStruct() {
+@("encode.string.struct")
+unittest {
     auto enc = Cerealiser();
     const str = StringStruct("foo");
     enc ~= str;
@@ -57,7 +60,8 @@ private struct ProtoHeaderStruct {
 }
 
 
-void testEncDecProtoHeaderStruct() {
+@("enc.dec.proto.header.struct")
+unittest {
     const hdr = ProtoHeaderStruct(6, 1, 3, 254);
     auto enc = Cerealiser();
     enc ~= hdr; //1101 0011, 254
@@ -75,7 +79,8 @@ private struct StructWithNoCereal {
     @NoCereal ushort nocereal2;
 }
 
-void testNoCereal() {
+@("no.cereal")
+unittest {
     auto cerealizer = Cerealizer();
     cerealizer ~= StructWithNoCereal(3, 14, 42, 5, 12);
     //only nibble1, nibble2 and value should show up in bytes
@@ -99,7 +104,8 @@ private struct CustomStruct {
     }
 }
 
-void testCustomCereal() {
+@("custom.cereal")
+unittest {
     auto cerealiser = Cerealiser();
     cerealiser ~= CustomStruct(1, 2);
     cerealiser.bytes.shouldEqual([ 1, 0, 2, 4]);
@@ -110,7 +116,8 @@ void testCustomCereal() {
 }
 
 
-void testAttrMember() {
+@("attr.member")
+unittest {
     //test that attributes work when calling grain member by member
     auto cereal = Cerealizer();
     auto str = StructWithNoCereal(3, 14, 42, 5, 12);
@@ -135,7 +142,8 @@ struct EnumStruct {
     Enum bar;
 }
 
-void testEnum() {
+@("enum")
+unittest {
     auto cerealiser = Cerealiser();
     const e = EnumStruct(1, EnumStruct.Enum.Baz);
     cerealiser ~= e;
@@ -156,7 +164,8 @@ struct PostBlitStruct {
     }
 }
 
-void testPostBlit() {
+@("post.blit")
+unittest {
     auto enc = Cerealiser();
     enc ~= PostBlitStruct(3, 5, 8);
     const bytes = [ 3, 8, 0, 4];
@@ -171,7 +180,8 @@ private struct StringsStruct {
     @RawArray string[] strings;
 }
 
-void testRawArray() {
+@("raw.array")
+unittest {
     auto enc = Cerealiser();
     auto strs = StringsStruct(5, ["foo", "foobar", "ohwell"]);
     enc ~= strs;
@@ -184,7 +194,8 @@ void testRawArray() {
     dec.value!StringsStruct.shouldEqual(strs);
 }
 
-void testReadmeCode() {
+@("readme.code")
+unittest {
     struct MyStruct {
         ubyte mybyte1;
         @NoCereal uint nocereal1; //won't be serialised
@@ -266,7 +277,8 @@ private:
     }
 }
 
-void testAcceptPostBlitAttrs() {
+@("accept.post.blit.attrs")
+unittest {
     import cerealed.traits;
     static assert(hasPostBlit!MqttFixedHeader);
     static assert(hasAccept!CustomStruct);
@@ -275,13 +287,15 @@ void testAcceptPostBlitAttrs() {
 
 }
 
-void testCerealiseMqttHeader() {
+@("cerealise.mqtt.header")
+unittest {
     auto cereal = Cerealiser();
     cereal ~= MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5);
     cereal.bytes.shouldEqual([0x3c, 0x5]);
 }
 
-void testDecerealiseMqttHeader() {
+@("decerealise.mqtt.header")
+unittest {
     auto cereal = Decerealiser([0x3c, 0x5]);
     cereal.value!MqttFixedHeader.shouldEqual(MqttFixedHeader(MqttType.PUBLISH, true, 2, false, 5));
 }
@@ -317,7 +331,8 @@ struct StructWithPreBlit {
     mixin assertHasPreBlit!StructWithPreBlit;
 }
 
-void testPreBlit() {
+@("pre.blit")
+unittest {
     immutable ubyte[] bytesOk = [0, 0, 0, 3, 1, 2];
     bytesOk.decerealise!StructWithPreBlit;
 

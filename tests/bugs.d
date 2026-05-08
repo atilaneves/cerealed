@@ -10,7 +10,8 @@ private struct Pair {
 }
 
 
-void testAssocArrayWithPair() {
+@("assoc.array.with.pair")
+unittest {
     auto p = Pair("foo", 5);
     auto map = [p: 105];
     auto enc = Cerealiser();
@@ -25,7 +26,8 @@ void testAssocArrayWithPair() {
     map.values.shouldEqual(map2.values);
 }
 
-void testByteArray() {
+@("byte.array")
+unittest {
     ubyte[] arr = [1,2,3,4];
 
     auto enc = Cerealiser();

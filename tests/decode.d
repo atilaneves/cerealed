@@ -4,7 +4,8 @@ import unit_threaded;
 import cerealed.decerealiser;
 import core.exception;
 
-void testDecodeBool() {
+@("decode.bool")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([1, 0, 1, 0, 0, 1]);
     bool val;
@@ -18,7 +19,8 @@ void testDecodeBool() {
 }
 
 
-void testDecodeByte() {
+@("decode.byte")
+unittest {
     auto cereal = Decerealiser([0x0, 0x2, 0xfc]);
     cereal.value!byte.shouldEqual(0);
     cereal.value!byte.shouldEqual(2);
@@ -26,7 +28,8 @@ void testDecodeByte() {
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeRefByte() {
+@("decode.ref.byte")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xfc]);
     byte val;
@@ -34,7 +37,8 @@ void testDecodeRefByte() {
     val.shouldEqual(-4);
 }
 
-void testDecodeUByte() {
+@("decode.u.byte")
+unittest {
     auto cereal = Decerealiser([0x0, 0x2, 0xfc]);
     cereal.value!ubyte.shouldEqual(0);
     cereal.value!ubyte.shouldEqual(2);
@@ -42,14 +46,16 @@ void testDecodeUByte() {
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeShort() {
+@("decode.short")
+unittest {
     auto cereal = Decerealiser([0xff, 0xfe, 0x0, 0x3]);
     cereal.value!short.shouldEqual(-2);
     cereal.value!short.shouldEqual(3);
     shouldThrow!RangeError(cereal.value!short); //no more bytes
 }
 
-void testDecodeRefShort() {
+@("decode.ref.short")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff, 0xfe]);
     short val;
@@ -57,13 +63,15 @@ void testDecodeRefShort() {
     val.shouldEqual(-2);
 }
 
-void testDecodeInt() {
+@("decode.int")
+unittest {
     auto cereal = Decerealiser([ 0xff, 0xf0, 0xbd, 0xc0]);
     cereal.value!int.shouldEqual(-1_000_000);
     shouldThrow!RangeError(cereal.value!int); //no more bytes
 }
 
-void testDecodeRefInt() {
+@("decode.ref.int")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff, 0xf0, 0xbd, 0xc0]);
     int val;
@@ -71,14 +79,16 @@ void testDecodeRefInt() {
     val.shouldEqual(-1_000_000);
 }
 
-void testDecodeLong() {
+@("decode.long")
+unittest {
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
     cereal.value!long.shouldEqual(1);
     cereal.value!long.shouldEqual(2);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeRefLong() {
+@("decode.ref.long")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1]);
     long val;
@@ -87,21 +97,24 @@ void testDecodeRefLong() {
 }
 
 
-void testDecodeBigULong() {
+@("decode.big.u.long")
+unittest {
     auto dec = Decerealiser([0xd8, 0xbf, 0xc7, 0xcd, 0x2d, 0x9b, 0xa1, 0xb1]);
     dec.value!ulong.shouldEqual(0xd8bfc7cd2d9ba1b1);
     shouldThrow!RangeError(dec.value!ubyte); //no more bytes
 }
 
 
-void testDecodeDouble() {
+@("decode.double")
+unittest {
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
     shouldNotThrow(cereal.value!double);
     shouldNotThrow(cereal.value!double);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeChars() {
+@("decode.chars")
+unittest {
     auto cereal = Decerealiser([ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff ]);
     cereal.value!char.shouldEqual(0xff);
     cereal.value!wchar.shouldEqual(0xffff);
@@ -109,7 +122,8 @@ void testDecodeChars() {
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeRefChar() {
+@("decode.ref.char")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0xff]);
     char val;
@@ -118,13 +132,15 @@ void testDecodeRefChar() {
 }
 
 
-void testDecodeArray() {
+@("decode.array")
+unittest {
     auto cereal = Decerealiser([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
     cereal.value!(int[]).shouldEqual([ 2, 6, 9 ]);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeRefArray() {
+@("decode.ref.array")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 1, 0, 0, 0, 2]);
     int[] val;
@@ -132,20 +148,23 @@ void testDecodeRefArray() {
     val.shouldEqual([2]);
 }
 
-void testDecodeArrayLongLength() {
+@("decode.array.long.length")
+unittest {
     auto cereal = Decerealiser([ 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9 ]);
     cereal.value!(int[], long).shouldEqual([ 2, 6, 9 ]);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeAssocArray() {
+@("decode.assoc.array")
+unittest {
     auto cereal = Decerealiser([ 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
     cereal.value!(int[int]).shouldEqual([ 1:2, 3:6]);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
 
-void testDecodeRefAssocArray() {
+@("decode.ref.assoc.array")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 1, 0, 0, 0, 2, 0, 0, 0, 3]);
     int[int] val;
@@ -153,19 +172,22 @@ void testDecodeRefAssocArray() {
     val.shouldEqual([2:3]);
 }
 
-void testDecodeAssocArrayIntLength() {
+@("decode.assoc.array.int.length")
+unittest {
     auto cereal = Decerealiser([ 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 6 ]);
     cereal.value!(int[int], int).shouldEqual([ 1:2, 3:6]);
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeString() {
+@("decode.string")
+unittest {
     auto cereal = Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
     cereal.value!(string).shouldEqual("atoyn");
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeRefString() {
+@("decode.ref.string")
+unittest {
     import cerealed.cereal: grain;
     auto cereal = Decerealiser([0, 5, 'a', 't', 'o', 'y', 'n']);
     string val;
@@ -174,7 +196,8 @@ void testDecodeRefString() {
     cereal.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testDecodeBits() {
+@("decode.bits")
+unittest {
     auto cereal = Decerealiser([ 0x9e, 0xea]);
     //1001 1110 1110 1010 or
     //100 111 10111 01 010
@@ -192,13 +215,15 @@ void testDecodeBits() {
     cereal.readBits(3).shouldEqual(2);
 }
 
-void testDecodeBitsMultiByte() {
+@("decode.bits.multi.byte")
+unittest {
     auto cereal = Decerealiser([ 0x9e, 0xea]);
     cereal.readBits(9).shouldEqual(317);
     cereal.readBits(7).shouldEqual(0x6a);
 }
 
-void testDecodeStringArray() {
+@("decode.string.array")
+unittest {
     auto dec = Decerealiser([ 0, 3,
                               0, 3, 'f', 'o', 'o',
                               0, 4, 'w', '0', '0', 't',
@@ -233,7 +258,8 @@ unittest {
 }
 
 @("Types with @disable this can be encoded/decoded")
-@safe unittest {
+@safe
+unittest {
     static struct NoDefault {
         ubyte i;
         @disable this();

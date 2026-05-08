@@ -20,7 +20,8 @@ struct Packet {
 }
 
 
-void testUnits() {
+@("units")
+unittest {
     ubyte[] bytes = [3, 0, 4, 9, 0, 7, 1, 2, 0, 6, 2, 3, 0, 5, 4, 5, 0, 4, 9, 8];
     auto pkt = decerealise!Packet(bytes);
 
@@ -53,7 +54,8 @@ struct PacketWithArrayLengthExpr {
     @ArrayLength("length - headerSize") Unit[] units;
 }
 
-void testArrayLengthExpr() {
+@("array.length.expr")
+unittest {
     immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
                                0, 7, 1, 2,
                                0, 6, 2, 3,
@@ -80,13 +82,15 @@ struct NegativeStruct {
     @ArrayLength("len") Unit[] units;
 }
 
-void testNegativeLength() {
+@("negative.length")
+unittest {
     immutable ubyte[] bytes = [1, 2, 3, 4, 5];
     decerealise!NegativeStruct(bytes).shouldThrow!CerealException;
 }
 
 
-void testNotEnoughBytes() {
+@("not.enough.bytes")
+unittest {
     immutable ubyte[] bytes = [3, 0, 7, 0, 8, //header
                                0, 7]; //truncated
     decerealise!PacketWithArrayLengthExpr(bytes).shouldThrow!CerealException;
@@ -106,7 +110,8 @@ struct PacketWithLengthInBytes {
     @LengthInBytes("lengthNoHeader - headerSize") Unit[] units;
 }
 
-void testLengthInBytes() {
+@("length.in.bytes")
+unittest {
     immutable ubyte[] bytes = [ 7, 0, 11, //header (11 bytes = hdr + 2 units of 4 bytes each)
                                 0, 3, 1, 2,
                                 0, 9, 3, 4,
@@ -142,7 +147,8 @@ struct BigUnitPacket {
     @LengthInBytes("totalLength - headerSize") BigUnit[] units;
 }
 
-void testLengthInBytesOneUnit() {
+@("length.in.bytes.one.unit")
+unittest {
     immutable ubyte[] bytes = [ 0, 10, //totalLength = 1 unit of size 8 + header size of 1
                                 0, 0, 0, 1, 0, 0, 0, 2
         ];
