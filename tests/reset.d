@@ -5,7 +5,8 @@ import cerealed.cerealiser;
 import cerealed.decerealiser;
 
 
-void testResetCerealiser() {
+@("reset.cerealiser")
+unittest {
     auto enc = Cerealiser();
     enc ~= 5;
     enc ~= 'a';
@@ -23,7 +24,8 @@ void testResetCerealiser() {
 }
 
 
-void testResetDecerealiser() {
+@("reset.decerealiser")
+unittest {
     const ubyte[] bytes1 = [1, 2, 3, 5, 8, 13];
     auto dec = Decerealiser(bytes1);
 
@@ -42,7 +44,8 @@ void testResetDecerealiser() {
 }
 
 
-void testEmptyDecerealiser() {
+@("empty.decerealiser")
+unittest {
     import core.exception: RangeError;
     auto dec = Decerealiser();
     dec.value!ubyte.shouldThrow!RangeError; //no bytes

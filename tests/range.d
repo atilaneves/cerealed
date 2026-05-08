@@ -6,7 +6,8 @@ import std.range;
 import core.exception;
 
 
-void testInputRange() {
+@("input.range")
+unittest {
     auto enc = Cerealiser();
     enc ~= iota(cast(ubyte)5);
     enc.bytes.shouldEqual([0, 5, 0, 1, 2, 3, 4]);
@@ -20,12 +21,14 @@ private struct MyOutputRange {
     }
 }
 
-void testMyOutputRange() {
+@("my.output.range")
+unittest {
     static assert(isOutputRange!(MyOutputRange, ubyte));
 }
 
+@("output.range.value")
 @SingleThreaded
-void testOutputRangeValue() {
+unittest {
     gOutputBytes = [];
 
     auto dec = Decerealiser([0, 5, 2, 3, 9, 6, 1]);
@@ -34,8 +37,9 @@ void testOutputRangeValue() {
     gOutputBytes.shouldEqual([2, 3, 9, 6, 1]);
 }
 
+@("output.range.read")
 @SingleThreaded
-void testOutputRangeRead() {
+unittest {
     gOutputBytes = [];
 
     auto dec = Decerealiser([0, 5, 2, 3, 9, 6, 1]);
@@ -62,8 +66,9 @@ private struct StructWithInputRange {
     MyInputRange input;
 }
 
+@("embedded.input.range")
 @SingleThreaded
-void testEmbeddedInputRange() {
+unittest {
     auto enc = Cerealiser();
     auto str = StructWithInputRange(2, MyInputRange([9, 7, 6]));
     enc ~= str;
@@ -82,8 +87,9 @@ private struct StructWithOutputRange {
     ubyte b2;
 }
 
+@("embedded.output.range")
 @SingleThreaded
-void testEmbeddedOutputRange() {
+unittest {
     auto enc = Cerealiser();
     enum compiles = __traits(compiles, { enc ~= StructWithOutputRange(); });
     static assert(!compiles, "Should not be able to read from an OutputRange");

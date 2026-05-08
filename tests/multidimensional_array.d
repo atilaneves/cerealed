@@ -4,7 +4,8 @@ import unit_threaded;
 import cerealed;
 
 
-void testEmptyMultidimensionalArray() {
+@("empty.multidimensional.array")
+unittest {
     int[][] original, restored;
     auto enc = Cerealiser();
     enc ~= original;
@@ -14,7 +15,8 @@ void testEmptyMultidimensionalArray() {
 }
 
 
-void testMultidimensionalArray() {
+@("multidimensional.array")
+unittest {
     int[][] some = [
         [3, 5, 6],
         [-3, 6, int.max, int.min],

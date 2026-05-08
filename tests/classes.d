@@ -11,7 +11,8 @@ private class DummyClass {
     }
 }
 
-void testDummyClass() {
+@("dummy.class")
+unittest {
     auto enc = Cerealiser();
     auto dummy = new DummyClass();
     enc ~= dummy;
@@ -37,7 +38,8 @@ private class ClassWithStruct {
     }
 }
 
-void testClassWithStruct() {
+@("class.with.struct")
+unittest {
     auto enc = Cerealiser();
     auto klass = new ClassWithStruct(DummyStruct(2, 3), 4);
     enc ~= klass;
@@ -74,7 +76,8 @@ class DerivedClass: BaseClass {
     }
 }
 
-void testDerivedClass() {
+@("derived.class")
+unittest {
     auto enc = Cerealiser();
     auto klass = new DerivedClass(2, 4, 8, 9);
     enc ~= klass;
@@ -86,7 +89,8 @@ void testDerivedClass() {
 }
 
 
-void testSerialisationViaBaseClass() {
+@("serialisation.via.base.class")
+unittest {
     BaseClass klass = new DerivedClass(2, 4, 8, 9);
     const baseBytes = [2, 4];
     const childBytes = [2, 4, 8, 9];

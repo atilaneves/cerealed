@@ -20,7 +20,8 @@ private void implEncDec(T)(T[] values) {
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testEncDecBool() {
+@("enc.dec.bool")
+unittest {
     implEncDec([ true, true, false, false, true]);
 }
 
@@ -30,47 +31,58 @@ private void implEncDecValues(T, alias arr)() {
     implEncDec(values);
 }
 
-void testEncDecByte() {
+@("enc.dec.byte")
+unittest {
     implEncDecValues!(byte, [ 1, 3, -2, 5, -4 ]);
 }
 
-void testEncDecUByte() {
+@("enc.dec.u.byte")
+unittest {
     implEncDecValues!(ubyte, [ 1, 255, 12 ]);
 }
 
-void testEncDecShort() {
+@("enc.dec.short")
+unittest {
     implEncDecValues!(short, [ 1, -2, -32768, 5 ]);
 }
 
-void testEncDecUShort() {
+@("enc.dec.u.short")
+unittest {
     implEncDecValues!(short, [ 1, -2, 32767, 5 ]);
 }
 
-void testEncDecInt() {
+@("enc.dec.int")
+unittest {
     implEncDecValues!(int, [ 1, -2, -1_000_000, 2_000_000 ]);
 }
 
-void testEncDecUInt() {
+@("enc.dec.u.int")
+unittest {
    implEncDecValues!(uint, [ 1, -2, 1_000_000, 2_000_000 ]);
 }
 
-void testEncDecLong() {
+@("enc.dec.long")
+unittest {
     implEncDecValues!(long, [ 5_000_000, 2, -3, -5_000_000_000, 1 ]);
 }
 
-void testEncDecULong() {
+@("enc.dec.u.long")
+unittest {
     implEncDecValues!(ulong, [ 5_000_000, 2, 7_000_000_000, 1 ]);
 }
 
-void testEncDecFloat() {
+@("enc.dec.float")
+unittest {
     implEncDec([ 2.0f, -4.3f, 3.1415926f ]); //don't add a value without 'f'!
 }
 
-void testEncDecDouble() {
+@("enc.dec.double")
+unittest {
     implEncDec([ 2.0, -9.0 ]);
 }
 
-void testEncDecChars() {
+@("enc.dec.chars")
+unittest {
     char c = 5;
     wchar w = 300;
     dchar d = 1_000_000;
@@ -83,7 +95,8 @@ void testEncDecChars() {
     dec.value!ubyte.shouldThrow!RangeError; //no more bytes
 }
 
-void testEncDecArray() {
+@("enc.dec.array")
+unittest {
     auto enc = Cerealiser();
     const ints = [ 2, 6, 9];
     enc ~= ints;
@@ -93,7 +106,8 @@ void testEncDecArray() {
 }
 
 
-@("struct with @LengthType") unittest {
+@("struct with @LengthType")
+unittest {
     import cerealed.attrs: LengthType;
     struct Foo {
         @LengthType!ubyte ushort[] arr;
@@ -107,7 +121,8 @@ void testEncDecArray() {
     dec.value!Foo.shouldEqual(foo);
 }
 
-void testEncDecAssocArray() {
+@("enc.dec.assoc.array")
+unittest {
     auto enc = Cerealiser();
     const intToInts = [ 1:2, 3:6, 9:18];
     enc ~= intToInts;

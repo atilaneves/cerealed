@@ -3,7 +3,8 @@ module tests.static_array;
 import unit_threaded;
 import cerealed;
 
-void testStaticArray() {
+@("static.array")
+unittest {
     int[2] original, restored;
 
     original[0] = 34;
@@ -22,7 +23,8 @@ void testStaticArray() {
 }
 
 
-void testArrayOfArrays() {
+@("array.of.arrays")
+unittest {
     static struct Unit {
         ubyte thingie;
         ushort length;

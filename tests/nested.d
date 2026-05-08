@@ -13,7 +13,8 @@ struct SomeStruct {
     Nested[] nesteds;
 }
 
-void testEmptyNested() {
+@("empty.nested")
+unittest {
     SomeStruct original, restored;
     auto enc = Cerealiser();
     enc ~= original;
@@ -24,7 +25,8 @@ void testEmptyNested() {
 }
 
 
-void testNested() {
+@("nested")
+unittest {
     auto some = SomeStruct(["foo", "sunny"],
                            [[2, 4], [1, 3, 5]],
                            [Nested([7: Nested()])]);
@@ -37,7 +39,8 @@ void testNested() {
     dec.value!SomeStruct.shouldEqual(some);
 }
 
-void testNestedDynamic() {
+@("nested.dynamic")
+unittest {
     SomeStruct[] some;
     some ~= SomeStruct(["foo", "sunny"],
                        [[2, 4], [1, 3, 5]],

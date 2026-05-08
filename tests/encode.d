@@ -4,7 +4,8 @@ import unit_threaded;
 import cerealed.cerealiser;
 
 
-void testEncodeBool() {
+@("encode.bool")
+unittest {
     auto cereal = Cerealiser();
     cereal.write(false);
     cereal.write(true);
@@ -15,56 +16,64 @@ void testEncodeBool() {
     cereal.bytes.shouldEqual([ 0x0, 0x1, 0x0, 0x1 ]);
 }
 
-void testEncodeByte() {
+@("encode.byte")
+unittest {
     auto cereal = Cerealiser();
     byte[] ins = [ 1, 3, -2, 5, -4];
     foreach(i; ins) cereal.write(i);
     cereal.bytes.shouldEqual([ 0x1, 0x3, 0xfe, 0x5, 0xfc ]);
 }
 
-void testEncodeUByte() {
+@("encode.u.byte")
+unittest {
     auto cereal = Cerealiser();
     ubyte[] ins = [ 2, 3, 12, 10];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0x2, 0x3, 0xc, 0xa ]);
 }
 
-void testEncodeShort() {
+@("encode.short")
+unittest {
     auto cereal = Cerealiser();
     short[] ins = [ -2, 3, -32767, 0];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0xff, 0xfe, 0x0, 0x3, 0x80, 0x01, 0x0, 0x0 ]);
 }
 
-void testEncodeUShort() {
+@("encode.u.short")
+unittest {
     auto cereal = Cerealiser();
     ushort[] ins = [ 2, 3, cast(short)65535, 0];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0x0, 0x2, 0x0, 0x3, 0xff, 0xff, 0x0, 0x0 ]);
 }
 
-void testEncodeInt() {
+@("encode.int")
+unittest {
     auto cereal = Cerealiser();
     int[] ins = [ 3, -1_000_000];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0x0, 0x0, 0x0, 0x3, 0xff, 0xf0, 0xbd, 0xc0 ]);
 }
 
-void testEncodeUInt() {
+@("encode.u.int")
+unittest {
     auto cereal = Cerealiser();
     uint[] ins = [ 1_000_000, 0];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0x0, 0x0f, 0x42, 0x40, 0x0, 0x0, 0x0, 0x0 ]);
 }
 
-void testEncodeLong() {
+@("encode.long")
+unittest {
     auto cereal = Cerealiser();
     long[] ins = [1, 2];
     foreach(i; ins) cereal ~= i;
     cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2]);
 }
 
-void testEncodeULong() {
+@("encode.u.long")
+unittest {
     auto cereal = Cerealiser();
     cereal ~= 45L;
     cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 45 ]);
@@ -74,24 +83,28 @@ void testEncodeULong() {
     cereal.bytes.shouldEqual([ 0, 0, 0, 0, 0, 0, 0, 42 ]);
 }
 
-void testEncodeBigULong() {
+@("encode.big.u.long")
+unittest {
     ulong val = 0xd8bfc7cd2d9ba1b1;
     auto enc = Cerealiser();
     enc ~= val;
     enc.bytes.shouldEqual([0xd8, 0xbf, 0xc7, 0xcd, 0x2d, 0x9b, 0xa1, 0xb1]);
 }
 
-void testEncodeFloat() {
+@("encode.float")
+unittest {
     auto cereal = Cerealiser();
     cereal ~= 1.0f;
 }
 
-void testEncodeDouble() {
+@("encode.double")
+unittest {
     auto cereal = Cerealiser();
     cereal ~= 1.0;
 }
 
-void testEncodeChars() {
+@("encode.chars")
+unittest {
     auto cereal = Cerealiser();
     char  c; cereal ~= c;
     wchar w; cereal ~= w;
@@ -99,7 +112,8 @@ void testEncodeChars() {
     cereal.bytes.shouldEqual([ 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff]);
 }
 
-void testEncodeArray() {
+@("encode.array")
+unittest {
     auto cereal = Cerealiser();
     const ints = [ 2, 6, 9];
     cereal ~= ints;
@@ -107,7 +121,8 @@ void testEncodeArray() {
     cereal.bytes.shouldEqual([ 0, 3, 0, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 9]);
 }
 
-void testEncodeAssocArray() {
+@("encode.assoc.array")
+unittest {
     import std.algorithm;
 
     auto cereal = Cerealiser();
@@ -122,7 +137,8 @@ void testEncodeAssocArray() {
     cereal.bytes.canFind([0, 0, 0, 3, /*:*/ 0, 0, 0, 6,]).shouldBeTrue;
 }
 
-void testEncodeString() {
+@("encode.string")
+unittest {
     auto cereal = Cerealiser();
     const str = "foobarbaz";
     cereal ~= str;
@@ -130,14 +146,16 @@ void testEncodeString() {
     cereal.bytes.shouldEqual([ 0, 9, 'f', 'o', 'o', 'b', 'a', 'r', 'b', 'a', 'z' ]);
 }
 
-void testEncodeNibble() {
+@("encode.nibble")
+unittest {
     auto cereal = Cerealiser();
     cereal.writeBits(0x4, 4);
     cereal.writeBits(0xf, 4);
     cereal.bytes.shouldEqual([ 0x4f ]);
 }
 
-void testEncodeSubByte() {
+@("encode.sub.byte")
+unittest {
     auto cereal = Cerealiser();
     cereal.writeBits(1, 1);
     cereal.writeBits(3, 2);
@@ -147,7 +165,8 @@ void testEncodeSubByte() {
     cereal.bytes.shouldEqual([ 0xeb]);
 }
 
-void testEncodeSubWord() {
+@("encode.sub.word")
+unittest {
     auto cereal = Cerealiser();
     cereal.writeBits(4, 3);
     cereal.writeBits(7, 3);
@@ -157,7 +176,8 @@ void testEncodeSubWord() {
     cereal.bytes.shouldEqual([ 0x9e, 0xea]);
 }
 
-void testEncodeMoreThan8Bits() {
+@("encode.more.than8.bits")
+unittest {
     {
         auto cereal = Cerealiser();
         cereal.writeBits(1, 9);
@@ -172,7 +192,8 @@ void testEncodeMoreThan8Bits() {
     }
 }
 
-void testEncodeFailsIfTooBigForBits() {
+@("encode.fails.if.too.big.for.bits")
+unittest {
     auto cereal = Cerealiser();
     shouldNotThrow(cereal.writeBits(1, 1));
     shouldThrow(cereal.writeBits(2, 1));
@@ -180,7 +201,8 @@ void testEncodeFailsIfTooBigForBits() {
     shouldThrow(cereal.writeBits(5, 2));
 }
 
-void testEncodeTwoBytesBits() {
+@("encode.two.bytes.bits")
+unittest {
     auto cereal = Cerealiser();
     immutable uint value = 5;
     cereal.writeBits(3, 4);
@@ -192,13 +214,15 @@ void testEncodeTwoBytesBits() {
 }
 
 
-void testCerealise() {
+@("cerealise")
+unittest {
     cerealise(4).shouldEqual([0, 0, 0, 4]);
     cerealize("foo").shouldEqual([0, 3, 'f', 'o', 'o']);
 }
 
 @("struct with no default ctor")
-@safe pure unittest {
+@safe pure
+unittest {
     static struct NoDefault {
         ubyte i;
         @disable this();

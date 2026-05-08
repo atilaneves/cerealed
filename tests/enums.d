@@ -7,7 +7,8 @@ import core.exception;
 
 private enum MyEnum { Foo, Bar, Baz };
 
-void testEnum() {
+@("enum")
+unittest {
     auto enc = Cerealiser();
     enc ~= MyEnum.Bar;
     enc ~= MyEnum.Baz;
@@ -21,7 +22,8 @@ void testEnum() {
     dec.value!ubyte.shouldThrow!RangeError;
 }
 
-void testDecodeEnum() {
+@("decode.enum")
+unittest {
     enum Foo : ubyte {
         Bar = 0,
         Baz = 1

@@ -16,7 +16,8 @@ private struct OuterStructWithPointerToStruct {
     ubyte b;
 }
 
-void testStructWithPointerToStruct() {
+@("struct.with.pointer.to.struct")
+unittest {
     auto enc = Cerealiser();
     //outer not const because not copyable from const
     auto outer = OuterStructWithPointerToStruct(3, new InnerStruct(7, 2), 5);
@@ -57,7 +58,8 @@ private struct OuterStructWithClass {
     ubyte b;
 }
 
-void testStructWithClassReference() {
+@("struct.with.class.reference")
+unittest {
     auto enc = Cerealiser();
     auto outer = OuterStructWithClass(2, new InnerClass(3, 5), 8);
     enc ~= outer;
@@ -76,7 +78,8 @@ void testStructWithClassReference() {
     decOuter.b.shouldEqual(outer.b);
 }
 
-void testPointerToInt() {
+@("pointer.to.int")
+unittest {
     auto enc = Cerealiser();
     auto i = new int; *i = 4;
     enc ~= i;

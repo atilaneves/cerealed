@@ -11,7 +11,8 @@ struct SimpleStruct {
     ushort us2;
 }
 
-void testSizeofSimpleStruct() {
+@("sizeof.simple.struct")
+unittest {
     unalignedSizeof!SimpleStruct.shouldEqual(5);
 }
 
@@ -20,7 +21,8 @@ struct Outer {
     SimpleStruct inner;
 }
 
-void testSizeOfStructWithStructs() {
+@("size.of.struct.with.structs")
+unittest {
     unalignedSizeof!Outer.shouldEqual(5);
 }
 
@@ -30,7 +32,8 @@ union Union {
     ushort us;
 }
 
-void testSizeOfUnion() {
+@("size.of.union")
+unittest {
     unalignedSizeof!Union.shouldEqual(2);
 }
 
@@ -40,6 +43,7 @@ class Class {
     ushort us;
 }
 
-void testSizeOfClass() {
+@("size.of.class")
+unittest {
     unalignedSizeof!Class.shouldEqual(3);
 }
