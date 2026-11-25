@@ -1,0 +1,26 @@
+import unit_threaded;
+
+mixin runTestsMain!(
+    "cerealed.attrs",
+    "cerealed.scopebuffer",
+    "cerealed.traits",
+    "tests.bugs",
+    "tests.cerealiser_impl",
+    "tests.classes",
+    "tests.compile_time",
+    "tests.decode",
+    "tests.encode",
+    "tests.encode_decode",
+    "tests.enums",
+    "tests.example",
+    "tests.multidimensional_array",
+    "tests.nested",
+    "tests.pointers",
+    "tests.property",
+    "tests.protocol_unit",
+    "tests.range",
+    "tests.reset",
+    "tests.static_array",
+    "tests.structs",
+    "tests.utils",
+);
