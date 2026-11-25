@@ -14,10 +14,11 @@ configuration "library" {
 
 
 configuration "unittest" {
+    targetType "executable"
     targetName "ut"
+    mainSourceFile "tests/main.d"
     importPaths "tests"
     sourcePaths "tests"
 
     dependency "unit-threaded" version="*"
-    dependency "unit-threaded:autorunner" version="*"
 }
